@@ -1,4 +1,4 @@
-# mygrad_research
+# MERMAID_work
 My graduate research at Princeton University, mostly MERMAID interrogation
 
 Author: Sirawich Pipatprathanporn
