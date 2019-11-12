@@ -3,10 +3,12 @@ function [y,t_start,fs] = hourly_maker(file, next)
 % 
 % file      input file for making hourly plots
 % next      the next file for determining sample rate
-%           [TODO] if left blank, then the sample rate will be assumed to 
+%           if left blank, then the sample rate will be assumed to 
 %           be 40
 %
-% Last modified by Sirawich Pipatprathanporn, 10/17/2019
+% Last modified by Sirawich Pipatprathanporn, 11/11/2019
+
+defval('next','none');
 
 % define variables
 filename = file;
@@ -18,11 +20,18 @@ fc = [3,10];
 % read file
 y=loadb(filename,format,'l');
 
-% determine sample rate, fs
 t_start = time(filename);
-t_end = time(nextname);
-t_length = interval(t_start,t_end);
-fs = length(y)/t_length;
+
+if nextname ~= "none"
+    t_end = time(nextname);
+    t_length = interval(t_start,t_end);
+    % determine sample rate, fs
+    fs = length(y)/t_length;
+else
+    % default mode: assume sampling rate = 40 Hz
+    fs = 40.0;
+    t_length = length(y) / fs;
+end
 fprintf('size = %d, interval = %d, fs = %f\n', length(y), t_length, fs);
 
 % normalize the response
@@ -39,7 +48,6 @@ if t_length > 3600
 
     % min(interval to next hour, total length): detect < 1hr length data
     dm = min(interval(t_start, find_nexthour(t_start)),t_length);
-    hold on
     if dm ~= 0
         hour_y = yn(round(t*fs):round((t+dm-1)*fs));
         hour_yf = yf(round(t*fs):round((t+dm-1)*fs));
@@ -59,7 +67,6 @@ if t_length > 3600
         offset = offset + 2;
     end
 else
-    hold on
     plot_section(yn, yf, fs, t_start, ...
                  interval(find_previoushour(t_start), t_start), 0);
 end
@@ -69,6 +76,8 @@ xlabel('time (mm:ss)')
 hold off
 set(gca, 'YDir','reverse')
 title(sprintf('%s',replace(remove_path(filename),'_','\_')))
+% saveas(gcf,sprintf('%s_fs40_plot.pdf',replace(remove_path(filename) ...
+%         ,'_','_')),'pdf');
 end
 
 % remove the path from filename string
@@ -122,7 +131,7 @@ function t = find_nexthour(dtime)
     end
 end
 
-% return the next new hour e.g. returns 15:00:00 if the input is 15:23:37 
+% return the previous new hour e.g. returns 15:00:00 if the input is 15:23:37 
 function t = find_previoushour(dtime)
     dvec = datevec(dtime);
     dvec(5) = 0;
@@ -142,5 +151,6 @@ function plot_section(y,yf,fs,t_start,t_begin,offset)
     x = linspace(t_begin, t_begin + length(y)/fs , length(y));
     x = duration(0,0,x,'Format','mm:ss');
     plot(x, t_start + duration(0, 30 * (-y + offset), 0),'k');
+    hold on
     plot(x, t_start + duration(0, 30 * (-yf + offset), 0),'r');
 end
