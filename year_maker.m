@@ -9,7 +9,7 @@ function year_maker(ddir, i_begin, i_end)
 %
 % Any calls of i_begin and i_end are valid as long as  i_begin >= i_end
 %
-% Last modified by Sirawich Pipatprathanporn, 11/11/2019
+% Last modified by Sirawich Pipatprathanporn, 11/13/2019
 
 % Assume sampling frequency to be 40 Hz
 fs = 40;
