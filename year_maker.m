@@ -20,12 +20,26 @@ hold on
 % read all data files
 [allfiles,fndex] = oneyeardata(ddir);
 
+% the time that MERMAID records the signal
+uptime = duration(0,0,0,'Format','d');
+
+% the time from the beginning to the end
+total_time = time(allfiles{min(fndex,i_end)}) - ...
+             time(allfiles{max(1,i_begin)});
+total_time.Format = 'd';
+
 for index = max(1,i_begin):min(i_end,fndex)
     filename = allfiles{index};
     a = loadb(filename, 'int32', 'l');
     t_start = time(filename);
     t_length = length(a) / fs;
     t_end = t_start + t_length / s2d;
+    uptime = uptime + t_length / s2d;
+    
+    % total_time = end of last file - beginning of first file
+    if index == min(i_end, fndex)
+        total_time = total_time + t_length / s2d;
+    end
     
     % plot each day section
     t_curr = t_start;
@@ -54,9 +68,40 @@ for index = max(1,i_begin):min(i_end,fndex)
     p = plot(xx, yy,'k');
     p.LineWidth = 2;
 end
+
+% customize the plot
 grid on
-title('Year plot');
-set(gca, 'YDir','reverse')
+plot_customization(gca, uptime, total_time);
+
+% report the result
+fprintf('total uptime = %s\n', string(uptime));
+end
+
+function plot_customization(ax, uptime, total_time)
+    plot_set_title(ax, uptime, total_time);
+    plot_set_lim(ax);
+end
+
+function plot_set_title(ax, uptime, total_time)
+    title_str = sprintf('Mermaid 023: uptime %s', string(uptime));
+    title_str = erase(title_str, 'days');
+    title(sprintf('%s/%s', title_str, string(total_time)));
+    set(ax, 'YDir','reverse')
+end
+
+function plot_set_lim(ax)
+    % 1 days
+    xx_min = datetime(2019,1,2) - datetime(2019,1,1);
+    xx_min.Format = 'd';
+    % 32 day
+    xx_max = datetime(2019,2,2) - datetime(2019,1,1);
+    xx_max.Format = 'd';
+
+    yy_min = datetime(2018, 8, 15);
+    yy_max = datetime(2019, 8, 15);
+
+    ax.XLim = [xx_min xx_max];
+    ax.YLim = [yy_min yy_max];  
 end
 
 % remove the path from filename string
