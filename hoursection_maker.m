@@ -1,4 +1,14 @@
-function hoursection_maker(filename, saveloc)
+function hoursection_maker(filename, savedir)
+% Creates hour sections of the data and stored in binary files with names
+% in this format:
+%       <beginning time in yyyy-MM-ddTHH:mm:SS.ssssss>.hsc
+%
+% INPUT
+% filename  = the name of raw MERMAID data file
+% savedir   = the directory of the output file
+%               savedir should be a fullfile path
+%
+% NO OUTPUT (besides hoursection files)
 
 fprintf("hoursection_maker('%s')\n", filename);
 
@@ -15,7 +25,7 @@ fprintf('size = %d, interval = %d, fs = %f\n', length(y), t_length, fs);
 
 % no need to split into sections if the length is less than 1 hour
 if t_length < 3600
-    outfile = strcat(saveloc, filename, '.hsc');
+    outfile = strcat(savedir, filename, '.hsc');
     fid = fopen(outfile,'w','l');
     fwrite(fid,y,'int32');
     fclose(fid);
@@ -27,7 +37,7 @@ else
         
         t_curr = t_start + index / 24;
         t_curr.Format = 'uuuu-MM-dd''T''HH:mm:ss.SSSSSS';
-        outfile = strcat(saveloc, time2filename(t_curr), '.hsc');
+        outfile = strcat(savedir, time2filename(t_curr), '.hsc');
         fid = fopen(outfile,'w','l');
         fwrite(fid,y_sec,'int32');
         fclose(fid);
