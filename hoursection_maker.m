@@ -23,10 +23,10 @@ if t_length < 3600
 else
     num_sections = ceil(t_length / 3600);
     for index = 1:num_sections
-        y_sec = y(index*3600*fs + 1: min((index+1)*3600*fs, length(y)));
+        y_sec = y((index-1)*3600*fs + 1: min(index*3600*fs, length(y)));
         
         t_curr = t_start + index / 24;
-        t_curr.Format = 'uuuu-MM-dd''T''HH:mm:ss';
+        t_curr.Format = 'uuuu-MM-dd''T''HH:mm:ss.SSSSSS';
         outfile = strcat(saveloc, time2filename(t_curr), '.hsc');
         fid = fopen(outfile,'w','l');
         fwrite(fid,y_sec,'int32');
