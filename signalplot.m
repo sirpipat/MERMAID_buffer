@@ -1,7 +1,7 @@
 function signalplot(x, fs)
 
 L = length(x);
-t = (0:L-1) / fs;
+t = (-L/2:L/2-1) / fs;
 
 plot(t, x);
 title('Signal');       
