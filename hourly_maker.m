@@ -15,7 +15,7 @@ filename = file;
 nextname = next;
 fprintf("hourly_maker('%s', '%s')\n", file, next);
 format = 'int32';
-fc = [3,10];
+fc = [1,10];
 
 % read file
 y=loadb(filename,format,'l');
