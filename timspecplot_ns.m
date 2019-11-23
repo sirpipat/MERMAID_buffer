@@ -1,5 +1,5 @@
-function [p,xl,yl,bm,Bl10,F,T]=timspecplot_ns(x,nfft,Fs,wlen,wolap,beg,unt)
-% [p,xl,yl,bm,Bl10,F,T]=TIMSPECPLOT(x,h,nfft,Fs,wlen,wolap,beg,unt)
+function [p,xl,yl,Bl10,F,T]=timspecplot_ns(x,nfft,Fs,wlen,wolap,beg,unt)
+% [p,xl,yl,Bl10,F,T]=TIMSPECPLOT(x,h,nfft,Fs,wlen,wolap,beg,unt)
 %
 % Plots spectrogram of data using the SPECTROGRAM algorithm and maybe,
 % performs an analysis of it using BFT.  
