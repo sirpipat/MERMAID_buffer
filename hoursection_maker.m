@@ -35,7 +35,7 @@ else
     for index = 1:num_sections
         y_sec = y((index-1)*3600*fs + 1: min(index*3600*fs, length(y)));
         
-        t_curr = t_start + index / 24;
+        t_curr = t_start + (index-1) / 24;
         t_curr.Format = 'uuuu-MM-dd''T''HH:mm:ss.SSSSSS';
         outfile = strcat(savedir, time2filename(t_curr), '.hsc');
         fid = fopen(outfile,'w','l');
