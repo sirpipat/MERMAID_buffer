@@ -1,5 +1,5 @@
 function plot2x2specdensity(hscdir, index1, index2, index3, index4)
-% create 4 spectograms for 4 time windows
+% create 4 power spectral density profiles for 4 time windows
 % plotted as 2x2 subplots
 
 % parameter list
