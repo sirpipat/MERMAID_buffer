@@ -5,7 +5,7 @@ function hourtimspec_maker(hscdir, savedir)
 % parameter list
 nfft = 1024;
 fs = 40;
-wlen = 256;
+wlen = 1024;
 wolap = 0.70;
 beg = 0;
 
