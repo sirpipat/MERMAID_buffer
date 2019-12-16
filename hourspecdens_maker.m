@@ -17,7 +17,9 @@ for ii = 1:hndex
     % skip if the file is too short
     if length(y) > lwin + 1024
         % plot spectral density plot
-        specdensplot(y,nfft,fs,lwin,olap,sfax,'s');    
+        specdensplot(y,nfft,fs,lwin,olap,sfax,'s');
+        % add grid to the plot
+        grid on
 
         savefile = erase(allhscfiles{ii},'.hsc');
         savefile = remove_path(savefile);
