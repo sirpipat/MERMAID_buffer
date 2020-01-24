@@ -11,7 +11,7 @@ function t = file2datetime(filename)
 %
 % OUTPUT:
 %
-% t         Datetime of the beginning
+% t         Datetime at the beginning
 %
 % SEE ALSO:
 % REMOVEPATH
