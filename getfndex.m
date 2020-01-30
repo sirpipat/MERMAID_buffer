@@ -1,5 +1,5 @@
 function fndex = getfndex(cell, value)
-% index = GET_FNDEX(cell, value)
+% index = GETFNDEX(cell, value)
 %
 % INPUT:
 % array     sorted cell
