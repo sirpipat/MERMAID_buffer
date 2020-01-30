@@ -1,9 +1,9 @@
-function plot_section(filename, t_begin, t_end)
+function plot_section(filename, dt_begin, dt_end)
 
 % parameter list
 fs = 40;
 s2d = 86400;
-nfft = 256;
+nfft = 4000;
 
 % for specsdensplot
 wlen = nfft;
@@ -16,10 +16,19 @@ olap = 70;
 sfax = 10;
 
 % reads data
-y = loadb(filename, 'int32', 'l');
+[y, dt_file_begin, dt_file_end] = readOneYearData(filename, fs);
+
+% check if dt_begin and dt_end is valid
+if dt_begin >= dt_end || dt_begin > dt_file_end || dt_end < dt_file_begin
+    fprintf('ERROR: invalid dt_begin or dt_end\n');
+    return
+end
+
+t_begin = seconds(dt_begin - dt_file_begin);
+t_end = seconds(dt_end - dt_file_begin);
 
 % slices for the section
-y = y(fs*t_begin:fs*t_end);
+y = y((1 + fs*t_begin):fs*t_end);
 
 % filters with f_c = [0.75 2] Hz
 yf = bandpass(y, fs, 0.75, 2, 2, 2, 'butter', 'linear');
