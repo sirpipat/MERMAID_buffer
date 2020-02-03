@@ -16,6 +16,9 @@ grid on
 ax = gca();
 ax.TickDir = 'both';
 ax.Position = [0.15 0.15 0.7 0.7];
+ax.YLabel.String = ...
+    strcat("spectral density (energy/Hz) ; \Delta\it f = ", ...
+    sprintf("%0.4f", fs/nfft));
 ax.Title.String = title;
 
 % adds XTickLabels at both ends of XAxis
