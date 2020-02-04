@@ -1,14 +1,24 @@
-function [ax, ax2] = plot_specdensplot(dt, freqs, nfft, fs, lwin, olap, title)
-
-% creates sine functions
-t = 0:dt*fs;
-x = 0;
-for ii = 1:length(freqs)
-    x = x + sin(2 * pi * freqs(ii) * t / fs);
-end
-
-% normalizes the funciton
-x = 100 * x / length(freqs);
+function [ax, ax2] = plot_specdensplot(x, nfft, fs, lwin, olap, title)
+% [ax, ax2] = PLOT_SPECDENSPLOT(x, nfft, fs, lwin, olap, title)
+% Makes spectral density plot with both frequency and period axis from a 
+% signal
+%
+% INPUT:
+% x         Signal in time domain
+% nfft      Number of frequencies
+% fs        Sampling frequency (Hz)
+% lwin      Length of windowed segment, in samples
+% olap      Overlap of data segments, in percent
+% title     Title of the plot
+%
+% OUTPUT:
+% ax        Axes handling the frequency axis and the plot
+% ax2       Axes handling the period axis
+%
+% SEE ALSO
+% SPECDENSPLOT, DOUBLEAXES, INVERSEAXIS
+%
+% Last modified by Sirawich Pipatprathanporn: 02/04/2020
 
 % makes a plot
 specdensplot(x, nfft, fs, lwin, olap, 10, 's');
