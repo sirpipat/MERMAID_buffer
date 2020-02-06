@@ -3,15 +3,16 @@ function [allfiles,fndex] = allfile(dir)
 %
 % INPUT:
 %
-%  ddir      Where you keep the data (trailing slash needed!)
+%  ddir     Where you keep the data (trailing slash needed!)
+%           This should be a character vector
 %
 % OUTPUT:
 %
 % allfiles   Bottom-file list with complete file names
 % fndex      The total number of elements in the list
 %
-% Last modified by Sirawich Pipatprathanporn, 11/16/2019
-
+% Last modified by Sirawich Pipatprathanporn, 02/05/2020
+%
 % Remember that when using LS2CELL in full path mode, you need the
 % trailing file separators
 
