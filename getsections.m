@@ -16,7 +16,7 @@ function [sections, intervals] = getsections(dir, dt_begin, dt_end, fs)
 % SEE ALSO:
 % ONEYEARDATA, FILE2DATETIME, GETFNDEX, READONEYEARDATA
 %
-% Last modified by Sirawich Pipatprathanporn: 01/24/2020
+% Last modified by Sirawich Pipatprathanporn: 02/06/2020
 
 defval('dir', getenv('ONEYEAR'));
 defval('fs', 40);
@@ -40,17 +40,22 @@ end
 fndex_begin = getfndex(allbegins, dt_begin);
 fndex_end = getfndex(allbegins, dt_end);
 
-sections = allfiles(fndex_begin:fndex_end);
+sections = {};
 intervals = {};
+% indexing only for the loop below
+jj = 1;
 
 for ii = fndex_begin:fndex_end
-    % index for intervals = 1:length(sections)
-    jj = ii - fndex_begin + 1;
     % finds the end time of the file
     [~, ~, section_end] = readOneYearData(allfiles{ii}, fs);
     interval_begin = max(dt_begin, allbegins{ii});
     interval_end = min(dt_end, section_end);
-    intervals{jj} = {interval_begin, interval_end};
+    % only add valid sections
+    if interval_begin < interval_end
+        sections{jj} = allfiles{ii};
+        intervals{jj} = {interval_begin, interval_end};
+        jj = jj + 1;
+    end
 end
 
 end
