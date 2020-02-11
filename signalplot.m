@@ -1,14 +1,22 @@
-function signalplot(x, fs, t, position)
-% signalplot(x, fs, position)
+function ax = signalplot(x, fs, t, ax, title_name, position)
+% ax = SIGNALPLOT(x, fs, t, ax, title_name, position)
 % Make a plot of the signal
 %
 % INPUT
 % x         = input signal
 % fs        = sampling frequency
+% t         = time/datetime at the beginning
+% ax        = current axes
+% title     = title of the plot
 % position  = position of zero either left or center
-% Last modified by Sirawich Pipatprathanporn, 11/23/2019
+%
+% OUTPUT
+% ax        = handling axes of the plot
+%
+% Last modified by Sirawich Pipatprathanporn, 02/07/2020
 
-defval('position','left');
+defval('title_name', 'signal');
+defval('position', 'left');
 
 % seconds to days
 s2d = 86400;
@@ -21,10 +29,16 @@ end
 
 max_x = max([max(x) abs(min(x))]);
 
+% plots the signal
+axes(ax);
 plot(t_plot, x);
 title('Signal');       
 xlabel('Time')
 ylim([-max_x max_x]);
 xlim([min(t_plot) max(t_plot)]);
+title(title_name);
 grid on
+
+% return the axes
+ax = gca();
 end
