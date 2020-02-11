@@ -1,4 +1,4 @@
-function [x, t_begin, t_end] = readOneYearData(filename, fs)
+function [x, t_begin, t_end] = readOneYearData(filename, fs, direction)
 % [x, t_begin, t_end] = readOneYearData(filename, fs)
 %
 % read a OneYearData file and return the data with beginning time and end time
@@ -6,6 +6,8 @@ function [x, t_begin, t_end] = readOneYearData(filename, fs)
 % INPUT:
 % filename    Full filename of the OneYearData file
 % fs          Sampling rate [Default: 40]
+% direction   0 - Using the filename as the start time  [Default]
+%             1 - Using the filename as the end time
 %
 % OUTPUT:
 % x           The data
@@ -15,14 +17,21 @@ function [x, t_begin, t_end] = readOneYearData(filename, fs)
 % SEE ALSO:
 % FILE2DATETIME, REMOVEPATH, LOADB
 %
-% Last modified by Sirawich Pipatprathanporn: 01/17/2020
+% Last modified by Sirawich Pipatprathanporn: 02/08/2020
 
 defval('fs', 40);
+defval('direction', 0);
 
 % convert seconds to days
-s2d = 86400;
+d2s = 86400;
 
 x = loadb(filename, 'int32', 'l');
-t_begin = file2datetime(filename);
-t_end = t_begin + (length(x) / fs) / s2d;
+
+if (direction == 0)
+    t_begin = file2datetime(filename);
+    t_end = t_begin + ((length(x) - 1) / fs) / d2s;
+else
+    t_end = file2datetime(filename);
+    t_begin = t_end - ((length(x) - 1) / fs) / d2s;
+end
 end
