@@ -1,4 +1,4 @@
-function matchsac(sacfile, merdir, savedir)
+function [Cmax, Cfmax, t_shift, t_shiftf] = matchsac(sacfile, merdir, savedir)
 % Finds a section in OneYearData that SAC file belongs to
 % Then plots xcorr and matched signals
 %
@@ -8,7 +8,10 @@ function matchsac(sacfile, merdir, savedir)
 % savedir       Directory you wish to save the figures
 %
 % OUTPUT:
-% TBD
+% Cmax          Maximum cross correlation of raw signals
+% Cfmax         Maximum cross correlation of filtered signals
+% t_shift       Best-fitted time shift for raw signals
+% t_shift       Best-fitted time shift for filtered signals
 %
 % SEE ALSO:
 % READSAC, GETSECTIONS, READSECTION, 
@@ -53,8 +56,8 @@ x_sacd = decimate(x_sac, 2);
 x_merd = decimate(x_mer, 4);
 
 % applies Butterworth bandpass 0.05-0.10 Hz
-x_sacf = bandpass(x_sacd, fs, 0.05, 0.10, 2, 1, 'butter', 'linear');
-x_merf = bandpass(x_merd, fs, 0.05, 0.10, 2, 1, 'butter', 'linear');
+x_sacf = bandpass(x_sacd, fs, 0.05, 0.10, 2, 2, 'butter', 'linear');
+x_merf = bandpass(x_merd, fs, 0.05, 0.10, 2, 2, 'butter', 'linear');
 
 % finds timeshift for raw SAC signal
 C = xcorr(x_merd, x_sacd);
@@ -74,8 +77,8 @@ fprintf('shifted time [RAW]      = %f s\n', t_shift);
 
 % find timeshift for filtered SAC signal
 Cf = xcorr(x_merf, x_sacf);
-[Cmaxf, Imaxf] = max(Cf);
-t_shiftf = ((Imaxf - length(x_merf)) / 10) - max_margin;
+[Cfmax, Ifmax] = max(Cf);
+t_shiftf = ((Ifmax - length(x_merf)) / 10) - max_margin;
 I = ((1:length(C)) - length(x_merd)) / 10 - max_margin;
 figure(2)
 plot(I, Cf);
@@ -90,35 +93,27 @@ fprintf('shifted time [FILTERED] = %f s\n', t_shiftf);
 
 % plot raw signals
 figure(3);
-signalplot(x_sacd, fs, dt_B + t_shift / d2s);
-hold on
-signalplot(x_merd, fs, dt_begin);
-grid on
-hold off
-title('Unfiltered signals');
-fig = gcf();
-ax = fig.Children;
-ax.Children(2).YData = ax.Children(2).YData - 2 * max(ax.Children(1).YData);
-ax.YLim = max(ax.Children(1).YData) * [-3 1];
-ax.XLim = [dt_begin dt_end];
-legend('SAC', 'MER');
+ax1 = subplot(2,1,2);
+ax1 = signalplot(x_sacd, fs, dt_B, ax1, 'Unfiltered SAC');
+ax2 = subplot(2,1,1);
+ax2 = signalplot(x_merd, fs, dt_begin, ax2, 'Unfiltered MER');
+ax1.XLim = ax2.XLim - t_shift / d2s;
+ax1.YLim = ax2.YLim;
+
 savefile = strcat(savedir, filename, '_match_raw.eps');
 saveas(gcf, savefile, 'epsc');
 
 % plot filtered signals
 figure(4);
-signalplot(x_sacf, fs, dt_B + t_shiftf / d2s);
-grid on
-hold on
-signalplot(x_merf, fs, dt_begin);
-hold off
-title('Filtered [0.05-0.10 Hz] signals');
-fig = gcf();
-ax = fig.Children;
-ax.Children(2).YData = ax.Children(2).YData - 2 * max(ax.Children(1).YData);
-ax.YLim = max(ax.Children(1).YData) * [-3 1];
-ax.XLim = [dt_begin dt_end];
-legend('SAC', 'MER');
+ax1 = subplot(2,1,2);
+ax1 = signalplot(x_sacf, fs, dt_B, ax1, ...
+    'Filtered SAC [0.05-0.10 Hz]');
+ax2 = subplot(2,1,1);
+ax2 = signalplot(x_merf, fs, dt_begin, ax2, ...
+    'Filtered MER [0.05-0.10 Hz]');
+ax1.XLim = ax2.XLim  - t_shiftf / d2s;
+ax1.YLim = ax2.YLim;
+
 savefile = strcat(savedir, filename, '_match_fil.eps');
 saveas(gcf, savefile, 'epsc');
 end
