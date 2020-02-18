@@ -25,45 +25,51 @@ split_name = split(removepath(sacfile), '.');
 filename = cell2mat(split_name(1));
 
 % maximum margin from both end of SAC datetimes in seconds
-max_margin = 1200;
-
-% the number of seconds in a day
-d2s = 86400;
+max_margin = seconds(600);
 
 % reads data from SAC file
 [x_sac, Hdr, ~, ~, ~] = readsac(sacfile);
 dt_ref = datetime(Hdr.NZYEAR, 1, 0, Hdr.NZHOUR, Hdr.NZMIN, Hdr.NZSEC, ...
-    Hdr.NZMSEC) + Hdr.NZJDAY;
-dt_B = dt_ref + Hdr.B / d2s;
-dt_E = dt_ref + Hdr.E / d2s;
+    Hdr.NZMSEC, 'TimeZone', 'UTC') + days(Hdr.NZJDAY);
+dt_B = dt_ref + seconds(Hdr.B);
+dt_E = dt_ref + seconds(Hdr.E);
 
 fprintf("Reported section: %s -- %s\n", string(dt_B), string(dt_E));
 
 % finds MERMAID file(s) containing dt_B and dt_E
-[sections, intervals] = getsections(merdir, dt_B - max_margin / d2s, ...
-    dt_E + max_margin / d2s);
+[sections, intervals] = getsections(merdir, dt_B - max_margin, ...
+    dt_E + max_margin);
 % update max_margin
 max_margin = seconds(dt_B - intervals{1}{1});
 
-% reads the section from MERMAID file(s)
+% reads the section from raw file(s)
 % Assuming there is only 1 secion
-[x_mer, dt_begin, dt_end] = readsection(sections{1}, intervals{1}{1}, ...
+[x_raw, dt_begin, dt_end] = readsection(sections{1}, intervals{1}{1}, ...
     intervals{1}{2});
+
+% decimate the raw section to obtain sampling rate about 20 Hz
+x_rawd20 = decimate(x_raw, 2);
+
+% zero pads before and after the SAC section to get the same length as
+% the raw setion
+x_before = zeros(seconds(dt_B - dt_begin) * 20, 1);
+x_after = zeros(seconds(dt_end - dt_E) * 20, 1);
+x_sac = cat(1, x_before, x_sac, x_after);
 
 % decimates to obtain sampling rate about 10 Hz
 fs = 10;
-x_sacd = decimate(x_sac, 2);
-x_merd = decimate(x_mer, 4);
+x_sacd10 = decimate(x_sac, 2);
+x_rawd10 = decimate(x_raw, 4);
 
 % applies Butterworth bandpass 0.05-0.10 Hz
-x_sacf = bandpass(x_sacd, fs, 0.05, 0.10, 2, 2, 'butter', 'linear');
-x_merf = bandpass(x_merd, fs, 0.05, 0.10, 2, 2, 'butter', 'linear');
+x_sacf = bandpass(x_sacd10, fs, 0.05, 0.10, 2, 2, 'butter', 'linear');
+x_merf = bandpass(x_rawd10, fs, 0.05, 0.10, 2, 2, 'butter', 'linear');
 
 % finds timeshift for raw SAC signal
-C = xcorr(x_merd, x_sacd);
+C = xcorr(x_rawd20, x_sac, 'normalized');
 [Cmax, Imax] = max(C);
-t_shift = ((Imax - length(x_merd)) / 10) - max_margin;
-I = ((1:length(C)) - length(x_merd)) / 10 - max_margin;
+t_shift = ((Imax - length(x_rawd20)) / 10) - max_margin;
+I = ((1:length(C)) - length(x_rawd20)) / 10 - max_margin;
 figure(1)
 plot(I, C);
 grid on
@@ -76,10 +82,10 @@ saveas(gcf, savefile, 'epsc');
 fprintf('shifted time [RAW]      = %f s\n', t_shift);
 
 % find timeshift for filtered SAC signal
-Cf = xcorr(x_merf, x_sacf);
+Cf = xcorr(x_merf, x_sacf, 'normalized');
 [Cfmax, Ifmax] = max(Cf);
 t_shiftf = ((Ifmax - length(x_merf)) / 10) - max_margin;
-I = ((1:length(C)) - length(x_merd)) / 10 - max_margin;
+I = ((1:length(C)) - length(x_rawd10)) / 10 - max_margin;
 figure(2)
 plot(I, Cf);
 grid on
@@ -94,9 +100,9 @@ fprintf('shifted time [FILTERED] = %f s\n', t_shiftf);
 % plot raw signals
 figure(3);
 ax1 = subplot(2,1,2);
-ax1 = signalplot(x_sacd, fs, dt_B, ax1, 'Unfiltered SAC');
+ax1 = signalplot(x_sacd10, fs, dt_B, ax1, 'Unfiltered SAC');
 ax2 = subplot(2,1,1);
-ax2 = signalplot(x_merd, fs, dt_begin, ax2, 'Unfiltered MER');
+ax2 = signalplot(x_rawd10, fs, dt_begin, ax2, 'Unfiltered MER');
 ax1.XLim = ax2.XLim - t_shift / d2s;
 ax1.YLim = ax2.YLim;
 
