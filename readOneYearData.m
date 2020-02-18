@@ -26,9 +26,9 @@ x = loadb(filename, 'int32', 'l');
 
 if (direction == 0)
     t_begin = file2datetime(filename);
-    t_end = t_begin + second((length(x) - 1) / fs);
+    t_end = t_begin + seconds((length(x) - 1) / fs);
 else
     t_end = file2datetime(filename);
-    t_begin = t_end - second((length(x) - 1) / fs);
+    t_begin = t_end - seconds((length(x) - 1) / fs);
 end
 end
