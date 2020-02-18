@@ -37,6 +37,6 @@ dt_end = min(dt_end, dt_file_end);
 
 % slices the data
 first_index = fs * seconds(dt_begin - dt_file_begin) + 1;
-last_index = fs * seconds(dt_end - dt_file_begin);
+last_index = fs * seconds(dt_end - dt_file_begin) + 1;
 x = x(first_index:last_index);
 end
