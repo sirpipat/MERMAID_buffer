@@ -25,6 +25,7 @@ if ~contains(datestr,'.')
     str = [datestr,'.000000'];
     datestr = join(str);
 end
-t = datetime(datestr,'InputFormat','yyyy-MM-dd''T''HH:mm:ss.SSSSSS');
+t = datetime(datestr,'InputFormat','uuuu-MM-dd''T''HH:mm:ss.SSSSSS',...
+             'TimeZone', 'UTC');
 
 end
