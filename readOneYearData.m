@@ -22,16 +22,13 @@ function [x, t_begin, t_end] = readOneYearData(filename, fs, direction)
 defval('fs', 40);
 defval('direction', 0);
 
-% convert seconds to days
-d2s = 86400;
-
 x = loadb(filename, 'int32', 'l');
 
 if (direction == 0)
     t_begin = file2datetime(filename);
-    t_end = t_begin + ((length(x) - 1) / fs) / d2s;
+    t_end = t_begin + second((length(x) - 1) / fs);
 else
     t_end = file2datetime(filename);
-    t_begin = t_end - ((length(x) - 1) / fs) / d2s;
+    t_begin = t_end - second((length(x) - 1) / fs);
 end
 end
