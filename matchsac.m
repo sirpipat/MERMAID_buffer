@@ -38,7 +38,7 @@ fprintf("Reported section: %s -- %s\n", string(dt_B), string(dt_E));
 
 % finds MERMAID file(s) containing dt_B and dt_E
 [sections, intervals] = getsections(merdir, dt_B - max_margin, ...
-    dt_E + max_margin);
+    dt_B + seconds((2 * Hdr.NPTS -1) / 40) + max_margin);
 % update max_margin
 max_margin = seconds(dt_B - intervals{1}{1});
 
@@ -52,8 +52,8 @@ x_rawd20 = decimate(x_raw, 2);
 
 % zero pads before and after the SAC section to get the same length as
 % the raw setion
-x_before = zeros(seconds(dt_B - dt_begin) * 20, 1);
-x_after = zeros(seconds(dt_end - dt_E) * 20, 1);
+x_before = zeros(round(seconds(dt_B - dt_begin) * 20), 1);
+x_after = zeros(length(x_rawd20) - length(x_before) - length(x_sac) , 1);
 x_sac = cat(1, x_before, x_sac, x_after);
 
 % decimates to obtain sampling rate about 10 Hz
@@ -66,12 +66,11 @@ x_sacf = bandpass(x_sacd10, fs, 0.05, 0.10, 2, 2, 'butter', 'linear');
 x_merf = bandpass(x_rawd10, fs, 0.05, 0.10, 2, 2, 'butter', 'linear');
 
 % finds timeshift for raw SAC signal
-C = xcorr(x_rawd20, x_sac, 'normalized');
+[C, lag] = xcorr(x_rawd20, x_sac, 'coeff');
 [Cmax, Imax] = max(C);
-t_shift = ((Imax - length(x_rawd20)) / 10) - max_margin;
-I = ((1:length(C)) - length(x_rawd20)) / 10 - max_margin;
+t_shift = ((Imax - length(x_rawd20)) / 20);
 figure(1)
-plot(I, C);
+plot(lag / 20, C);
 grid on
 title('XCORR [unfiltered]');
 xlabel('time shift [s]');
@@ -82,12 +81,11 @@ saveas(gcf, savefile, 'epsc');
 fprintf('shifted time [RAW]      = %f s\n', t_shift);
 
 % find timeshift for filtered SAC signal
-Cf = xcorr(x_merf, x_sacf, 'normalized');
+[Cf, lagf] = xcorr(x_merf, x_sacf, 'coeff');
 [Cfmax, Ifmax] = max(Cf);
-t_shiftf = ((Ifmax - length(x_merf)) / 10) - max_margin;
-I = ((1:length(C)) - length(x_rawd10)) / 10 - max_margin;
+t_shiftf = ((Ifmax - length(x_merf)) / 10);
 figure(2)
-plot(I, Cf);
+plot(lagf / 10, Cf);
 grid on
 title('XCORR [filtered, 0.05-0.10 Hz]');
 xlabel('time shift [s]');
@@ -100,10 +98,10 @@ fprintf('shifted time [FILTERED] = %f s\n', t_shiftf);
 % plot raw signals
 figure(3);
 ax1 = subplot(2,1,2);
-ax1 = signalplot(x_sacd10, fs, dt_B, ax1, 'Unfiltered SAC');
+ax1 = signalplot(x_sacd10, fs, dt_begin, ax1, 'Unfiltered SAC');
 ax2 = subplot(2,1,1);
-ax2 = signalplot(x_rawd10, fs, dt_begin, ax2, 'Unfiltered MER');
-ax1.XLim = ax2.XLim - t_shift / d2s;
+ax2 = signalplot(x_rawd10, fs, dt_begin, ax2, 'Unfiltered RAW');
+ax1.XLim = ax2.XLim - seconds(t_shift);
 ax1.YLim = ax2.YLim;
 
 savefile = strcat(savedir, filename, '_match_raw.eps');
@@ -112,12 +110,12 @@ saveas(gcf, savefile, 'epsc');
 % plot filtered signals
 figure(4);
 ax1 = subplot(2,1,2);
-ax1 = signalplot(x_sacf, fs, dt_B, ax1, ...
+ax1 = signalplot(x_sacf, fs, dt_begin, ax1, ...
     'Filtered SAC [0.05-0.10 Hz]');
 ax2 = subplot(2,1,1);
 ax2 = signalplot(x_merf, fs, dt_begin, ax2, ...
-    'Filtered MER [0.05-0.10 Hz]');
-ax1.XLim = ax2.XLim  - t_shiftf / d2s;
+    'Filtered RAW [0.05-0.10 Hz]');
+ax1.XLim = ax2.XLim  - seconds(t_shiftf);
 ax1.YLim = ax2.YLim;
 
 savefile = strcat(savedir, filename, '_match_fil.eps');
