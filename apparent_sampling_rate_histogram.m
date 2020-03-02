@@ -1,10 +1,18 @@
 function apparent_sampling_rate_histogram(direction)
+% APPARENT_SAMPLING_RATE_HISTOGRAM(direction)
 % plot histograms of apparent sampling rates
 % assuming no gaps between the files
 %
-% INPUT
+% INPUT:
 % direction   0 - Using the filename as the start time  [Default]
 %             1 - Using the filename as the end time
+% OUTPUT:
+% no output
+%
+% SEE ALSO:
+% ONEYEARDATA, FILE2DATETIME, READ_FILESIZE
+%
+% Last modified by Sirawich Pipatprathanporn: 03/01/2020
 
 defval('direction',0);
 

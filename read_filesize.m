@@ -1,5 +1,15 @@
 function [allfilelengths,fndex] = read_filesize(filesizename)
-% generate an array of filelengths in samples from the filesize file
+% [allfilelengths,fndex] = READ_FILESIZE(filesizename)
+% generates an array of filelengths in samples from the filesize file
+%
+% INPUT:
+% filesizename          The name of the filesize file
+%
+% OUTPUT:
+% allfilelengths        An array of filelengths [in samples]
+% fndex                 The number of elements in allfilelengths
+%
+% Last modified by Sirawich Pipatprathanporn: 03/01/2020
 
 filedir = '/home/sirawich/research/processed_data/toc/';
 defval('filesizename', sprintf('%sOneYearData_filesize.txt',filedir));

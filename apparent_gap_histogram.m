@@ -1,10 +1,19 @@
 function apparent_gap_histogram(direction)
-% plot histograms of apparent gap between files
+% APPARENT_GAP_HISTOGRAM(direction)
+% plots histograms of apparent gap between files
 % assuming the sampling frequency to be 40 Hz
 %
-% INPUT
+% INPUT:
 % direction   0 - Using the filename as the start time  [Default]
 %             1 - Using the filename as the end time
+%
+% OUTPUT:
+% no output
+%
+% SEE ALSO:
+% ONEYEARDATA, FILE2DATETIME, READ_FILESIZE
+%
+% Last modified by Sirawich Pipatprathanporn: 03/01/2020
 
 defval('direction',0);
 
@@ -20,13 +29,8 @@ for ii = 1:fndex
 end
 
 % read the length of the files. Then, convert to duration
-filedir = '/home/sirawich/research/processed_data/toc/';
-fileID = fopen(sprintf('%sOneYearData_filesize.txt', filedir),'r');
-formatSpec = '%10s %8s %d';
-sizeA = [19 Inf];
-A = fscanf(fileID,formatSpec,sizeA);
-fclose(fileID);
-alldurs = seconds((A(19,:)/4 - 1) / 40);
+[allfilelengths, ~] = read_filesize();
+alldurs = seconds((allfilelengths - 1) / fs);
 if direction == 1
     alldurs = circshift(alldurs,-1,2);
 end
