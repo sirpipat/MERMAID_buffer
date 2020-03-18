@@ -1,13 +1,16 @@
-function [dt_B, dt_E, Cmax, Cfmax, t_shift, t_shiftf] = matchsac(sacfile, oneyeardir, savedir)
+function [dt_B, dt_E, Cmax, Cfmax, t_shift, t_shiftf] = matchsac(sacfile, oneyeardir, savedir, plt)
 % Finds a section in OneYearData that SAC file belongs to
 % Then plots xcorr and matched signals
 %
 % INPUT:
 % sacfile       Full filename of the sacfile
-% merdir        Directory of the MERMAID files [Default: $ONEYEAR]
+% oneyeardir    Directory of the raw buffer files [Default: $ONEYEAR]
 % savedir       Directory you wish to save the figures
+% plt           Plot options: true = print, false = not print
 %
 % OUTPUT:
+% dt_B          Beginning datetime of interpolated SAC data
+% dt_E          Ending datetime of interpolated SAC data
 % Cmax          Maximum cross correlation of raw signals
 % Cfmax         Maximum cross correlation of filtered signals
 % t_shift       Best-fitted time shift for raw signals
@@ -19,6 +22,7 @@ function [dt_B, dt_E, Cmax, Cfmax, t_shift, t_shiftf] = matchsac(sacfile, oneyea
 % Last modified by Sirawich Pipatprathanporn, 02/06/2020
 
 defval('merdir', getenv('ONEYEAR'));
+defval('plt', true);
 
 % file name for figures
 split_name = split(removepath(sacfile), '.');
@@ -36,7 +40,7 @@ dt_E = dt_ref + seconds(Hdr.E);
 
 fprintf("Reported section: %s -- %s\n", string(dt_B), string(dt_E));
 
-%% Second round: interpolate before xcorr
+%% interpolate before xcorr
 % interpolates SAC data to obtain sampling frequency at 20 Hz
 dt_sac = dt_ref + seconds(tims);
 dt_interp = transpose(dateshift(dt_B,'start','second'):seconds(1/20):dt_E);
@@ -91,136 +95,145 @@ t_shiftf = ((Ifmax - length(x_rawf)) / 10);
 fprintf('shifted time [FILTERED] = %f s\n', t_shiftf);
 
 %% plots
-figure(6)
-clf
-set(gcf,'Units','inches','Position',[2 2 6.5 7.5]);
-% plot raw buffer
-ax1 = subplot('Position',[0.05 6/7+0.02 0.9 1/7-0.06]);
-ax1 = signalplot(x_rawd10, fs, dt_begin, ax1, 'Unfiltered RAW', 'left', 'blue');
-hold on
-vline(ax1, dt_B + seconds(t_shift), '--', 2, 'r');
-[~,y] = norm2trueposition(ax1, 0, 0.9);
-text(dt_B + seconds(t_shift + 10), y, 'Begin', 'Color', 'r');
-vline(ax1, dt_E + seconds(t_shift), '--', 2, 'r');
-text(dt_E + seconds(t_shift - 40), y, 'End', 'Color', 'r');
-hold off
+if plt
+    figure(6)
+    clf
+    set(gcf,'Units','inches','Position',[2 2 6.5 7.5]);
+    % plot head title
+    ax0 = subplot('Position',[0.05 0.94 0.9 0.02]);
+    title(replace(removepath(sacfile), '_', '\_'));
+    set(ax0, 'FontSize', 10, 'Color', 'none');
+    ax0.XAxis.Visible = 'off';
+    ax0.YAxis.Visible = 'off';
 
-% plot event sac
-ax2 = subplot('Position',[0.05 5/7+0.02 0.9 1/7-0.06]);
-ax2 = signalplot(x_sacd10, fs, dt_begin, ax2, 'Unfiltered SAC', 'left', 'black');
-hold on
-vline(ax2, dt_B, '--', 2, 'r');
-[~,y] = norm2trueposition(ax2, 0, 0.9);
-text(dt_B + seconds(10), y, 'Begin', 'Color', 'r');
-vline(ax2, dt_E, '--', 2, 'r');
-text(dt_E - seconds(45), y, 'End', 'Color', 'r');
-hold off
+    % plot raw buffer
+    ax1 = subplot('Position',[0.05 6/7 0.9 1/7-0.06]);
+    ax1 = signalplot(x_rawd20, 20, dt_begin, ax1, 'Buffer [Raw]', ...
+        'left', 'blue');
+    ax1.XLabel.String = 'Buffer Time';
+    hold on
+    vline(ax1, dt_B + seconds(t_shift), '--', 2, 'r');
+    [~,y] = norm2trueposition(ax1, 0, 0.9);
+    text(dt_B + seconds(t_shift + 10), y, 'Begin', 'Color', 'r');
+    vline(ax1, dt_E + seconds(t_shift), '--', 2, 'r');
+    text(dt_E + seconds(t_shift - 40), y, 'End', 'Color', 'r');
+    hold off
 
-% plot zoom-in sections
-ax3 = subplot('Position',[0.05 4/7+0.02 0.42 1/7-0.06]);
-ax3 = signalplot(x_rawd10, fs, dt_begin, ax3, 'Unfiltered RAW', 'left', 'blue');
-ax3.XLim = [dt_B dt_E];
+    % plot event sac
+    ax2 = subplot('Position',[0.05 5/7 0.9 1/7-0.06]);
+    ax2 = signalplot(x_sac, 20, dt_begin, ax2, 'Reported [raw]', ...
+        'left', 'black');
+    ax2.XLabel.String = 'Processed Time';
+    hold on
+    vline(ax2, dt_B, '--', 2, 'r');
+    [~,y] = norm2trueposition(ax2, 0, 0.9);
+    text(dt_B + seconds(10), y, 'Begin', 'Color', 'r');
+    vline(ax2, dt_E, '--', 2, 'r');
+    text(dt_E - seconds(45), y, 'End', 'Color', 'r');
+    hold off
 
-ax4 = subplot('Position',[0.05 3/7+0.02 0.42 1/7-0.06]);
-ax4 = signalplot(x_sacd10, fs, dt_begin, ax4, 'Unfiltered SAC', 'left', 'black');
-ax4.XLim = [dt_B dt_E];
+    % plot zoom-in sections
+    ax3 = subplot('Position',[0.05 4/7 0.42 1/7-0.06]);
+    ax3 = signalplot(x_rawd20, 20, dt_begin, ax3, 'Buffer [raw]', ...
+        'left', 'blue');
+    ax3.XLabel.String = 'Buffer Time';
+    ax3.XLim = [dt_B dt_E];
 
-% plot zoom-in sections
-ax5 = subplot('Position',[0.53 4/7+0.02 0.42 1/7-0.06]);
-ax5 = signalplot(x_rawf, fs, dt_begin, ax5, 'Filtered RAW', 'left', 'blue');
-ax5.XLim = [dt_B dt_E];
+    ax4 = subplot('Position',[0.05 3/7 0.42 1/7-0.06]);
+    ax4 = signalplot(x_sac, 20, dt_begin, ax4, 'Reported [raw]', ...
+        'left', 'black');
+    ax4.XLabel.String = 'Processed Time';
+    ax4.XLim = [dt_B dt_E];
 
-ax6 = subplot('Position',[0.53 3/7+0.02 0.42 1/7-0.06]);
-ax6 = signalplot(x_sacf, fs, dt_begin, ax6, 'Filtered SAC', 'left', 'black');
-ax6.XLim = [dt_B dt_E];
+    % plot zoom-in sections
+    ax5 = subplot('Position',[0.53 4/7 0.42 1/7-0.06]);
+    ax5 = signalplot(x_rawf, fs, dt_begin, ax5, ...
+        'Buffer [filtered 0.05-0.10 Hz]', 'left', 'blue');
+    ax5.XLabel.String = 'Buffer Time';
+    ax5.XLim = [dt_B dt_E];
 
-% plot raw cc
-ax7 = subplot('Position',[0.05 2/7+0.02 0.42 1/7-0.06]);
-plot(lag / 20, C, 'Color', 'black');
-hold on
-plot(t_shift, Cmax, 'Marker', '+', 'Color', 'r', 'MarkerSize', 8);
-hold off
-grid on
-title('XCORR [unfiltered]');
-xlabel('time shift [s]');
-ylabel('XCORR');
-xlim([-200 200]);
-ylim([-1 1]);
+    ax6 = subplot('Position',[0.53 3/7 0.42 1/7-0.06]);
+    ax6 = signalplot(x_sacf, fs, dt_begin, ax6, ...
+        'Reported [filtered 0.05-0.10 Hz]', 'left', 'black');
+    ax6.XLabel.String = 'Processed Time';
+    ax6.XLim = [dt_B dt_E];
 
-% plot filter cc
-ax8 = subplot('Position',[0.53 2/7+0.02 0.42 1/7-0.06]);
-plot(lagf / 10, Cf, 'Color', 'black');
-hold on
-plot(t_shiftf, Cfmax, 'Marker', '+', 'Color', 'r', 'MarkerSize', 8);
-hold off
-grid on
-title('XCORR [filtered, 0.05-0.10 Hz]');
-xlabel('time shift [s]');
-ylabel('XCORR');
-xlim([-200 200]);
-ylim([-1 1]);
+    % plot raw cc
+    ax7 = subplot('Position',[0.05 2/7 0.42 1/7-0.06]);
+    plot(lag / 20, C, 'Color', 'black');
+    hold on
+    plot(t_shift, Cmax, 'Marker', '+', 'Color', 'r', 'MarkerSize', 8);
+    hold off
+    grid on
+    title('Correlation Coefficient [raw]');
+    xlabel('time shift [s]');
+    ylabel('CC');
+    xlim([-200 200]);
+    ylim([-1 1]);
 
-% plot 2 signals on top of each other
-ax9 = subplot('Position',[0.05 1/7+0.02 0.42 1/7-0.06]);
-ax9 = signalplot(x_rawd10, fs, dt_begin-seconds(t_shift), ax9, '', ...
-    'left', 'blue');
-hold on
-ax_title = sprintf('Unfiltered: aligned');
-ax9 = signalplot(x_sacd10, fs, dt_begin, ax9, ax_title, 'left', 'black');
-hold off
-x_left = dt_B + (dt_E - dt_B) * 1/3;
-x_right = dt_B + (dt_E - dt_B) * 2/3;
-xlim([x_left x_right]);
-legend('raw','sac');
+    % plot filter cc
+    ax8 = subplot('Position',[0.53 2/7 0.42 1/7-0.06]);
+    plot(lagf / 10, Cf, 'Color', 'black');
+    hold on
+    plot(t_shiftf, Cfmax, 'Marker', '+', 'Color', 'r', 'MarkerSize', 8);
+    hold off
+    grid on
+    title('Correlation coefficient [filtered]');
+    xlabel('time shift [s]');
+    ylabel('CC');
+    xlim([-200 200]);
+    ylim([-1 1]);
 
-% plot 2 signals on top of each other
-ax10 = subplot('Position',[0.53 1/7+0.02 0.42 1/7-0.06]);
-ax10 = signalplot(x_rawf, fs, dt_begin-seconds(t_shiftf), ax10, '', ...
-    'left', 'blue');
-hold on
-ax_title = sprintf('Filtered: aligned');
-ax10 = signalplot(x_sacf, fs, dt_begin, ax10, ax_title, 'left', 'black');
-hold off
-x_left = dt_B + (dt_E - dt_B) * 1/3;
-x_right = dt_B + (dt_E - dt_B) * 2/3;
-xlim([x_left x_right]);
-legend('raw','sac');
+    % plot 2 signals on top of each other
+    ax9 = subplot('Position',[0.05 1/7 0.42 1/7-0.06]);
+    ax9 = signalplot(x_rawd20, 20, dt_begin-seconds(t_shift), ax9, '', ...
+        'left', 'blue');
+    hold on
+    ax_title = sprintf('Shifted Buffer and Reported [raw]');
+    ax9 = signalplot(x_sac, 20, dt_begin, ax9, ax_title, 'left', 'black');
+    hold off
+    x_left = dt_B + (dt_E - dt_B) * 4/5;
+    x_right = dt_B + (dt_E - dt_B) * 5/5;
+    xlim([x_left x_right]);
+    ax9.XLabel.String = 'Processed Time';
+    legend('shifted buffer','reported','Location','northwest');
 
-% report t_shift and Cmax on an empty axes
-ax11 = subplot('Position',[0.02 0.02 0.42 1/7-0.06]);
-ax11.Color = 'none';
-text(8/9*ax11.XLim(1)+1/9*ax11.XLim(2),1/4*ax11.YLim(1)+3/4*ax11.YLim(2),...
-    sprintf('Time shift  = %7.3f seconds',t_shift),'FontSize',12);
-text(8/9*ax11.XLim(1)+1/9*ax11.XLim(2),3/4*ax11.YLim(1)+1/4*ax11.YLim(2),...
-    sprintf('maxium cc = %7.3f',Cmax),'FontSize',12);
-ax11.XAxis.Visible = 'off';
-ax11.YAxis.Visible = 'off';
+    % plot 2 signals on top of each other
+    ax10 = subplot('Position',[0.53 1/7 0.42 1/7-0.06]);
+    ax10 = signalplot(x_rawf, fs, dt_begin-seconds(t_shiftf), ax10, '', ...
+        'left', 'blue');
+    hold on
+    ax_title = sprintf('Shifted Buffer and Reported [filtered]');
+    ax10 = signalplot(x_sacf, fs, dt_begin, ax10, ax_title, 'left', 'black');
+    hold off
+    x_left = dt_B + (dt_E - dt_B) * 4/5;
+    x_right = dt_B + (dt_E - dt_B) * 5/5;
+    xlim([x_left x_right]);
+    ax10.XLabel.String = 'Processed Time';
+    legend('shifted buffer','reported','Location','northwest');
 
-% report t_shiftf and Cfmax on an empty axes
-ax12 = subplot('Position',[0.53 0.02 0.42 1/7-0.06]);
-ax12.Color = 'none';
-text(15/16*ax12.XLim(1)+1/16*ax12.XLim(2),1/4*ax12.YLim(1)+3/4*ax12.YLim(2),...
-    sprintf('Time shift  = %7.3f seconds',t_shiftf),'FontSize',12);
-text(15/16*ax12.XLim(1)+1/16*ax12.XLim(2),3/4*ax12.YLim(1)+1/4*ax12.YLim(2),...
-    sprintf('maxium cc = %7.3f',Cfmax),'FontSize',12);
-ax12.XAxis.Visible = 'off';
-ax12.YAxis.Visible = 'off';
+    % report t_shift and Cmax on an empty axes
+    ax11 = subplot('Position',[0.02 0 0.42 1/7-0.06]);
+    ax11.Color = 'none';
+    text(8/9*ax11.XLim(1)+1/9*ax11.XLim(2),1/4*ax11.YLim(1)+3/4*ax11.YLim(2),...
+        sprintf('Time shift  = %6.2f seconds',t_shift),'FontSize',12);
+    text(8/9*ax11.XLim(1)+1/9*ax11.XLim(2),3/4*ax11.YLim(1)+1/4*ax11.YLim(2),...
+        sprintf('maximum cc = %7.3f',Cmax),'FontSize',12);
+    ax11.XAxis.Visible = 'off';
+    ax11.YAxis.Visible = 'off';
 
-%% save the figure
-savefile = strcat(savedir, filename, '.eps');
-saveas(gcf, savefile, 'epsc');
-% 
-% % plot filtered signals
-% figure(4);
-% ax1 = subplot(2,1,2);
-% ax1 = signalplot(x_sacf, fs, dt_begin, ax1, ...
-%     'Filtered SAC [0.05-0.10 Hz]');
-% ax2 = subplot(2,1,1);
-% ax2 = signalplot(x_merf, fs, dt_begin, ax2, ...
-%     'Filtered RAW [0.05-0.10 Hz]');
-% ax1.XLim = ax2.XLim  - seconds(t_shiftf);
-% ax1.YLim = ax2.YLim;
-% 
-% savefile = strcat(savedir, filename, '_match_fil.eps');
-% saveas(gcf, savefile, 'epsc');
+    % report t_shiftf and Cfmax on an empty axes
+    ax12 = subplot('Position',[0.53 0 0.42 1/7-0.06]);
+    ax12.Color = 'none';
+    text(15/16*ax12.XLim(1)+1/16*ax12.XLim(2),1/4*ax12.YLim(1)+3/4*ax12.YLim(2),...
+        sprintf('Time shift  = %5.1f seconds',t_shiftf),'FontSize',12);
+    text(15/16*ax12.XLim(1)+1/16*ax12.XLim(2),3/4*ax12.YLim(1)+1/4*ax12.YLim(2),...
+        sprintf('maximum cc = %7.3f',Cfmax),'FontSize',12);
+    ax12.XAxis.Visible = 'off';
+    ax12.YAxis.Visible = 'off';
+
+    %% save the figure
+    savefile = strcat(savedir, filename, '.eps');
+    saveas(gcf, savefile, 'epsc');
+end
 end
