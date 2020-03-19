@@ -21,7 +21,8 @@ function [dt_B, dt_E, Cmax, Cfmax, t_shift, t_shiftf] = matchsac(sacfile, oneyea
 %
 % Last modified by Sirawich Pipatprathanporn, 02/06/2020
 
-defval('merdir', getenv('ONEYEAR'));
+defval('oneyeardir', getenv('ONEYEAR'));
+defval('savedir', getenv('EPS'));
 defval('plt', true);
 
 % file name for figures
