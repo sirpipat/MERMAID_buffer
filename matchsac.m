@@ -136,6 +136,9 @@ for ii = 1:num_window
     [C,l] = xcorr(detrend(x_raw_slice,1), detrend(x_sac,1), 'coeff');
     CC(1, ii) = C(l == 0);
 end
+% remove any data that lag is beyond +- 200 seconds
+CC(abs(lag > 200)) = 0;
+% find best CC and timeshift
 [CCmax, IImax] = max(CC);
 t_shift = lag(IImax);
 
@@ -158,6 +161,9 @@ for ii = 1:num_window
     [C,l] = xcorr(detrend(x_raw_slice,1), detrend(x_sacf,1), 'coeff');
     CCf(1, ii) = C(l == 0);
 end
+% remove any data that lag is beyond +/- 200 seconds
+CCf(abs(lagf) > 200) = 0;
+% find best CC and time shift
 [CCfmax, IIfmax] = max(CCf);
 t_shiftf = lagf(IIfmax);
 %% plots
