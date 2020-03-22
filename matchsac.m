@@ -1,4 +1,5 @@
-function [dt_B, dt_E, Cmax, Cfmax, t_shift, t_shiftf] = matchsac(sacfile, oneyeardir, savedir, plt)
+function [dt_B, dt_E, CCmax, CCfmax, t_shift, t_shiftf] = matchsac(sacfile, oneyeardir, savedir, plt)
+% [dt_B, dt_E, Cmax, Cfmax, t_shift, t_shiftf] = MATCHSAC(sacfile, oneyeardir, savedir, plt)
 % Finds a section in OneYearData that SAC file belongs to
 % Then plots xcorr and matched signals
 %
@@ -11,8 +12,8 @@ function [dt_B, dt_E, Cmax, Cfmax, t_shift, t_shiftf] = matchsac(sacfile, oneyea
 % OUTPUT:
 % dt_B          Beginning datetime of interpolated SAC data
 % dt_E          Ending datetime of interpolated SAC data
-% Cmax          Maximum cross correlation of raw signals
-% Cfmax         Maximum cross correlation of filtered signals
+% CCmax         Maximum cross correlation of raw signals
+% CCfmax        Maximum cross correlation of filtered signals
 % t_shift       Best-fitted time shift for raw signals
 % t_shift       Best-fitted time shift for filtered signals
 %
@@ -41,60 +42,124 @@ dt_E = dt_ref + seconds(Hdr.E);
 
 fprintf("Reported section: %s -- %s\n", string(dt_B), string(dt_E));
 
-%% interpolate before xcorr
-% interpolates SAC data to obtain sampling frequency at 20 Hz
-dt_sac = dt_ref + seconds(tims);
-dt_interp = transpose(dateshift(dt_B,'start','second'):seconds(1/20):dt_E);
-x_sac = lowpass(x_sac,1/Hdr.DELTA,10,2,2,'butter','linear');
-x_sac_interp = interp1(dt_sac,x_sac,dt_interp,'linear');
-% removes NaN datapoints
-dt_interp = dt_interp(~isnan(x_sac_interp));
-x_sac_interp = x_sac_interp(~isnan(x_sac_interp));
-
-dt_B = dt_interp(1);
-dt_E = dt_interp(end);
+% Assume the buffer's sampling rate to be twice of the SAC's sampling rate
+fs = (Hdr.NPTS - 1) / (Hdr.E - Hdr.B);
+fs_buffer = 2 * fs;
 
 % finds raw file(s) containing dt_B and dt_E
 [sections, intervals] = getsections(oneyeardir, dt_B - max_margin, ...
-    dt_E + max_margin);
+    dt_E + max_margin, fs_buffer);
 % update max_margin
 max_margin = seconds(dt_B - intervals{1}{1});
 
 % reads the section from raw file(s)
 % Assuming there is only 1 secion
 [x_raw, dt_begin, dt_end] = readsection(sections{1}, intervals{1}{1}, ...
-    intervals{1}{2});
+    intervals{1}{2}, fs_buffer);
 
-% decimate the raw section to obtain sampling rax_rawd10te about 20 Hz
+% decimate the raw section to obtain sampling rate about 20 Hz
 x_rawd20 = decimate(x_raw, 2);
 
 % zero pads before and after the SAC section to get the same length as
-% the raw setion
+% the raw setion 
 x_before = zeros(round(seconds(dt_B - dt_begin) * 20), 1);
-x_after = zeros(length(x_rawd20) - length(x_before) - length(x_sac_interp) , 1);
-x_sac = cat(1, x_before, x_sac_interp, x_after);
+x_after = zeros(length(x_rawd20) - length(x_before) - length(x_sac) , 1);
+x_sac_plot = cat(1, x_before, x_sac, x_after);
 
-% decimates to obtain sampling rate about 10 Hz
-fs = 10;
-x_sacd10 = decimate(x_sac, 2);
-x_rawd10 = decimate(x_raw, 4);
+% decimates to obtain sampling rate about 20/d_factor Hz then detrend
+d_factor = 3;
+x_sacd10 = detrend(decimate(x_sac, d_factor), 1);
+x_rawd10 = detrend(decimate(x_rawd20, d_factor), 1);
 
 % applies Butterworth bandpass 0.05-0.10 Hz
-x_sacf = bandpass(x_sacd10, fs, 0.05, 0.10, 2, 2, 'butter', 'linear');
-x_rawf = bandpass(x_rawd10, fs, 0.05, 0.10, 2, 2, 'butter', 'linear');
+x_sacf = bandpass(x_sacd10, fs/d_factor, 0.05, 0.10, 2, 2, 'butter', 'linear');
+x_rawf = bandpass(x_rawd10, fs/d_factor, 0.05, 0.10, 2, 2, 'butter', 'linear');
 
 % finds timeshift for raw SAC signal
-[C, lag] = xcorr(x_rawd20, x_sac, 'coeff');
+[C, lag] = xcorr(detrend(x_rawd20,1), detrend(x_sac,1));
 [Cmax, Imax] = max(C);
-t_shift = ((Imax - length(x_rawd20)) / 20);
+t_shift = ((Imax - length(x_rawd20)) / fs) - max_margin;
 fprintf('shifted time [RAW]      = %f s\n', t_shift);
 
-% find timeshift for filtered SAC signal
-[Cf, lagf] = xcorr(x_rawf, x_sacf, 'coeff');
+% finds timeshift for filtered SAC signal
+[Cf, lagf] = xcorr(detrend(x_rawf,1), detrend(x_sacf,1));
 [Cfmax, Ifmax] = max(Cf);
-t_shiftf = ((Ifmax - length(x_rawf)) / 10);
+t_shiftf = ((Ifmax - length(x_rawf)) / (fs / d_factor)) - max_margin;
 fprintf('shifted time [FILTERED] = %f s\n', t_shiftf);
 
+% exit if the time shift is maximum margin
+if or(abs(t_shift) > max_margin, abs(t_shiftf) > max_margin)
+    fprintf('Cannot match\n');
+    CCmax = 0;
+    CCfmax = 0;
+    t_shift = 9999;
+    t_shiftf = 9999;
+    return
+end
+
+%% OLD CODE: Quicker but does not calculate CC vs. time shift
+% % computes correlation coefficients between sliced raw buffer and raw SAC
+% x_rawd20_slice = x_rawd20((1:length(x_sac)) + Imax - length(x_rawd20));
+% CC = xcorr(detrend(x_rawd20_slice,1), detrend(x_sac,1), 'coeff');
+% [CCmax, IImax] = max(CC);
+% tt_shift = (IImax - length(x_rawd20_slice)) / fs;
+% fprintf('shifted time [CC]       = %f s\n', tt_shift);
+% lag = lag / fs - max_margin;
+% CC = C;
+% 
+% % computes correlation coefficients between sliced fileted buffer and 
+% % filtered SAC
+% x_rawf_slice = x_rawf((1:length(x_sacf)) + Ifmax - length(x_rawf));
+% CCf = xcorr(detrend(x_rawf_slice,1), detrend(x_sacf,1), 'coeff');
+% [CCfmax, IIfmax] = max(CCf);
+% tt_shiftf = (IIfmax - length(x_rawf_slice)) / (fs / d_factor);
+% fprintf('shifted time [CCf]      = %f s\n', tt_shiftf);
+% lagf = lagf / (fs/d_factor) - max_margin;
+% CCf = Cf;
+
+%% compute correlation coefficients between raw buffer and raw SAC at
+% different windows
+x_rawd20 = cat(1, x_rawd20, zeros(length(x_sac),1));
+num_window = length(x_rawd20) - length(x_sac) + 1;
+CC = zeros(1, num_window);
+lag = -max_margin:(1/fs):seconds(intervals{1}{2} - dt_E);
+% correct the length of lag
+size_diff = length(CC) - length(lag);
+if size_diff > 0
+    lag_extension = (1:size_diff) / fs + lag(end);
+    lag = [lag lag_extension];
+elseif size_diff < 0
+    lag = lag(1:length(CC));
+end
+for ii = 1:num_window
+    x_raw_slice = x_rawd20((1:length(x_sac)) + ii - 1);
+    [C,l] = xcorr(detrend(x_raw_slice,1), detrend(x_sac,1), 'coeff');
+    CC(1, ii) = C(l == 0);
+end
+[CCmax, IImax] = max(CC);
+t_shift = lag(IImax);
+
+%% compute correlation coefficients between filtered buffer and filtered SAC
+% at different windows
+x_rawf = cat(1, x_rawf, zeros(length(x_sacf),1));
+num_window = length(x_rawf) - length(x_sacf) + 1;
+CCf = zeros(1, num_window);
+lagf = -max_margin:(1/(fs/d_factor)):seconds(intervals{1}{2} - dt_E);
+% correct the length of lagf
+size_diff = length(CCf) - length(lagf);
+if size_diff > 0
+    lagf_extension = (1:size_diff) / (fs/d_factor) + lagf(end);
+    lagf = [lagf lagf_extension];
+elseif size_diff < 0
+    lagf = lagf(1:length(CCf));
+end
+for ii = 1:num_window
+    x_raw_slice = x_rawf((1:length(x_sacf)) + ii - 1);
+    [C,l] = xcorr(detrend(x_raw_slice,1), detrend(x_sacf,1), 'coeff');
+    CCf(1, ii) = C(l == 0);
+end
+[CCfmax, IIfmax] = max(CCf);
+t_shiftf = lagf(IIfmax);
 %% plots
 if plt
     figure(6)
@@ -109,7 +174,8 @@ if plt
 
     % plot raw buffer
     ax1 = subplot('Position',[0.05 6/7 0.9 1/7-0.06]);
-    ax1 = signalplot(x_rawd20, 20, dt_begin, ax1, 'Buffer [Raw]', ...
+    ax1 = signalplot(x_raw, fs_buffer, dt_begin, ax1, ...
+        sprintf('Buffer [Raw], fs = %6.3f Hz', fs_buffer), ...
         'left', 'blue');
     ax1.XLabel.String = 'Buffer Time';
     hold on
@@ -120,9 +186,10 @@ if plt
     text(dt_E + seconds(t_shift - 40), y, 'End', 'Color', 'r');
     hold off
 
-    % plot event sac
+    % plot raw event sac report
     ax2 = subplot('Position',[0.05 5/7 0.9 1/7-0.06]);
-    ax2 = signalplot(x_sac, 20, dt_begin, ax2, 'Reported [raw]', ...
+    ax2 = signalplot(x_sac_plot, fs, dt_begin, ax2, ...
+        sprintf('Reported [raw], fs = %6.3f Hz', fs), ...
         'left', 'black');
     ax2.XLabel.String = 'Processed Time';
     hold on
@@ -133,37 +200,43 @@ if plt
     text(dt_E - seconds(45), y, 'End', 'Color', 'r');
     hold off
 
-    % plot zoom-in sections
+    % plot zoom-in sections of raw buffer from dt_B to dt_E
     ax3 = subplot('Position',[0.05 4/7 0.42 1/7-0.06]);
-    ax3 = signalplot(x_rawd20, 20, dt_begin, ax3, 'Buffer [raw]', ...
+    ax3 = signalplot(x_raw, fs_buffer, dt_begin, ax3, ... 
+        sprintf('Buffer [raw], fs = %6.3f Hz', fs_buffer), ...
         'left', 'blue');
     ax3.XLabel.String = 'Buffer Time';
     ax3.XLim = [dt_B dt_E];
 
+    % plot zoom-in sections of raw sac report from dt_B to dt_E
     ax4 = subplot('Position',[0.05 3/7 0.42 1/7-0.06]);
-    ax4 = signalplot(x_sac, 20, dt_begin, ax4, 'Reported [raw]', ...
+    ax4 = signalplot(x_sac, fs, dt_B, ax4, ...
+        sprintf('Reported [raw], fs = %6.3f Hz', fs), ...
         'left', 'black');
     ax4.XLabel.String = 'Processed Time';
     ax4.XLim = [dt_B dt_E];
 
-    % plot zoom-in sections
+    % plot zoom-in sections of filtered buffer
     ax5 = subplot('Position',[0.53 4/7 0.42 1/7-0.06]);
-    ax5 = signalplot(x_rawf, fs, dt_begin, ax5, ...
-        'Buffer [filtered 0.05-0.10 Hz]', 'left', 'blue');
+    ax5 = signalplot(x_rawf, fs/d_factor, dt_begin, ax5, ...
+        sprintf('Buffer [dc%d, dt, bp 0.05-0.10 Hz], fs = %6.3f Hz', ...
+        2 * d_factor, fs / d_factor), 'left', 'blue');
     ax5.XLabel.String = 'Buffer Time';
     ax5.XLim = [dt_B dt_E];
 
+    % plot zoom-in sections of filtered sac report
     ax6 = subplot('Position',[0.53 3/7 0.42 1/7-0.06]);
-    ax6 = signalplot(x_sacf, fs, dt_begin, ax6, ...
-        'Reported [filtered 0.05-0.10 Hz]', 'left', 'black');
+    ax6 = signalplot(x_sacf, fs/d_factor, dt_B, ax6, ...
+        sprintf('Reported [dc%d, dt, bp 0.05-0.10 Hz], fs = %6.3f Hz', ...
+        d_factor, fs / d_factor), 'left', 'black');
     ax6.XLabel.String = 'Processed Time';
     ax6.XLim = [dt_B dt_E];
 
     % plot raw cc
     ax7 = subplot('Position',[0.05 2/7 0.42 1/7-0.06]);
-    plot(lag / 20, C, 'Color', 'black');
+    plot(lag, CC, 'Color', 'black');
     hold on
-    plot(t_shift, Cmax, 'Marker', '+', 'Color', 'r', 'MarkerSize', 8);
+    plot(t_shift, CCmax, 'Marker', '+', 'Color', 'r', 'MarkerSize', 8);
     hold off
     grid on
     title('Correlation Coefficient [raw]');
@@ -174,12 +247,12 @@ if plt
 
     % plot filter cc
     ax8 = subplot('Position',[0.53 2/7 0.42 1/7-0.06]);
-    plot(lagf / 10, Cf, 'Color', 'black');
+    plot(lagf, CCf, 'Color', 'black');
     hold on
-    plot(t_shiftf, Cfmax, 'Marker', '+', 'Color', 'r', 'MarkerSize', 8);
+    plot(t_shiftf, CCfmax, 'Marker', '+', 'Color', 'r', 'MarkerSize', 8);
     hold off
     grid on
-    title('Correlation coefficient [filtered]');
+    title('Correlation Coefficient [filtered]');
     xlabel('time shift [s]');
     ylabel('CC');
     xlim([-200 200]);
@@ -187,11 +260,11 @@ if plt
 
     % plot 2 signals on top of each other
     ax9 = subplot('Position',[0.05 1/7 0.42 1/7-0.06]);
-    ax9 = signalplot(x_rawd20, 20, dt_begin-seconds(t_shift), ax9, '', ...
+    ax9 = signalplot(x_rawd20, fs, dt_begin-seconds(t_shift), ax9, '', ...
         'left', 'blue');
     hold on
     ax_title = sprintf('Shifted Buffer and Reported [raw]');
-    ax9 = signalplot(x_sac, 20, dt_begin, ax9, ax_title, 'left', 'black');
+    ax9 = signalplot(x_sac, fs, dt_B, ax9, ax_title, 'left', 'black');
     hold off
     x_left = dt_B + (dt_E - dt_B) * 4/5;
     x_right = dt_B + (dt_E - dt_B) * 5/5;
@@ -201,11 +274,11 @@ if plt
 
     % plot 2 signals on top of each other
     ax10 = subplot('Position',[0.53 1/7 0.42 1/7-0.06]);
-    ax10 = signalplot(x_rawf, fs, dt_begin-seconds(t_shiftf), ax10, '', ...
+    ax10 = signalplot(x_rawf, fs/d_factor, dt_begin-seconds(t_shiftf), ax10, '', ...
         'left', 'blue');
     hold on
     ax_title = sprintf('Shifted Buffer and Reported [filtered]');
-    ax10 = signalplot(x_sacf, fs, dt_begin, ax10, ax_title, 'left', 'black');
+    ax10 = signalplot(x_sacf, fs/d_factor, dt_B, ax10, ax_title, 'left', 'black');
     hold off
     x_left = dt_B + (dt_E - dt_B) * 4/5;
     x_right = dt_B + (dt_E - dt_B) * 5/5;
@@ -217,9 +290,9 @@ if plt
     ax11 = subplot('Position',[0.02 0 0.42 1/7-0.06]);
     ax11.Color = 'none';
     text(8/9*ax11.XLim(1)+1/9*ax11.XLim(2),1/4*ax11.YLim(1)+3/4*ax11.YLim(2),...
-        sprintf('Time shift  = %6.2f seconds',t_shift),'FontSize',12);
+        sprintf('Time shift  = %7.3f seconds',t_shift),'FontSize',12);
     text(8/9*ax11.XLim(1)+1/9*ax11.XLim(2),3/4*ax11.YLim(1)+1/4*ax11.YLim(2),...
-        sprintf('maximum cc = %7.3f',Cmax),'FontSize',12);
+        sprintf('maximum cc = %5.3f',CCmax),'FontSize',12);
     ax11.XAxis.Visible = 'off';
     ax11.YAxis.Visible = 'off';
 
@@ -227,14 +300,13 @@ if plt
     ax12 = subplot('Position',[0.53 0 0.42 1/7-0.06]);
     ax12.Color = 'none';
     text(15/16*ax12.XLim(1)+1/16*ax12.XLim(2),1/4*ax12.YLim(1)+3/4*ax12.YLim(2),...
-        sprintf('Time shift  = %5.1f seconds',t_shiftf),'FontSize',12);
+        sprintf('Time shift  = %7.3f seconds',t_shiftf),'FontSize',12);
     text(15/16*ax12.XLim(1)+1/16*ax12.XLim(2),3/4*ax12.YLim(1)+1/4*ax12.YLim(2),...
-        sprintf('maximum cc = %7.3f',Cfmax),'FontSize',12);
+        sprintf('maximum cc = %5.3f',CCfmax),'FontSize',12);
     ax12.XAxis.Visible = 'off';
     ax12.YAxis.Visible = 'off';
 
     %% save the figure
-    savefile = strcat(savedir, filename, '.eps');
-    saveas(gcf, savefile, 'epsc');
+    figdisp(filename,[],[],2,[],'epstopdf');
 end
 end
