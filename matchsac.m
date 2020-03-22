@@ -137,7 +137,7 @@ for ii = 1:num_window
     CC(1, ii) = C(l == 0);
 end
 % remove any data that lag is beyond +- 200 seconds
-CC(abs(lag > 200)) = 0;
+CC(abs(lag) > 200) = 0;
 % find best CC and timeshift
 [CCmax, IImax] = max(CC);
 t_shift = lag(IImax);
