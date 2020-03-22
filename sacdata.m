@@ -2,7 +2,7 @@ function [allsacfiles, sndex] = sacdata(sacdir)
 % [allsacfiles, sndex] = SACDATA(sacdir)
 % 
 % INPUT:
-% sacdir            Where you keep the sac files
+% sacdir            Where you keep the sac files [Default: $SAC]
 %
 % OUTPUT:
 % allsacfiles       Bottom-file list with complete file names
@@ -13,7 +13,7 @@ function [allsacfiles, sndex] = sacdata(sacdir)
 %
 % Last modified by Sirawich Pipatprathanporn: 03/01/2020
 
-defval('sacdir','/home/sirawich/research/processed_data/MERMAID_reports/');
+defval('sacdir',getenv('SAC'));
 
 % get sac folders
 [allsacdirs,dndex] = allfile(sacdir);
