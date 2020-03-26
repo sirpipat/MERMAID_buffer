@@ -133,8 +133,7 @@ elseif size_diff < 0
 end
 for ii = 1:num_window
     x_raw_slice = x_rawd20((1:length(x_sac)) + ii - 1);
-    [C,l] = xcorr(detrend(x_raw_slice,1), detrend(x_sac,1), 'coeff');
-    CC(1, ii) = C(l == 0);
+    CC(1,ii) = corr(detrend(x_raw_slice,1), detrend(x_sac,1));
 end
 % remove any data that lag is beyond +- 200 seconds
 CC(abs(lag) > 200) = 0;
@@ -158,8 +157,7 @@ elseif size_diff < 0
 end
 for ii = 1:num_window
     x_raw_slice = x_rawf((1:length(x_sacf)) + ii - 1);
-    [C,l] = xcorr(detrend(x_raw_slice,1), detrend(x_sacf,1), 'coeff');
-    CCf(1, ii) = C(l == 0);
+    CCf(1, ii) = corr(detrend(x_raw_slice,1), detrend(x_sacf,1));
 end
 % remove any data that lag is beyond +/- 200 seconds
 CCf(abs(lagf) > 200) = 0;
@@ -191,6 +189,7 @@ if plt
     vline(ax1, dt_E + seconds(t_shift), '--', 2, 'r');
     text(dt_E + seconds(t_shift - 40), y, 'End', 'Color', 'r');
     hold off
+    ax1.FontSize = 8;
 
     % plot raw event sac report
     ax2 = subplot('Position',[0.05 5/7 0.9 1/7-0.06]);
@@ -205,6 +204,7 @@ if plt
     vline(ax2, dt_E, '--', 2, 'r');
     text(dt_E - seconds(45), y, 'End', 'Color', 'r');
     hold off
+    ax2.FontSize = 8;
 
     % plot zoom-in sections of raw buffer from dt_B to dt_E
     ax3 = subplot('Position',[0.05 4/7 0.42 1/7-0.06]);
@@ -213,6 +213,7 @@ if plt
         'left', 'blue');
     ax3.XLabel.String = 'Buffer Time';
     ax3.XLim = [dt_B dt_E];
+    ax3.FontSize = 8;
 
     % plot zoom-in sections of raw sac report from dt_B to dt_E
     ax4 = subplot('Position',[0.05 3/7 0.42 1/7-0.06]);
@@ -221,6 +222,7 @@ if plt
         'left', 'black');
     ax4.XLabel.String = 'Processed Time';
     ax4.XLim = [dt_B dt_E];
+    ax4.FontSize = 8;
 
     % plot zoom-in sections of filtered buffer
     ax5 = subplot('Position',[0.53 4/7 0.42 1/7-0.06]);
@@ -229,6 +231,7 @@ if plt
         2 * d_factor, fs / d_factor), 'left', 'blue');
     ax5.XLabel.String = 'Buffer Time';
     ax5.XLim = [dt_B dt_E];
+    ax5.FontSize = 8;
 
     % plot zoom-in sections of filtered sac report
     ax6 = subplot('Position',[0.53 3/7 0.42 1/7-0.06]);
@@ -237,6 +240,7 @@ if plt
         d_factor, fs / d_factor), 'left', 'black');
     ax6.XLabel.String = 'Processed Time';
     ax6.XLim = [dt_B dt_E];
+    ax6.FontSize = 8;
 
     % plot raw cc
     ax7 = subplot('Position',[0.05 2/7 0.42 1/7-0.06]);
@@ -250,6 +254,7 @@ if plt
     ylabel('CC');
     xlim([-200 200]);
     ylim([-1 1]);
+    ax7.FontSize = 8;
 
     % plot filter cc
     ax8 = subplot('Position',[0.53 2/7 0.42 1/7-0.06]);
@@ -263,6 +268,7 @@ if plt
     ylabel('CC');
     xlim([-200 200]);
     ylim([-1 1]);
+    ax8.FontSize = 8;
 
     % plot 2 signals on top of each other
     ax9 = subplot('Position',[0.05 1/7 0.42 1/7-0.06]);
@@ -277,6 +283,7 @@ if plt
     xlim([x_left x_right]);
     ax9.XLabel.String = 'Processed Time';
     legend('shifted buffer','reported','Location','northwest');
+    ax9.FontSize = 8;
 
     % plot 2 signals on top of each other
     ax10 = subplot('Position',[0.53 1/7 0.42 1/7-0.06]);
@@ -291,6 +298,7 @@ if plt
     xlim([x_left x_right]);
     ax10.XLabel.String = 'Processed Time';
     legend('shifted buffer','reported','Location','northwest');
+    ax10.FontSize = 8;
 
     % report t_shift and Cmax on an empty axes
     ax11 = subplot('Position',[0.02 0 0.42 1/7-0.06]);
