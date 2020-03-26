@@ -20,7 +20,7 @@ function [dt_B, dt_E, CCmax, CCfmax, t_shift, t_shiftf] = matchsac(sacfile, oney
 % SEE ALSO:
 % READSAC, GETSECTIONS, READSECTION, 
 %
-% Last modified by Sirawich Pipatprathanporn, 02/06/2020
+% Last modified by Sirawich Pipatprathanporn, 03/25/2020
 
 defval('oneyeardir', getenv('ONEYEAR'));
 defval('savedir', getenv('EPS'));
