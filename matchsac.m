@@ -244,7 +244,7 @@ if plt
 
     % plot raw cc
     ax7 = subplot('Position',[0.05 2/7 0.42 1/7-0.06]);
-    plot(lag, CC, 'Color', 'black');
+    scatter(lag, CC, 'Color', 'black');
     hold on
     plot(t_shift, CCmax, 'Marker', '+', 'Color', 'r', 'MarkerSize', 8);
     hold off
@@ -252,13 +252,13 @@ if plt
     title('Correlation Coefficient [raw]');
     xlabel('time shift [s]');
     ylabel('CC');
-    xlim([-200 200]);
+    xlim([-10 10]);
     ylim([-1 1]);
     ax7.FontSize = 8;
 
     % plot filter cc
     ax8 = subplot('Position',[0.53 2/7 0.42 1/7-0.06]);
-    plot(lagf, CCf, 'Color', 'black');
+    scatter(lagf, CCf, 'Color', 'black');
     hold on
     plot(t_shiftf, CCfmax, 'Marker', '+', 'Color', 'r', 'MarkerSize', 8);
     hold off
@@ -266,7 +266,7 @@ if plt
     title('Correlation Coefficient [filtered]');
     xlabel('time shift [s]');
     ylabel('CC');
-    xlim([-200 200]);
+    xlim([-10 10]);
     ylim([-1 1]);
     ax8.FontSize = 8;
 
