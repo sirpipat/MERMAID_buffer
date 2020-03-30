@@ -91,7 +91,6 @@ xlabel('Correlation coefficient');
 ylabel('Counts');
 title_name = strcat('Histogram of CC [raw buffer, raw sac report]');
 title(title_name);
-figdisp('raw_cc_histogram', [], [], 2, [], 'epstopdf');
 
 subplot('Position', [0.55 0.11 0.43 0.8]);
 h = histogram(Cfmax(where));
@@ -101,4 +100,4 @@ xlabel('Correlation coefficient');
 ylabel('Counts');
 title_name = strcat('Histogram of CC [filtered buffer, filtered sac report]');
 title(title_name);
-figdisp('filtered_cc_histogram', [], [], 2, [], 'epstopdf');
+figdisp('cc_histograms', [], [], 2, [], 'epstopdf');
