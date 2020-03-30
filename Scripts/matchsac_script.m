@@ -57,7 +57,7 @@ P_label = sprintf('t-shfit [Raw] = (%6.4f) H + (%6.4f)', P_t_shift(1), P_t_shift
 Pf_label = sprintf('t-shift [Filtered] = (%6.4f) H + (%6.4f)', P_t_shiftf(1), P_t_shiftf(2));
 legend('Time shift [Raw]','Time shift [Filtered]',P_label,Pf_label,...
     'Location','northwest');
-ylim([0 0.55]);
+ylim([-1 1]);
 xlabel('Hours since the beginning of raw data section [hours]');
 ylabel('Time shift [s]');
 title('Time shift vs Hours since the beginning');
