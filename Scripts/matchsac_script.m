@@ -46,28 +46,30 @@ P_Cfmax = polyfit(t_sincef, Cfmax(where), 1);
 figure(7)
 set(gcf,'Units','inches','Position',[1 1 9 4]);
 subplot('Position', [0.06 0.11 0.43 0.8]);
-scatter(t_since, t_shift, 'Marker', 'x');
+p1 = scatter(t_since, t_shift, 'Marker', 'x');
 hold on
-scatter(t_sincef, t_shiftf, 'Marker', '+');
-plot(t_since, P_t_shift(1) * t_since + P_t_shift(2));
-plot(t_sincef, P_t_shiftf(1) * t_sincef + P_t_shiftf(2));
+p2 = scatter(t_sincef, t_shiftf, 'Marker', '+');
+p3 = plot(t_since, P_t_shift(1) * t_since + P_t_shift(2));
+p4 = plot(t_sincef, P_t_shiftf(1) * t_sincef + P_t_shiftf(2));
 hold off
 grid on
 P_label = sprintf('t-shfit [Raw] = (%6.4f) H + (%6.4f)', P_t_shift(1), P_t_shift(2));
 Pf_label = sprintf('t-shift [Filtered] = (%6.4f) H + (%6.4f)', P_t_shiftf(1), P_t_shiftf(2));
 legend('Time shift [Raw]','Time shift [Filtered]',P_label,Pf_label,...
     'Location','northwest');
-ylim([-1 1]);
+ylim([-0.2 1]);
 xlabel('Hours since the beginning of raw data section [hours]');
 ylabel('Time shift [s]');
 title('Time shift vs Hours since the beginning');
+delete(p3);
+delete(p4);
 
 subplot('Position', [0.55 0.11 0.43 0.8]);
-scatter(t_since, Cmax(where), 'Marker', 'x');
+p5 = scatter(t_since, Cmax(where), 'Marker', 'x');
 hold on
-scatter(t_sincef, Cfmax(where), 'Marker', '+');
-plot(t_since, P_Cmax(1) * t_since + P_Cmax(2));
-plot(t_sincef, P_Cfmax(1) * t_sincef + P_Cfmax(2));
+p6 = scatter(t_sincef, Cfmax(where), 'Marker', '+');
+p7 = plot(t_since, P_Cmax(1) * t_since + P_Cmax(2));
+p8 = plot(t_sincef, P_Cfmax(1) * t_sincef + P_Cfmax(2));
 hold off
 grid on
 P_label = sprintf('CC [Raw] = (%6.4f) H + (%6.4f)', P_Cmax(1), P_Cmax(2));
@@ -76,6 +78,8 @@ legend('CC [Raw]','CC [Filtered]',P_label,Pf_label,'Location','southwest');
 ylim([0 1.3]);
 xlabel('Hours since the beginning of raw data section [hours]');
 ylabel('Correlation coefficients');
+delete(p7);
+delete(p8);
 
 title('CC vs Hours since the beginning');
 figdisp('timeshift_vs_hours_since_beginning', [], [], 2, [], 'epstopdf');
