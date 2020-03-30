@@ -78,13 +78,13 @@ x_rawf = bandpass(x_rawd10, fs/d_factor, 0.05, 0.10, 2, 2, 'butter', 'linear');
 % finds timeshift for raw SAC signal
 [C, lag] = xcorr(detrend(x_rawd20,1), detrend(x_sac,1));
 [Cmax, Imax] = max(C);
-t_shift = ((Imax - length(x_rawd20)) / fs) - max_margin;
+t_shift = ((Imax - length(x_rawd20)) / fs) - seconds(dt_B - dt_begin);
 fprintf('shifted time [RAW]      = %f s\n', t_shift);
 
 % finds timeshift for filtered SAC signal
 [Cf, lagf] = xcorr(detrend(x_rawf,1), detrend(x_sacf,1));
 [Cfmax, Ifmax] = max(Cf);
-t_shiftf = ((Ifmax - length(x_rawf)) / (fs / d_factor)) - max_margin;
+t_shiftf = ((Ifmax - length(x_rawf)) / (fs / d_factor)) - seconds(dt_B - dt_begin);
 fprintf('shifted time [FILTERED] = %f s\n', t_shiftf);
 
 % exit if the time shift is maximum margin
@@ -122,7 +122,7 @@ end
 x_rawd20 = cat(1, x_rawd20, zeros(length(x_sac),1));
 num_window = length(x_rawd20) - length(x_sac) + 1;
 CC = zeros(1, num_window);
-lag = -max_margin:(1/fs):seconds(intervals{1}{2} - dt_E);
+lag = seconds(dt_begin - dt_B):(1/fs):seconds(dt_end - dt_E);
 % correct the length of lag
 size_diff = length(CC) - length(lag);
 if size_diff > 0
@@ -146,7 +146,7 @@ t_shift = lag(IImax);
 x_rawf = cat(1, x_rawf, zeros(length(x_sacf),1));
 num_window = length(x_rawf) - length(x_sacf) + 1;
 CCf = zeros(1, num_window);
-lagf = -max_margin:(1/(fs/d_factor)):seconds(intervals{1}{2} - dt_E);
+lagf = seconds(dt_begin - dt_B):(1/(fs/d_factor)):seconds(dt_end - dt_E);
 % correct the length of lagf
 size_diff = length(CCf) - length(lagf);
 if size_diff > 0
@@ -244,7 +244,7 @@ if plt
 
     % plot raw cc
     ax7 = subplot('Position',[0.05 2/7 0.42 1/7-0.06]);
-    scatter(lag, CC, 'Color', 'black');
+    scatter(lag, CC);
     hold on
     plot(t_shift, CCmax, 'Marker', '+', 'Color', 'r', 'MarkerSize', 8);
     hold off
@@ -252,13 +252,13 @@ if plt
     title('Correlation Coefficient [raw]');
     xlabel('time shift [s]');
     ylabel('CC');
-    xlim([-10 10]);
+    xlim([-0.7 0.7]);
     ylim([-1 1]);
     ax7.FontSize = 8;
 
     % plot filter cc
     ax8 = subplot('Position',[0.53 2/7 0.42 1/7-0.06]);
-    scatter(lagf, CCf, 'Color', 'black');
+    scatter(lagf, CCf);
     hold on
     plot(t_shiftf, CCfmax, 'Marker', '+', 'Color', 'r', 'MarkerSize', 8);
     hold off
@@ -266,7 +266,7 @@ if plt
     title('Correlation Coefficient [filtered]');
     xlabel('time shift [s]');
     ylabel('CC');
-    xlim([-10 10]);
+    xlim([-0.7 0.7]);
     ylim([-1 1]);
     ax8.FontSize = 8;
 

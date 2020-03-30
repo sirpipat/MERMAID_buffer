@@ -16,7 +16,7 @@ function [x, dt_begin, dt_end] = readsection(file, dt_begin, dt_end, fs)
 % SEE ALSO:
 % READONEYEARDATA
 %
-% Last modified by Sirawich Pipatprathanporn: 02/05/2020
+% Last modified by Sirawich Pipatprathanporn: 03/29/2020
 
 defval('fs', 40);
 
@@ -36,7 +36,12 @@ dt_begin = max(dt_begin, dt_file_begin);
 dt_end = min(dt_end, dt_file_end);
 
 % slices the data
-first_index = fs * seconds(dt_begin - dt_file_begin) + 1;
-last_index = fs * seconds(dt_end - dt_file_begin) + 1;
+first_index = round(fs * seconds(dt_begin - dt_file_begin) + 1, 0);
+last_index = round(fs * seconds(dt_end - dt_file_begin) + 1, 0);
 x = x(first_index:last_index);
+
+% fixed dt_begin and dt_end to match the datetimes of first and last 
+% sample from the section respectively
+dt_begin = dt_file_begin + seconds((first_index - 1) / fs);
+dt_end = dt_file_begin + seconds((last_index - 1) / fs);
 end
