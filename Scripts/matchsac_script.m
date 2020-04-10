@@ -19,13 +19,17 @@ for ii = 1:sndex
         matchsac(allsacfiles{ii}, getenv('ONEYEAR'), [], true);
 end
 
+keyboard;
+
 %% plot the time shift vs hour since the beginning and CC vs hours since the beginning
+% find the begin datetime of the raw buffer including each SAC report
 dt_begin = DUMMY_DATETIME;
 for ii = 1:sndex
     [sections, intervals] = getsections(getenv('ONEYEAR'),dt_B(1,ii),dt_E(1,ii),40);
     dt_begin(1,ii) = file2datetime(sections{1});
 end
-
+%%
+% the time since dt_begin to the beginning time of the SAC segment
 t_since = hours((dt_B - dt_begin) + seconds(t_shift));
 t_sincef = hours((dt_B - dt_begin) + seconds(t_shiftf));
 
@@ -35,6 +39,12 @@ t_since = t_since(where);
 t_sincef = t_sincef(where);
 t_shift = t_shift(where);
 t_shiftf = t_shiftf(where);
+
+dt_begin = dt_begin(where);
+
+% find all unique dt_begin
+[dt_bu,idt_begin,idt_bu] = unique(dt_begin);
+dt_begin_label = string(1:length(dt_bu));
 
 % find best fit lines
 P_t_shift = polyfit(t_since, t_shift, 1);
@@ -46,7 +56,7 @@ P_Cfmax = polyfit(t_sincef, Cfmax(where), 1);
 figure(7)
 set(gcf,'Units','inches','Position',[1 1 9 4]);
 subplot('Position', [0.06 0.11 0.43 0.8]);
-p1 = scatter(t_since, t_shift, 'Marker', 'x');
+text(t_since, t_shift, dt_begin_label(idt_bu));
 hold on
 p2 = scatter(t_sincef, t_shiftf, 'Marker', '+');
 p3 = plot(t_since, P_t_shift(1) * t_since + P_t_shift(2));
@@ -55,17 +65,20 @@ hold off
 grid on
 P_label = sprintf('t-shfit [Raw] = (%6.4f) H + (%6.4f)', P_t_shift(1), P_t_shift(2));
 Pf_label = sprintf('t-shift [Filtered] = (%6.4f) H + (%6.4f)', P_t_shiftf(1), P_t_shiftf(2));
-legend('Time shift [Raw]','Time shift [Filtered]',P_label,Pf_label,...
-    'Location','northwest');
-ylim([-0.2 1]);
+% legend('Time shift [Raw]','Time shift [Filtered]',P_label,Pf_label,...
+%     'Location','northwest');
+ylim([-0.1 0.5]);
+xlim([0 140]);
 xlabel('Hours since the beginning of raw data section [hours]');
 ylabel('Time shift [s]');
 title('Time shift vs Hours since the beginning');
+delete(p2);
 delete(p3);
 delete(p4);
 
-subplot('Position', [0.55 0.11 0.43 0.8]);
-p5 = scatter(t_since, Cmax(where), 'Marker', 'x');
+subplot('Position', [0.6 0.11 0.38 0.8]);
+p5 = scatter(t_since, Cmax(where), 'Marker', 'd', 'MarkerEdgeColor', 'k', ...
+    'MarkerFaceColor', 'b');
 hold on
 p6 = scatter(t_sincef, Cfmax(where), 'Marker', '+');
 p7 = plot(t_since, P_Cmax(1) * t_since + P_Cmax(2));
@@ -75,9 +88,10 @@ grid on
 P_label = sprintf('CC [Raw] = (%6.4f) H + (%6.4f)', P_Cmax(1), P_Cmax(2));
 Pf_label = sprintf('CC [Filtered] = (%6.4f) H + (%6.4f)', P_Cfmax(1), P_Cfmax(2));
 legend('CC [Raw]','CC [Filtered]',P_label,Pf_label,'Location','southwest');
-ylim([0 1.3]);
+ylim([0.998 1.0005]);
 xlabel('Hours since the beginning of raw data section [hours]');
 ylabel('Correlation coefficients');
+delete(p6);
 delete(p7);
 delete(p8);
 
