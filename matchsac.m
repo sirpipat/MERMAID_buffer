@@ -61,8 +61,8 @@ max_margin = seconds(dt_B - intervals{1}{1});
 x_rawd20 = decimate(x_raw, 2);
 
 % zero pads before and after the SAC section to get the same length as
-% the raw setion 
-x_before = zeros(round(seconds(dt_B - dt_begin) * 20), 1);
+% the raw section 
+x_before = zeros(round(seconds(dt_B - dt_begin) * fs), 1);
 x_after = zeros(length(x_rawd20) - length(x_before) - length(x_sac) , 1);
 x_sac_plot = cat(1, x_before, x_sac, x_after);
 
