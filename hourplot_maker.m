@@ -1,5 +1,5 @@
-function hourplot_maker(hscdir, savedir)
-% HOURPLOT_MAKER(hscdir, savedir)
+function hourplot_maker(hscdir, savedir, fs)
+% HOURPLOT_MAKER(hscdir, savedir, fs)
 %
 % Make 1-hr seismograms from all hoursection (.hsc) files
 %
@@ -7,6 +7,7 @@ function hourplot_maker(hscdir, savedir)
 %
 %  hscdir	Where you keep all hoursection (.hsc) files  
 %  savedir	Location for the hourplots
+%  fs       Sampling rate [Default: 40.01406 Hz]
 %
 % OUTPUT:
 %
@@ -16,14 +17,14 @@ function hourplot_maker(hscdir, savedir)
 
 [allhscfiles, hndex] = allfile(hscdir);
 
-% assume sampling frequency to be 40 Hz
-fs = 40;
+defval('fs', 40.01406);
 
 for ii = 1:hndex
     fprintf('%s\n', allhscfiles{ii});
     % read the files
     y = loadb(allhscfiles{ii},'int32','l');
     
+    % plot the signal
     signalplot(y, fs, file2datetime(erase(allhscfiles{ii},'.hsc')), ...
         axes, [], 'left');
     
