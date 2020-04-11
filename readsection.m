@@ -1,5 +1,6 @@
 function [x, dt_begin, dt_end] = readsection(file, dt_begin, dt_end, fs)
-% [x, dt_begin, dt_end] = READSECTION(file, dt_begin, dt_end)
+% [x, dt_begin, dt_end] = READSECTION(file, dt_begin, dt_end, fs)
+%
 % Reads data from a file and slices the section between dt_begin and dt_end
 %
 % INPUT:
