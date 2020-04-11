@@ -36,7 +36,7 @@ for ii = 1:hndex
     title(titlestr);
 
     % save the figure
-    savefile = strcat(savefile, '_rawplot');
+    savefile = strcat(savefile, '_rawplot', '.eps');
     figdisp(savefile, [], [], 2, [], 'epstopdf');
 end
 end
