@@ -12,6 +12,6 @@ function filename = datetime2file(dt)
 %
 % Last modified by Sirawich Pipatprathanporn: 04/10/2020
 
-dt.format = 'uuuu-MM-dd''T''HH:mm:ss.SSSSSS';
+dt.Format = 'uuuu-MM-dd''T''HH:mm:ss.SSSSSS';
 filename  = string(dt);
 end

@@ -10,6 +10,7 @@ function hoursection_maker(filename, savedir)
 %
 % NO OUTPUT (besides hoursection files)
 
+
 fprintf("hoursection_maker('%s')\n", filename);
 
 % sampling frequency
@@ -23,8 +24,8 @@ fprintf('size = %d, interval = %d, fs = %f\n', length(x), length(x)/fs, fs);
 
 % read first section
 [x, dt_B, dt_E] = readsection(filename, dt_start, dt_start + hours(1), fs);
-dt_B.format = 'uuuu-MM-dd''T''HH:mm:ss.SSSSSS';
-outfile = strcat(savedir, time2filename(dt_B), '.hsc');
+dt_B.Format = 'uuuu-MM-dd''T''HH:mm:ss.SSSSSS';
+outfile = strcat(savedir, datetime2file(dt_B), '.hsc');
 fid = fopen(outfile, 'w', 'l');
 fwrite(fid, x, 'int32');
 fclose(fid);
@@ -32,8 +33,8 @@ fclose(fid);
 % read later sections
 while dt_E < dt_end
     [x, dt_B, dt_E] = readsection(filename, dt_E, dt_E + hours(1), fs);
-    dt_B.format = 'uuuu-MM-dd''T''HH:mm:ss.SSSSSS';
-    outfile = strcat(savedir, time2filename(dt_B), '.hsc');
+    dt_B.Format = 'uuuu-MM-dd''T''HH:mm:ss.SSSSSS';
+    outfile = strcat(savedir, datetime2file(dt_B), '.hsc');
     fid = fopen(outfile, 'w', 'l');
     fwrite(fid, x, 'int32');
     fclose(fid);
