@@ -1,13 +1,27 @@
-function hourspecdens_maker(hscdir, savedir)
+function hourspecdens_maker(hscdir, nfft, fs, lwin, olap, sfax)
+% HOURSPECDENS_MAKER(hscdir, nfft, fs, lwin, olap, sfax)
+%
+% Plots spectral density plots from hour section files (.hsc) using pChave
+% algorithm
+%
+% INPUT
+% nfft     Number of FFT points [default: lwin]
+% fs       Sampling frequency [Default: 40.01406]
+% lwin     Window length, in samples [default: 256]
+% olap     Window overlap, in percent [default: 70]
+% sfax     Y-axis scaling factor [default: 10]
+%
+% OUTPUT
+% No output besides the power spectral density plots saved at $EPS
 
 [allhscfiles, hndex] = allfile(hscdir);
 
 % parameter list
-nfft = 1024;
-fs = 40;
-lwin = 1024;
-olap = 70;
-sfax = 10;
+defval('nfft', 1024);
+defval('fs', 40.01406);
+defval('lwin', 1024);
+defval('olap', 70);
+defval('sfax', 10);
 
 for ii = 1:hndex
     fprintf('%s\n', allhscfiles{ii});
@@ -22,22 +36,14 @@ for ii = 1:hndex
         grid on
 
         savefile = erase(allhscfiles{ii},'.hsc');
-        savefile = remove_path(savefile);
+        savefile = removepath(savefile);
         % includes datetime to the title of the plot
         titlestr = replace(savefile, '_','\_');
         title(titlestr);
 
         % save the figure
-        savefile = strcat(savedir, savefile, '_specdens', '.eps');
-        saveas(gcf, savefile,'epsc');
+        savefile = strcat(savefile, '_specdens', '.eps');
+        figdisp(savefile, [], [], 2, [], 'epstopdf');
     end
 end
-end
-
-% remove the path from filename string
-% e.g. remove_path('/home/Document/file.txt') == 'file.txt'
-function filename = remove_path(full_filename)
-    % remove file path from the file name
-    splited_name = split(full_filename, '/');
-    filename = cell2mat(splited_name(end));
 end
