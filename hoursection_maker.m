@@ -1,4 +1,6 @@
 function hoursection_maker(filename, savedir)
+% HOURSECTION_MAKER(filename, savedir)
+%
 % Creates hour sections of the data and stored in binary files with names
 % in this format:
 %       <beginning time in yyyy-MM-ddTHH:mm:SS.ssssss>.hsc
