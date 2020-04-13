@@ -1,7 +1,7 @@
 function ax2 = doubleaxes(ax)
-% ax2 = DOUBLEAXIS(ax)
+% ax2 = DOUBLEAXES(ax)
 %
-% Added second axes to the top-rightc
+% Added second axes to the top-right
 %
 %
 % INPUT
@@ -10,7 +10,7 @@ function ax2 = doubleaxes(ax)
 % OUTPUT
 % ax2   the second axes
 %
-% Last modified by Sirawich Pipatprathanporn: 01/27/2020
+% Last modified by Sirawich Pipatprathanporn: 04/13/2020
 
 ax2 = axes();
 ax2.XAxisLocation = 'top';

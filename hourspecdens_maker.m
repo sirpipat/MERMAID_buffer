@@ -13,7 +13,13 @@ function hourspecdens_maker(hscdir, nfft, fs, lwin, olap, sfax)
 %
 % OUTPUT
 % No output besides the power spectral density plots saved at $EPS
+%
+% SEE ALSO
+% SPECDENSPLOT, DOUBLEAXES, INVERSEAXIS
+%
+% Last modified by Sirawich Pipatprathanporn, 04/13/2020
 
+% get all filenames
 [allhscfiles, hndex] = allfile(hscdir);
 
 % parameter list
