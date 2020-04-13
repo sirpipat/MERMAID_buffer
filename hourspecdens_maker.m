@@ -31,15 +31,28 @@ for ii = 1:hndex
     % skip if the file is too short
     if length(y) > lwin + 1024
         % plot spectral density plot
-        specdensplot(y,nfft,fs,lwin,olap,sfax,'s');
+        clf
+        p = specdensplot(y,nfft,fs,lwin,olap,sfax,'s');
         % add grid to the plot
         grid on
-
+        % add the second axes and label
+        ax = p(1).Parent;
+        ax.Position = [0.1300 0.1100 0.7750 0.7150];
+        ax2 = doubleaxes(ax);
+        inverseaxis(ax2.XAxis, 'period (s)');
+        
+        % fix the precision of the frequency on YAxis label
+        y_label = ax.YAxis.Label.String;
+        y_split = split(y_label, '=');
+        f_string = sprintf(' %.4f', fs/nfft);
+        y_label = strcat(y_split{1}, ' =', f_string);
+        ax.YAxis.Label.String = y_label;
+        
         savefile = erase(allhscfiles{ii},'.hsc');
         savefile = removepath(savefile);
         % includes datetime to the title of the plot
         titlestr = replace(savefile, '_','\_');
-        title(titlestr);
+        ax2.Title.String = titlestr;
 
         % save the figure
         savefile = strcat(savefile, '_specdens', '.eps');
