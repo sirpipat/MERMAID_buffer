@@ -21,7 +21,6 @@ fs = 40.01406;
 % read file
 [x, dt_start, dt_end] = readOneYearData(filename, fs);
 
-
 fprintf('size = %d, interval = %d, fs = %f\n', length(x), length(x)/fs, fs);
 
 % read first section
