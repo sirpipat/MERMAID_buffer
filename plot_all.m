@@ -1,4 +1,4 @@
-function plot_all(y, dt_begin, nfft, fs, lwin, olap, sfax, beg, unit)
+function plot_all(y, dt_begin, nfft, fs, lwin, olap, sfax, beg, unit, p)
 % PLOT_ALL(y, dt_begin, nfft, fs, lwin, olap, sfax, beg, unit)
 % plot seismogram, power spectral density, spectograms, and filtered
 % seismogram
@@ -13,6 +13,8 @@ function plot_all(y, dt_begin, nfft, fs, lwin, olap, sfax, beg, unit)
 % sfax          Y-axis scaling factor [default: 10]
 % beg           Signal beginning [Default: 0]
 % unit          String with the unit name [Default: 's']
+% p             Position of the section in the raw buffer file
+%               when y is a sliced section. Otherwise, leave it blank
 %
 % OUTPUT
 % No output returned. The plot is saved in 
@@ -47,6 +49,10 @@ clf
 % plot title
 ax0 = subplot('Position',[0.05 0.93 0.9 0.02]);
 title(string(dt_begin));
+[x_pos, y_pos] = norm2trueposition(ax0, 3/8, 3/4);
+% report
+text(x_pos, y_pos, sprintf('%2.2f - %3.2f percent', p(1), p(2)), ...
+    'FontSize', 12);
 set(ax0, 'FontSize', 12, 'Color', 'none');
 ax0.XAxis.Visible = 'off';
 ax0.YAxis.Visible = 'off';
