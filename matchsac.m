@@ -50,7 +50,7 @@ fs_buffer = 2 * fs;
 [sections, intervals] = getsections(oneyeardir, dt_B - max_margin, ...
     dt_E + max_margin, fs_buffer);
 % update max_margin
-max_margin = seconds(dt_B - intervals{1}{1});
+% max_margin = seconds(dt_B - intervals{1}{1});
 
 % reads the section from raw file(s)
 % Assuming there is only 1 secion
@@ -88,7 +88,7 @@ t_shiftf = ((Ifmax - length(x_rawf)) / (fs / d_factor)) - seconds(dt_B - dt_begi
 fprintf('shifted time [FILTERED] = %f s\n', t_shiftf);
 
 % exit if the time shift is maximum margin
-if or(abs(t_shift) > max_margin, abs(t_shiftf) > max_margin)
+if or(abs(t_shift) > seconds(max_margin), abs(t_shiftf) > seconds(max_margin))
     fprintf('Cannot match\n');
     CCmax = 0;
     CCfmax = 0;
@@ -135,8 +135,8 @@ for ii = 1:num_window
     x_raw_slice = x_rawd20((1:length(x_sac)) + ii - 1);
     CC(1,ii) = corr(detrend(x_raw_slice,1), detrend(x_sac,1));
 end
-% remove any data that lag is beyond +- 200 seconds
-CC(abs(lag) > 200) = 0;
+% remove any data that lag is beyond +- maximum margin
+CC(abs(lag) > max_margin) = 0;
 % find best CC and timeshift
 [CCmax, IImax] = max(CC);
 t_shift = lag(IImax);
@@ -159,8 +159,8 @@ for ii = 1:num_window
     x_raw_slice = x_rawf((1:length(x_sacf)) + ii - 1);
     CCf(1, ii) = corr(detrend(x_raw_slice,1), detrend(x_sacf,1));
 end
-% remove any data that lag is beyond +/- 200 seconds
-CCf(abs(lagf) > 200) = 0;
+% remove any data that lag is beyond +/- max_margin
+CCf(abs(lagf) > max_margin) = 0;
 % find best CC and time shift
 [CCfmax, IIfmax] = max(CCf);
 t_shiftf = lagf(IIfmax);
@@ -252,7 +252,11 @@ if plt
     title('Correlation Coefficient [raw]');
     xlabel('time shift [s]');
     ylabel('CC');
-    xlim([-1 1]);
+    if and(t_shift > -1, t_shift < 1)
+        xlim([-1 1]);
+    else
+        xlim([-1 1] + t_shift);
+    end
     ylim([-1 1]);
     ax7.FontSize = 8;
 
@@ -266,7 +270,11 @@ if plt
     title('Correlation Coefficient [filtered]');
     xlabel('time shift [s]');
     ylabel('CC');
-    xlim([-1 1]);
+    if and(t_shiftf > -1, t_shiftf < 1)
+        xlim([-1 1]);
+    else
+        xlim([-1 1] + t_shiftf);
+    end
     ylim([-1 1]);
     ax8.FontSize = 8;
 
@@ -320,6 +328,40 @@ if plt
     ax12.XAxis.Visible = 'off';
     ax12.YAxis.Visible = 'off';
 
+    % add panel labels
+    norm_x = 0.05;
+    norm_y = 0.85;
+    axes(ax1)
+    [x,y] = norm2trueposition(ax1,norm_x/2,norm_y);
+    text(x,y,'a','FontSize',12);
+    axes(ax2)
+    [x,y] = norm2trueposition(ax2,norm_x/2,norm_y);
+    text(x,y,'b','FontSize',12);
+    axes(ax3)
+    [x,y] = norm2trueposition(ax3,norm_x,norm_y);
+    text(x,y,'c','FontSize',12);
+    axes(ax4)
+    [x,y] = norm2trueposition(ax4,norm_x,norm_y);
+    text(x,y,'d','FontSize',12);
+    axes(ax5)
+    [x,y] = norm2trueposition(ax5,norm_x,norm_y);
+    text(x,y,'e','FontSize',12);
+    axes(ax6)
+    [x,y] = norm2trueposition(ax6,norm_x,norm_y);
+    text(x,y,'f','FontSize',12);
+    axes(ax7)
+    [x,y] = norm2trueposition(ax7,norm_x,norm_y);
+    text(x,y,'g','FontSize',12);
+    axes(ax8)
+    [x,y] = norm2trueposition(ax8,norm_x,norm_y);
+    text(x,y,'h','FontSize',12);
+    axes(ax9)
+    [x,y] = norm2trueposition(ax9,1-norm_x,norm_y);
+    text(x,y,'i','FontSize',12);
+    axes(ax10)
+    [x,y] = norm2trueposition(ax10,1-norm_x,norm_y);
+    text(x,y,'j','FontSize',12);
+    
     %% save the figure
     figdisp(filename,[],[],2,[],'epstopdf');
 end
