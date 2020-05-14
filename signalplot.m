@@ -24,9 +24,19 @@ defval('color', 'black');
 s2d = 86400;
 
 L = length(x);
-t_plot = t + (0:L-1) / fs / s2d;
-if strcmp(position, 'center') == 1
-    t_plot = t_plot - L/2/fs / s2d;
+
+% time (s) input
+if isnumeric(t)
+    t_plot = t + (0:L-1) / fs;
+    if strcmp(position, 'center') == 1
+        t_plot = t_plot - L/2/fs;
+    end
+% datetime input
+else
+    t_plot = t + (0:L-1) / fs / s2d;
+    if strcmp(position, 'center') == 1
+        t_plot = t_plot - L/2/fs / s2d;
+    end
 end
 
 max_x = max([max(x) abs(min(x))]);
@@ -36,7 +46,11 @@ axes(ax);
 plot(t_plot, x,'Color',color);
 title('Signal');       
 xlabel('Time')
-ylim([-max_x max_x]);
+if max_x == 0
+    ylim([-1 1]);
+else
+    ylim([-max_x max_x]);
+end
 xlim([min(t_plot) max(t_plot)]);
 title(title_name);
 grid on
