@@ -33,12 +33,12 @@ wolap = olap / 100;
 
 dt_begin.Format = 'uuuu-MM-dd''T''HH:mm:ss.SSSSSS';
 
-% filters with f_c = [2 10] Hz
-yf1 = bandpass(y, fs, 2, 10, 2, 2, 'butter', 'linear');
+% dt bp2-10
+yf1 = bandpass(detrend(y,1), fs, 2, 10, 2, 2, 'butter', 'linear');
 
-% filters with f_c = [0.05 0.10] Hz
+% dt dc5 dt bp0.05-0.1
 d_factor = 5;
-yd = detrend(decimate(y, d_factor),1);
+yd = detrend(decimate(detrend(y,1), d_factor),1);
 yf2 = bandpass(yd, fs/d_factor, 0.05, 0.10, 2, 2, 'butter', 'linear');
 
 %% Create figure
@@ -69,6 +69,8 @@ t_ph = previous_hour(dt_begin);
 ax1.XTick = (0:900:7200) - seconds(dt_begin - t_ph);
 t_ph.Format = 'HH:mm';
 ax1.XTickLabel = string(t_ph + seconds(0:900:7200));
+% fix the precision of the time on XAxis label
+ax1.XAxis.Label.String = sprintf('time (s): %d s window', round(nfft/fs));
 % add label on the top and right
 ax1.TickDir = 'both';
 ax1s = doubleaxes(ax1);
@@ -86,6 +88,8 @@ ylim([40 140]);
 p(1).Color = [0.8 0.25 0.25];
 p(2).Color = [0.5 0.5 0.5];
 p(3).Color = [0.5 0.5 0.5];
+% fix the precision of the time on XAxis label
+ax2.XAxis.Label.String = sprintf('time (s): %d s window', round(nfft/fs));
 % fix the precision of the frequency on YAxis label
 y_label = ax2.YAxis.Label.String;
 y_split = split(y_label, '=');
@@ -102,9 +106,21 @@ inverseaxis(ax2s.XAxis, 'Period (s)');
 text(x_pos, y_pos, 'B', 'FontSize', 12);
 
 %%% plot raw signal
-ax3 = subplot('Position', [0.06 2/6+0.06 0.88 1/6-0.09]);
+ax3 = subplot('Position', [0.06 2/6+0.02 0.88 1/6-0.06]);
 ax3 = signalplot(y, fs, dt_begin, ax3, '', 'left');
-title('Raw buffer')
+% add moving average
+mov_mean = movmean(y, round(fs * 30));
+t_plot = dt_begin + seconds((0:length(y)-1) / fs);
+hold on
+plot(t_plot, mov_mean, 'Color', [0.2 0.6 0.2], 'LineWidth', 1);
+hold off
+% add moving rms
+y_sq = y .^ 2;
+mov_rms = movmean(y_sq, round(fs * 30)) .^ 0.5;
+hold on
+plot(t_plot, mov_rms, 'Color', [0.8 0.25 0.25], 'LineWidth', 1);
+hold off
+title('Raw buffer -- green = mov avg, red = mov rms, win = 30 s')
 ax3.TickDir = 'both';
 % set ylimit to exclude outliers
 r = rms(y);
@@ -112,11 +128,26 @@ ylim([-5*r 5*r]);
 % add subplot label
 [x_pos, y_pos] = norm2trueposition(ax3, 1/12, 7/8);
 text(x_pos, y_pos, 'C', 'FontSize', 12);
+% remove xlabel
+nolabels(ax3, 1);
+ax3.XAxis.Label.Visible = 'off';
 
-%%% plot raw signal
-ax4 = subplot('Position', [0.06 1/6+0.06 0.88 1/6-0.09]);
+%%% plot filered signal 2-10 Hz
+ax4 = subplot('Position', [0.06 1/6+0.04 0.88 1/6-0.06]);
 ax4 = signalplot(yf1, fs, dt_begin, ax4, '', 'left');
-title('Filtered: bp2-10')
+% add moving average
+mov_mean = movmean(yf1, round(fs * 30));
+t_plot = dt_begin + seconds((0:length(yf1)-1) / fs);
+hold on
+plot(t_plot, mov_mean, 'Color', [0.2 0.6 0.2], 'LineWidth', 1);
+hold off
+% add moving rms
+yf1_sq = yf1 .^ 2;
+mov_rms = movmean(yf1_sq, round(fs * 30)) .^ 0.5;
+hold on
+plot(t_plot, mov_rms, 'Color', [0.8 0.25 0.25], 'LineWidth', 1);
+hold off
+title('Filtered: bp2-10 -- green = mov avg, red = mov rms, win = 30 s')
 ax4.TickDir = 'both';
 % set ylimit to exclude outliers
 r = rms(yf1);
@@ -124,11 +155,26 @@ ylim([-10*r 10*r]);
 % add subplot label
 [x_pos, y_pos] = norm2trueposition(ax4, 1/12, 7/8);
 text(x_pos, y_pos, 'D', 'FontSize', 12);
+% remove xlabel
+nolabels(ax4, 1);
+ax4.XAxis.Label.Visible = 'off';
 
-%%% plot filtered signal
-ax5 = subplot('Position', [0.06 0.06 0.88 1/6-0.09]);
+%%% plot filtered signal 0.05-0.1 Hz
+ax5 = subplot('Position', [0.06 0.06 0.88 1/6-0.06]);
 ax5 = signalplot(yf2, fs/d_factor, dt_begin, ax5, '', 'left');
-title('Filtered: dc5 dt bp0.05-0.1')
+% add moving average
+mov_mean = movmean(yf2, round(fs/d_factor * 150));
+t_plot = dt_begin + seconds((0:length(yf2)-1) / (fs/d_factor));
+hold on
+plot(t_plot, mov_mean, 'Color', [0.2 0.6 0.2], 'LineWidth', 1);
+hold off
+% add moving rms
+yf2_sq = yf2 .^ 2;
+mov_rms = movmean(yf2_sq, round(fs/d_factor * 150)) .^ 0.5;
+hold on
+plot(t_plot, mov_rms, 'Color', [0.8 0.25 0.25], 'LineWidth', 1);
+hold off
+title('Filtered: dc5 dt bp0.05-0.1 -- green = mov avg, red = mov rms, win = 150 s')
 ax5.TickDir = 'both';
 % set ylimit to exclude outliers
 r = rms(yf2);
