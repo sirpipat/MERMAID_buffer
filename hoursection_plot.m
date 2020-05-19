@@ -22,6 +22,7 @@ defval('fs', 40.01406);
 defval('lwin', 1024);
 defval('olap', 70);
 defval('sfax', 10);
+defval('beg', 0);
 defval('unit', 's');
 
 fprintf("hoursection_plot('%s')\n", filename);
@@ -44,7 +45,7 @@ dt_curr = dt_curr + minutes(30);
 
 % slice later sections then plot
 % the next section overlaps the previous section by 30 minutes
-while dt_end - dt_curr > hours(1)
+while dt_end - dt_curr > minutes(30)
     [x, dt_B, dt_E] = slicesection(y, dt_start, dt_curr, ...
         dt_curr + hours(1), fs);
     dt_B.Format = 'uuuu-MM-dd''T''HH:mm:ss.SSSSSS';
