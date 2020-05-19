@@ -136,7 +136,7 @@ for ii = 1:num_window
     CC(1,ii) = corr(detrend(x_raw_slice,1), detrend(x_sac,1));
 end
 % remove any data that lag is beyond +- maximum margin
-CC(abs(lag) > max_margin) = 0;
+CC(abs(lag) > seconds(max_margin)) = 0;
 % find best CC and timeshift
 [CCmax, IImax] = max(CC);
 t_shift = lag(IImax);
@@ -160,7 +160,7 @@ for ii = 1:num_window
     CCf(1, ii) = corr(detrend(x_raw_slice,1), detrend(x_sacf,1));
 end
 % remove any data that lag is beyond +/- max_margin
-CCf(abs(lagf) > max_margin) = 0;
+CCf(abs(lagf) > seconds(max_margin)) = 0;
 % find best CC and time shift
 [CCfmax, IIfmax] = max(CCf);
 t_shiftf = lagf(IIfmax);
