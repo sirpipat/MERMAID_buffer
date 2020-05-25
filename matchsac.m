@@ -253,11 +253,11 @@ if plt
     xlabel('time shift [s]');
     ylabel('CC');
     if and(t_shift > -1, t_shift < 1)
-        xlim([-1 1]);
+        ax7.XLim = [-1 1];
     else
-        xlim([-1 1] + t_shift);
+        ax7.XLim = [-1 1] + t_shift;
     end
-    ylim([-1 1]);
+    ax7.YLim = [-1 1];
     ax7.FontSize = 8;
 
     % plot filter cc
@@ -271,11 +271,11 @@ if plt
     xlabel('time shift [s]');
     ylabel('CC');
     if and(t_shiftf > -1, t_shiftf < 1)
-        xlim([-1 1]);
+        ax8.XLim = [-1 1];
     else
-        xlim([-1 1] + t_shiftf);
+        ax8.XLim = [-1 1] + t_shiftf;
     end
-    ylim([-1 1]);
+    ax8.YLim = [-1 1];
     ax8.FontSize = 8;
 
     % plot 2 signals on top of each other
