@@ -14,7 +14,7 @@ function hoursection_plot(filename, nfft, fs, lwin, olap, sfax, beg, unit)
 %
 % NO OUTPUT (the plot saved at $EPS)
 %
-% Last modified by Sirawich Pipatprathanporn: 04/20/2020
+% Last modified by Sirawich Pipatprathanporn: 05/27/2020
 
 % default parameter list
 defval('nfft', 1024);
@@ -40,7 +40,7 @@ dt_curr = dt_start;
 dt_B.Format = 'uuuu-MM-dd''T''HH:mm:ss.SSSSSS';
 % relative position of the sliced section in the file
 p = [(dt_B - dt_start) (dt_E - dt_start)] / (dt_end - dt_start) * 100;
-plot_all(x, dt_B, nfft, fs, lwin, olap, sfax, beg, unit, p);
+timfreqplot(x, dt_B, nfft, fs, lwin, olap, sfax, beg, unit, p);
 dt_curr = dt_curr + minutes(30);
 
 % slice later sections then plot
@@ -51,7 +51,7 @@ while dt_end - dt_curr > minutes(30)
     dt_B.Format = 'uuuu-MM-dd''T''HH:mm:ss.SSSSSS';
     % relative position of the sliced section in the file
     p = [(dt_B - dt_start) (dt_E - dt_start)] / (dt_end - dt_start) * 100;
-    plot_all(x, dt_B, nfft, fs, lwin, olap, sfax, beg, unit, p);
+    timfreqplot(x, dt_B, nfft, fs, lwin, olap, sfax, beg, unit, p);
     dt_curr = dt_curr + minutes(30);
 end
 
