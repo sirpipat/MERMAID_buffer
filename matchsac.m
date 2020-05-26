@@ -1,4 +1,4 @@
-function [dt_B, dt_E, CCmax, CCfmax, t_shift, t_shiftf] = matchsac(sacfile, oneyeardir, savedir, plt)
+function [dt_B, dt_E, CCmax, CCfmax, t_shift, t_shiftf] = matchsac(sacfile, oneyeardir, savedir, maxmargin, plt, plotfilter)
 % [dt_B, dt_E, Cmax, Cfmax, t_shift, t_shiftf] = MATCHSAC(sacfile, oneyeardir, savedir, plt)
 % Finds a section in OneYearData that SAC file belongs to
 % Then plots xcorr and matched signals
@@ -7,31 +7,41 @@ function [dt_B, dt_E, CCmax, CCfmax, t_shift, t_shiftf] = matchsac(sacfile, oney
 % sacfile       Full filename of the sacfile
 % oneyeardir    Directory of the raw buffer files [Default: $ONEYEAR]
 % savedir       Directory you wish to save the figures
-% plt           Plot options: true = print, false = not print
+% maxmargin     Maximum time shift for time shift search [Default: 200]
+% plt           Plot options: 
+%                   true (default)  = print, 
+%                   false           = not print
+% plotfilter    Plot filter version options: 
+%                   true            = plot,
+%                   false (default) = not plot
 %
 % OUTPUT:
-% dt_B          Beginning datetime of interpolated SAC data
-% dt_E          Ending datetime of interpolated SAC data
+% dt_B          Beginning datetime of SAC data
+% dt_E          Ending datetime of SAC data
 % CCmax         Maximum cross correlation of raw signals
-% CCfmax        Maximum cross correlation of filtered signals
+% CCfmax        Maximum cross correlation of filtered signals: returns NaN
+%               if plotfilter is set to false
 % t_shift       Best-fitted time shift for raw signals
-% t_shift       Best-fitted time shift for filtered signals
+% t_shiftf      Best-fitted time shift for filtered signals: returns NaN if
+%               plotfilter is set to false
 %
 % SEE ALSO:
 % READSAC, GETSECTIONS, READSECTION, 
 %
-% Last modified by Sirawich Pipatprathanporn, 03/25/2020
+% Last modified by Sirawich Pipatprathanporn, 05/25/2020
 
 defval('oneyeardir', getenv('ONEYEAR'));
 defval('savedir', getenv('EPS'));
+defval('maxmargin', 200);
 defval('plt', true);
+defval('plotfilter',false);
 
 % file name for figures
 split_name = split(removepath(sacfile), '.');
 filename = cell2mat(split_name(1));
 
 % maximum margin from both end of SAC datetimes in seconds
-max_margin = seconds(200);
+maxmargin = seconds(maxmargin);
 
 % reads data from SAC file
 [x_sac, Hdr, ~, ~, tims] = readsac(sacfile);
@@ -47,10 +57,8 @@ fs = (Hdr.NPTS - 1) / (Hdr.E - Hdr.B);
 fs_buffer = 2 * fs;
 
 % finds raw file(s) containing dt_B and dt_E
-[sections, intervals] = getsections(oneyeardir, dt_B - max_margin, ...
-    dt_E + max_margin, fs_buffer);
-% update max_margin
-% max_margin = seconds(dt_B - intervals{1}{1});
+[sections, intervals] = getsections(oneyeardir, dt_B - maxmargin, ...
+    dt_E + maxmargin, fs_buffer);
 
 % reads the section from raw file(s)
 % Assuming there is only 1 secion
@@ -66,29 +74,33 @@ x_before = zeros(round(seconds(dt_B - dt_begin) * fs), 1);
 x_after = zeros(length(x_rawd20) - length(x_before) - length(x_sac) , 1);
 x_sac_plot = cat(1, x_before, x_sac, x_after);
 
-% decimates to obtain sampling rate about 20/d_factor Hz then detrend
-d_factor = 3;
-x_sacd10 = detrend(decimate(x_sac, d_factor), 1);
-x_rawd10 = detrend(decimate(x_rawd20, d_factor), 1);
-
-% applies Butterworth bandpass 0.05-0.10 Hz
-x_sacf = bandpass(x_sacd10, fs/d_factor, 0.05, 0.10, 2, 2, 'butter', 'linear');
-x_rawf = bandpass(x_rawd10, fs/d_factor, 0.05, 0.10, 2, 2, 'butter', 'linear');
-
 % finds timeshift for raw SAC signal
 [C, lag] = xcorr(detrend(x_rawd20,1), detrend(x_sac,1));
 [Cmax, Imax] = max(C);
 t_shift = ((Imax - length(x_rawd20)) / fs) - seconds(dt_B - dt_begin);
 fprintf('shifted time [RAW]      = %f s\n', t_shift);
 
-% finds timeshift for filtered SAC signal
-[Cf, lagf] = xcorr(detrend(x_rawf,1), detrend(x_sacf,1));
-[Cfmax, Ifmax] = max(Cf);
-t_shiftf = ((Ifmax - length(x_rawf)) / (fs / d_factor)) - seconds(dt_B - dt_begin);
-fprintf('shifted time [FILTERED] = %f s\n', t_shiftf);
+if plotfilter
+    % decimates to obtain sampling rate about 20/d_factor Hz then detrend
+    d_factor = 3;
+    x_sacd10 = detrend(decimate(x_sac, d_factor), 1);
+    x_rawd10 = detrend(decimate(x_rawd20, d_factor), 1);
+
+    % applies Butterworth bandpass 0.05-0.10 Hz
+    x_sacf = bandpass(x_sacd10, fs/d_factor, 0.05, 0.10, 2, 2, 'butter', 'linear');
+    x_rawf = bandpass(x_rawd10, fs/d_factor, 0.05, 0.10, 2, 2, 'butter', 'linear');
+    
+    % finds timeshift for filtered SAC signal
+    [Cf, lagf] = xcorr(detrend(x_rawf,1), detrend(x_sacf,1));
+    [Cfmax, Ifmax] = max(Cf);
+    t_shiftf = ((Ifmax - length(x_rawf)) / (fs / d_factor)) - seconds(dt_B - dt_begin);
+    fprintf('shifted time [FILTERED] = %f s\n', t_shiftf);
+else
+    t_shiftf = NaN;
+end
 
 % exit if the time shift is maximum margin
-if or(abs(t_shift) > seconds(max_margin), abs(t_shiftf) > seconds(max_margin))
+if or(abs(t_shift) > seconds(maxmargin), abs(t_shiftf) > seconds(maxmargin))
     fprintf('Cannot match\n');
     CCmax = 0;
     CCfmax = 0;
@@ -136,34 +148,36 @@ for ii = 1:num_window
     CC(1,ii) = corr(detrend(x_raw_slice,1), detrend(x_sac,1));
 end
 % remove any data that lag is beyond +- maximum margin
-CC(abs(lag) > seconds(max_margin)) = 0;
+CC(abs(lag) > seconds(maxmargin)) = 0;
 % find best CC and timeshift
 [CCmax, IImax] = max(CC);
 t_shift = lag(IImax);
 
 %% compute correlation coefficients between filtered buffer and filtered SAC
 % at different windows
-x_rawf = cat(1, x_rawf, zeros(length(x_sacf),1));
-num_window = length(x_rawf) - length(x_sacf) + 1;
-CCf = zeros(1, num_window);
-lagf = seconds(dt_begin - dt_B):(1/(fs/d_factor)):seconds(dt_end - dt_E);
-% correct the length of lagf
-size_diff = length(CCf) - length(lagf);
-if size_diff > 0
-    lagf_extension = (1:size_diff) / (fs/d_factor) + lagf(end);
-    lagf = [lagf lagf_extension];
-elseif size_diff < 0
-    lagf = lagf(1:length(CCf));
+if plotfilter
+    x_rawf = cat(1, x_rawf, zeros(length(x_sacf),1));
+    num_window = length(x_rawf) - length(x_sacf) + 1;
+    CCf = zeros(1, num_window);
+    lagf = seconds(dt_begin - dt_B):(1/(fs/d_factor)):seconds(dt_end - dt_E);
+    % correct the length of lagf
+    size_diff = length(CCf) - length(lagf);
+    if size_diff > 0
+        lagf_extension = (1:size_diff) / (fs/d_factor) + lagf(end);
+        lagf = [lagf lagf_extension];
+    elseif size_diff < 0
+        lagf = lagf(1:length(CCf));
+    end
+    for ii = 1:num_window
+        x_raw_slice = x_rawf((1:length(x_sacf)) + ii - 1);
+        CCf(1, ii) = corr(detrend(x_raw_slice,1), detrend(x_sacf,1));
+    end
+    % remove any data that lag is beyond +/- max_margin
+    CCf(abs(lagf) > seconds(maxmargin)) = 0;
+    % find best CC and time shift
+    [CCfmax, IIfmax] = max(CCf);
+    t_shiftf = lagf(IIfmax);
 end
-for ii = 1:num_window
-    x_raw_slice = x_rawf((1:length(x_sacf)) + ii - 1);
-    CCf(1, ii) = corr(detrend(x_raw_slice,1), detrend(x_sacf,1));
-end
-% remove any data that lag is beyond +/- max_margin
-CCf(abs(lagf) > seconds(max_margin)) = 0;
-% find best CC and time shift
-[CCfmax, IIfmax] = max(CCf);
-t_shiftf = lagf(IIfmax);
 %% plots
 if plt
     figure(6)
@@ -207,7 +221,11 @@ if plt
     ax2.FontSize = 8;
 
     % plot zoom-in sections of raw buffer from dt_B to dt_E
-    ax3 = subplot('Position',[0.05 4/7 0.42 1/7-0.06]);
+    if plotfilter
+        ax3 = subplot('Position',[0.05 4/7 0.42 1/7-0.06]);
+    else
+        ax3 = subplot('Position',[0.05 4/7 0.9 1/7-0.06]);
+    end
     ax3 = signalplot(x_raw, fs_buffer, dt_begin, ax3, ... 
         sprintf('Buffer [raw], fs = %6.3f Hz', fs_buffer), ...
         'left', 'blue');
@@ -216,7 +234,11 @@ if plt
     ax3.FontSize = 8;
 
     % plot zoom-in sections of raw sac report from dt_B to dt_E
-    ax4 = subplot('Position',[0.05 3/7 0.42 1/7-0.06]);
+    if plotfilter
+        ax4 = subplot('Position',[0.05 3/7 0.42 1/7-0.06]);
+    else
+        ax4 = subplot('Position',[0.05 3/7 0.9 1/7-0.06]);
+    end
     ax4 = signalplot(x_sac, fs, dt_B, ax4, ...
         sprintf('Reported [raw], fs = %6.3f Hz', fs), ...
         'left', 'black');
@@ -224,26 +246,32 @@ if plt
     ax4.XLim = [dt_B dt_E];
     ax4.FontSize = 8;
 
-    % plot zoom-in sections of filtered buffer
-    ax5 = subplot('Position',[0.53 4/7 0.42 1/7-0.06]);
-    ax5 = signalplot(x_rawf, fs/d_factor, dt_begin, ax5, ...
-        sprintf('Buffer [dc%d, dt, bp 0.05-0.10 Hz], fs = %6.3f Hz', ...
-        2 * d_factor, fs / d_factor), 'left', 'blue');
-    ax5.XLabel.String = 'Buffer Time';
-    ax5.XLim = [dt_B dt_E];
-    ax5.FontSize = 8;
+    if plotfilter
+        % plot zoom-in sections of filtered buffer
+        ax5 = subplot('Position',[0.53 4/7 0.42 1/7-0.06]);
+        ax5 = signalplot(x_rawf, fs/d_factor, dt_begin, ax5, ...
+            sprintf('Buffer [dc%d, dt, bp 0.05-0.10 Hz], fs = %6.3f Hz', ...
+            2 * d_factor, fs / d_factor), 'left', 'blue');
+        ax5.XLabel.String = 'Buffer Time';
+        ax5.XLim = [dt_B dt_E];
+        ax5.FontSize = 8;
 
-    % plot zoom-in sections of filtered sac report
-    ax6 = subplot('Position',[0.53 3/7 0.42 1/7-0.06]);
-    ax6 = signalplot(x_sacf, fs/d_factor, dt_B, ax6, ...
-        sprintf('Reported [dc%d, dt, bp 0.05-0.10 Hz], fs = %6.3f Hz', ...
-        d_factor, fs / d_factor), 'left', 'black');
-    ax6.XLabel.String = 'Processed Time';
-    ax6.XLim = [dt_B dt_E];
-    ax6.FontSize = 8;
+        % plot zoom-in sections of filtered sac report
+        ax6 = subplot('Position',[0.53 3/7 0.42 1/7-0.06]);
+        ax6 = signalplot(x_sacf, fs/d_factor, dt_B, ax6, ...
+            sprintf('Reported [dc%d, dt, bp 0.05-0.10 Hz], fs = %6.3f Hz', ...
+            d_factor, fs / d_factor), 'left', 'black');
+        ax6.XLabel.String = 'Processed Time';
+        ax6.XLim = [dt_B dt_E];
+        ax6.FontSize = 8;
+    end
 
     % plot raw cc
-    ax7 = subplot('Position',[0.05 2/7 0.42 1/7-0.06]);
+    if plotfilter
+        ax7 = subplot('Position',[0.05 2/7 0.42 1/7-0.06]);
+    else
+        ax7 = subplot('Position',[0.05 2/7 0.9 1/7-0.06]);
+    end
     scatter(lag, CC, '.k');
     hold on
     plot(t_shift, CCmax, 'Marker', '+', 'Color', 'r', 'MarkerSize', 8);
@@ -261,25 +289,31 @@ if plt
     ax7.FontSize = 8;
 
     % plot filter cc
-    ax8 = subplot('Position',[0.53 2/7 0.42 1/7-0.06]);
-    scatter(lagf, CCf, '.k');
-    hold on
-    plot(t_shiftf, CCfmax, 'Marker', '+', 'Color', 'r', 'MarkerSize', 8);
-    hold off
-    grid on
-    title('Correlation Coefficient [filtered]');
-    xlabel('time shift [s]');
-    ylabel('CC');
-    if and(t_shiftf > -1, t_shiftf < 1)
-        ax8.XLim = [-1 1];
-    else
-        ax8.XLim = [-1 1] + t_shiftf;
+    if plotfilter
+        ax8 = subplot('Position',[0.53 2/7 0.42 1/7-0.06]);
+        scatter(lagf, CCf, '.k');
+        hold on
+        plot(t_shiftf, CCfmax, 'Marker', '+', 'Color', 'r', 'MarkerSize', 8);
+        hold off
+        grid on
+        title('Correlation Coefficient [filtered]');
+        xlabel('time shift [s]');
+        ylabel('CC');
+        if and(t_shiftf > -1, t_shiftf < 1)
+            ax8.XLim = [-1 1];
+        else
+            ax8.XLim = [-1 1] + t_shiftf;
+        end
+        ax8.YLim = [-1 1];
+        ax8.FontSize = 8;
     end
-    ax8.YLim = [-1 1];
-    ax8.FontSize = 8;
 
     % plot 2 signals on top of each other
-    ax9 = subplot('Position',[0.05 1/7 0.42 1/7-0.06]);
+    if plotfilter
+        ax9 = subplot('Position',[0.05 1/7 0.42 1/7-0.06]);
+    else
+        ax9 = subplot('Position',[0.05 1/7 0.9 1/7-0.06]);
+    end
     ax9 = signalplot(x_rawd20, fs, dt_begin-seconds(t_shift), ax9, '', ...
         'left', 'blue');
     hold on
@@ -293,76 +327,123 @@ if plt
     legend('shifted buffer','reported','Location','northwest');
     ax9.FontSize = 8;
 
-    % plot 2 signals on top of each other
-    ax10 = subplot('Position',[0.53 1/7 0.42 1/7-0.06]);
-    ax10 = signalplot(x_rawf, fs/d_factor, dt_begin-seconds(t_shiftf), ax10, '', ...
-        'left', 'blue');
-    hold on
-    ax_title = sprintf('Shifted Buffer and Reported [filtered]');
-    ax10 = signalplot(x_sacf, fs/d_factor, dt_B, ax10, ax_title, 'left', 'black');
-    hold off
-    x_left = dt_B + (dt_E - dt_B) * 4/5;
-    x_right = dt_B + (dt_E - dt_B) * 5/5;
-    xlim([x_left x_right]);
-    ax10.XLabel.String = 'Processed Time';
-    legend('shifted buffer','reported','Location','northwest');
-    ax10.FontSize = 8;
+    % plot 2 filtered signals on top of each other
+    if plotfilter
+        ax10 = subplot('Position',[0.53 1/7 0.42 1/7-0.06]);
+        ax10 = signalplot(x_rawf, fs/d_factor, ...
+            dt_begin-seconds(t_shiftf), ax10, '', 'left', 'blue');
+        hold on
+        ax_title = sprintf('Shifted Buffer and Reported [filtered]');
+        ax10 = signalplot(x_sacf, fs/d_factor, dt_B, ax10, ax_title, ...
+            'left', 'black');
+        hold off
+        x_left = dt_B + (dt_E - dt_B) * 4/5;
+        x_right = dt_B + (dt_E - dt_B) * 5/5;
+        xlim([x_left x_right]);
+        ax10.XLabel.String = 'Processed Time';
+        legend('shifted buffer','reported','Location','northwest');
+        ax10.FontSize = 8;
+    end
 
     % report t_shift and Cmax on an empty axes
-    ax11 = subplot('Position',[0.02 0 0.42 1/7-0.06]);
+    if plotfilter
+        ax11 = subplot('Position',[0.02 0 0.42 1/7-0.06]);
+    else
+        ax11 = subplot('Position',[0.02 0 0.9 1/7-0.06]);
+    end
     ax11.Color = 'none';
-    text(8/9*ax11.XLim(1)+1/9*ax11.XLim(2),1/4*ax11.YLim(1)+3/4*ax11.YLim(2),...
+    if plotfilter
+        x_begin = 1/9;
+    else
+        x_begin = 1/3;
+    end
+    text(8/9*ax11.XLim(1)+x_begin*ax11.XLim(2),1/4*ax11.YLim(1)+3/4*ax11.YLim(2),...
         sprintf('Time shift  = %7.3f seconds',t_shift),'FontSize',12);
-    text(8/9*ax11.XLim(1)+1/9*ax11.XLim(2),3/4*ax11.YLim(1)+1/4*ax11.YLim(2),...
+    text(8/9*ax11.XLim(1)+x_begin*ax11.XLim(2),3/4*ax11.YLim(1)+1/4*ax11.YLim(2),...
         sprintf('maximum cc = %5.3f',CCmax),'FontSize',12);
     ax11.XAxis.Visible = 'off';
     ax11.YAxis.Visible = 'off';
 
     % report t_shiftf and Cfmax on an empty axes
-    ax12 = subplot('Position',[0.53 0 0.42 1/7-0.06]);
-    ax12.Color = 'none';
-    text(15/16*ax12.XLim(1)+1/16*ax12.XLim(2),1/4*ax12.YLim(1)+3/4*ax12.YLim(2),...
-        sprintf('Time shift  = %7.3f seconds',t_shiftf),'FontSize',12);
-    text(15/16*ax12.XLim(1)+1/16*ax12.XLim(2),3/4*ax12.YLim(1)+1/4*ax12.YLim(2),...
-        sprintf('maximum cc = %5.3f',CCfmax),'FontSize',12);
-    ax12.XAxis.Visible = 'off';
-    ax12.YAxis.Visible = 'off';
+    if plotfilter
+        ax12 = subplot('Position',[0.53 0 0.42 1/7-0.06]);
+        ax12.Color = 'none';
+        text(15/16*ax12.XLim(1)+1/16*ax12.XLim(2),1/4*ax12.YLim(1)+3/4*ax12.YLim(2),...
+            sprintf('Time shift  = %7.3f seconds',t_shiftf),'FontSize',12);
+        text(15/16*ax12.XLim(1)+1/16*ax12.XLim(2),3/4*ax12.YLim(1)+1/4*ax12.YLim(2),...
+            sprintf('maximum cc = %5.3f',CCfmax),'FontSize',12);
+        ax12.XAxis.Visible = 'off';
+        ax12.YAxis.Visible = 'off';
+    end
 
     % add panel labels
     norm_x = 0.05;
     norm_y = 0.85;
+    axlabel = 97;     % ASCII code for 'a'
+    
     axes(ax1)
-    [x,y] = norm2trueposition(ax1,norm_x/2,norm_y);
-    text(x,y,'a','FontSize',12);
+    [x,y] = norm2trueposition(ax1,norm_x,norm_y);
+    text(x,y,char(axlabel),'FontSize',12);
+    axlabel = axlabel + 1;
+    
     axes(ax2)
-    [x,y] = norm2trueposition(ax2,norm_x/2,norm_y);
-    text(x,y,'b','FontSize',12);
+    [x,y] = norm2trueposition(ax2,norm_x,norm_y);
+    text(x,y,char(axlabel),'FontSize',12);
+    axlabel = axlabel + 1;
+    
     axes(ax3)
     [x,y] = norm2trueposition(ax3,norm_x,norm_y);
-    text(x,y,'c','FontSize',12);
+    text(x,y,char(axlabel),'FontSize',12);
+    axlabel = axlabel + 1;
+    
     axes(ax4)
     [x,y] = norm2trueposition(ax4,norm_x,norm_y);
-    text(x,y,'d','FontSize',12);
-    axes(ax5)
-    [x,y] = norm2trueposition(ax5,norm_x,norm_y);
-    text(x,y,'e','FontSize',12);
-    axes(ax6)
-    [x,y] = norm2trueposition(ax6,norm_x,norm_y);
-    text(x,y,'f','FontSize',12);
+    text(x,y,char(axlabel),'FontSize',12);
+    axlabel = axlabel + 1;
+    
+    if plotfilter
+        axes(ax5)
+        [x,y] = norm2trueposition(ax5,norm_x,norm_y);
+        text(x,y,char(axlabel),'FontSize',12);
+        axlabel = axlabel + 1;
+        
+        axes(ax6)
+        [x,y] = norm2trueposition(ax6,norm_x,norm_y);
+        text(x,y,char(axlabel),'FontSize',12);
+        axlabel = axlabel + 1;
+    end
+    
     axes(ax7)
     [x,y] = norm2trueposition(ax7,norm_x,norm_y);
-    text(x,y,'g','FontSize',12);
-    axes(ax8)
-    [x,y] = norm2trueposition(ax8,norm_x,norm_y);
-    text(x,y,'h','FontSize',12);
+    text(x,y,char(axlabel),'FontSize',12);
+    axlabel = axlabel + 1;
+    
+    if plotfilter
+        axes(ax8)
+        [x,y] = norm2trueposition(ax8,norm_x,norm_y);
+        text(x,y,char(axlabel),'FontSize',12);
+        axlabel = axlabel + 1;
+    end
+    
     axes(ax9)
     [x,y] = norm2trueposition(ax9,1-norm_x,norm_y);
-    text(x,y,'i','FontSize',12);
-    axes(ax10)
-    [x,y] = norm2trueposition(ax10,1-norm_x,norm_y);
-    text(x,y,'j','FontSize',12);
+    text(x,y,char(axlabel),'FontSize',12);
+    axlabel = axlabel + 1;
+    
+    if plotfilter
+        axes(ax10)
+        [x,y] = norm2trueposition(ax10,1-norm_x,norm_y);
+        text(x,y,char(axlabel),'FontSize',12);
+        axlabel = axlabel + 1;
+    end
     
     %% save the figure
     figdisp(filename,[],[],2,[],'epstopdf');
 end
+
+if ~plotfilter
+    CCfmax = NaN;
+    t_shiftf = NaN;
+end
+
 end
