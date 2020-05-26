@@ -184,7 +184,7 @@ ylim([-5*r 5*r]);
 text(x_pos, y_pos, 'e', 'FontSize', 12);
 
 %% Save figure
-savefile = strcat(replace(string(dt_begin), ':', '_'), '_all', '.eps');
+savefile = strcat(mfilename, '_', replace(string(dt_begin), ':', '_'), '.eps');
 figdisp(savefile, [], [], 2, [], 'epstopdf');
 end
 
