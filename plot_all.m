@@ -19,7 +19,7 @@ function plot_all(y, dt_begin, nfft, fs, lwin, olap, sfax, beg, unit, p)
 % OUTPUT
 % No output returned. The plot is saved in 
 % 
-% Last modified by Sirawich Pipatprathanporn: 04/20/2020
+% Last modified by Sirawich Pipatprathanporn: 05/26/2020
 
 % parameter list
 defval('fs', 40.01406);
@@ -58,7 +58,7 @@ ax0.XAxis.Visible = 'off';
 ax0.YAxis.Visible = 'off';
 
 %%% plot spectogram
-ax1 = subplot('Position', [0.06 4/7 0.43 3/7-0.12]);
+ax1 = subplot('Position', [0.07 4/7 0.42 3/7-0.12]);
 timspecplot_ns(y,nfft,fs,lwin,wolap,beg,unit);
 title('');
 % insert colorbar
@@ -77,7 +77,7 @@ ax1s = doubleaxes(ax1);
 ax1s.YAxis.Visible = 'off';
 % add subplot label
 [x_pos, y_pos] = norm2trueposition(ax1, 1/8, 7/8);
-text(x_pos, y_pos, 'A', 'FontSize', 12);
+text(x_pos, y_pos, 'a', 'FontSize', 12);
 
 %%% plot power spectral density profile
 ax2 = subplot('Position', [0.61 4/7 0.33 3/7-0.12]);
@@ -89,7 +89,7 @@ p(1).Color = [0.8 0.25 0.25];
 p(2).Color = [0.5 0.5 0.5];
 p(3).Color = [0.5 0.5 0.5];
 % fix the precision of the time on XAxis label
-ax2.XAxis.Label.String = sprintf('time (s): %d s window', round(nfft/fs));
+ax2.XAxis.Label.String = sprintf('frequency (Hz): %d s window', round(nfft/fs));
 % fix the precision of the frequency on YAxis label
 y_label = ax2.YAxis.Label.String;
 y_split = split(y_label, '=');
@@ -103,10 +103,10 @@ ax2s = doubleaxes(ax2);
 inverseaxis(ax2s.XAxis, 'Period (s)');
 % add subplot label
 [x_pos, y_pos] = norm2trueposition(ax2, 1/800, 7/8);
-text(x_pos, y_pos, 'B', 'FontSize', 12);
+text(x_pos, y_pos, 'b', 'FontSize', 12);
 
 %%% plot raw signal
-ax3 = subplot('Position', [0.06 2/6+0.02 0.88 1/6-0.06]);
+ax3 = subplot('Position', [0.07 2/6+0.02 0.87 1/6-0.06]);
 ax3 = signalplot(y, fs, dt_begin, ax3, '', 'left');
 % add moving average
 mov_mean = movmean(y, round(fs * 30));
@@ -127,13 +127,13 @@ r = rms(y);
 ylim([-5*r 5*r]);
 % add subplot label
 [x_pos, y_pos] = norm2trueposition(ax3, 1/12, 7/8);
-text(x_pos, y_pos, 'C', 'FontSize', 12);
+text(x_pos, y_pos, 'c', 'FontSize', 12);
 % remove xlabel
 nolabels(ax3, 1);
 ax3.XAxis.Label.Visible = 'off';
 
 %%% plot filered signal 2-10 Hz
-ax4 = subplot('Position', [0.06 1/6+0.04 0.88 1/6-0.06]);
+ax4 = subplot('Position', [0.07 1/6+0.04 0.87 1/6-0.06]);
 ax4 = signalplot(yf1, fs, dt_begin, ax4, '', 'left');
 % add moving average
 mov_mean = movmean(yf1, round(fs * 30));
@@ -154,13 +154,13 @@ r = rms(yf1);
 ylim([-10*r 10*r]);
 % add subplot label
 [x_pos, y_pos] = norm2trueposition(ax4, 1/12, 7/8);
-text(x_pos, y_pos, 'D', 'FontSize', 12);
+text(x_pos, y_pos, 'd', 'FontSize', 12);
 % remove xlabel
 nolabels(ax4, 1);
 ax4.XAxis.Label.Visible = 'off';
 
 %%% plot filtered signal 0.05-0.1 Hz
-ax5 = subplot('Position', [0.06 0.06 0.88 1/6-0.06]);
+ax5 = subplot('Position', [0.07 0.06 0.87 1/6-0.06]);
 ax5 = signalplot(yf2, fs/d_factor, dt_begin, ax5, '', 'left');
 % add moving average
 mov_mean = movmean(yf2, round(fs/d_factor * 150));
@@ -181,10 +181,10 @@ r = rms(yf2);
 ylim([-5*r 5*r]);
 % add subplot label
 [x_pos, y_pos] = norm2trueposition(ax5, 1/12, 7/8);
-text(x_pos, y_pos, 'E', 'FontSize', 12);
+text(x_pos, y_pos, 'e', 'FontSize', 12);
 
 %% Save figure
-savefile = strcat(string(dt_begin), '_all', '.eps');
+savefile = strcat(replace(string(dt_begin), ':', '_'), '_all', '.eps');
 figdisp(savefile, [], [], 2, [], 'epstopdf');
 end
 
