@@ -36,6 +36,7 @@ defval('maxmargin', 200);
 defval('plt', true);
 defval('plotfilter',false);
 
+%% read the data from files
 % file name for figures
 split_name = split(removepath(sacfile), '.');
 filename = cell2mat(split_name(1));
@@ -65,21 +66,42 @@ fs_buffer = 2 * fs;
 [x_raw, dt_begin, dt_end] = readsection(sections{1}, intervals{1}{1}, ...
     intervals{1}{2}, fs_buffer);
 
-% decimate the raw section to obtain sampling rate about 20 Hz
-x_rawd20 = decimate(x_raw, 2);
+%% reduce the sampling rate of buffer by a factor of 2
+% downsample the raw section to obtain sampling rate about 20 Hz
+x_odd = x_raw(1:2:end);
+x_even = x_raw(2:2:end);
 
+% decimate the raw section to obtain sampling rate about 20 Hz
+if mod(length(x_raw), 2) == 1
+    % the number of samples in x_raw is an odd number
+    x_rawd20_odd = decimate(x_raw, 2);
+    x_rawd20_even = decimate(x_raw(1:end-1), 2);
+else
+    % the number of samples in x_raw is an even number
+    x_rawd20_odd = decimate(x_raw(1:end-1), 2);
+    x_rawd20_even = decimate(x_raw, 2);
+end
+
+% correct the begin time of decimated/downsampled signal
+dt_begin_odd = dt_begin;
+dt_begin_even = dt_begin + seconds(1/fs_buffer);
+
+%% rough estimation of the best time shift
 % zero pads before and after the SAC section to get the same length as
 % the raw section 
-x_before = zeros(round(seconds(dt_B - dt_begin) * fs), 1);
-x_after = zeros(length(x_rawd20) - length(x_before) - length(x_sac) , 1);
+x_before = zeros(round(seconds(dt_B - dt_begin_odd) * fs), 1);
+x_after = zeros(length(x_rawd20_odd) - length(x_before) - length(x_sac) , 1);
 x_sac_plot = cat(1, x_before, x_sac, x_after);
 
 % finds timeshift for raw SAC signal
-[C, lag] = xcorr(detrend(x_rawd20,1), detrend(x_sac,1));
+[C, lag] = xcorr(detrend(x_rawd20_odd,1), detrend(x_sac,1));
 [Cmax, Imax] = max(C);
-t_shift = ((Imax - length(x_rawd20)) / fs) - seconds(dt_B - dt_begin);
+t_shift = ((Imax - length(x_rawd20_odd)) / fs) - seconds(dt_B - dt_begin_odd);
 fprintf('shifted time [RAW]      = %f s\n', t_shift);
 
+% TODO: Fixed this block to handle x_odd, x_even, x_rawd20_odd, and
+% x_rawd20_even. During this time do not run the function with plotfilter
+% being true.
 if plotfilter
     % decimates to obtain sampling rate about 20/d_factor Hz then detrend
     d_factor = 3;
@@ -131,52 +153,98 @@ end
 
 %% compute correlation coefficients between raw buffer and raw SAC at
 % different windows
-x_rawd20 = cat(1, x_rawd20, zeros(length(x_sac),1));
-num_window = length(x_rawd20) - length(x_sac) + 1;
-CC = zeros(1, num_window);
-lag = seconds(dt_begin - dt_B):(1/fs):seconds(dt_end - dt_E);
-% correct the length of lag
-size_diff = length(CC) - length(lag);
-if size_diff > 0
-    lag_extension = (1:size_diff) / fs + lag(end);
-    lag = [lag lag_extension];
-elseif size_diff < 0
-    lag = lag(1:length(CC));
+
+% determine which resampling methods gives the highest CC
+[t_shift1,CCmax1,lag1,CC1] = ccshift(x_odd,x_sac,dt_begin_odd,dt_B,fs,...
+                                     maxmargin);
+best_method = 'downsample [odd]';
+t_shift = t_shift1;
+CCmax = CCmax1;
+lag = lag1;
+CC = CC1;
+
+[t_shift2,CCmax2,lag2,CC2] = ccshift(x_even,x_sac,dt_begin_even,dt_B,fs,...
+                                     maxmargin);
+if CCmax2 > CCmax
+    best_method = 'downsample [even]';
+    t_shift = t_shift2;
+    CCmax = CCmax2;
+    lag = lag2;
+    CC = CC2;
 end
-for ii = 1:num_window
-    x_raw_slice = x_rawd20((1:length(x_sac)) + ii - 1);
-    CC(1,ii) = corr(detrend(x_raw_slice,1), detrend(x_sac,1));
+
+[t_shift3,CCmax3,lag3,CC3] = ccshift(x_rawd20_odd,x_sac,dt_begin_odd,dt_B,fs,...
+                                     maxmargin);
+if CCmax3 > CCmax
+    best_method = 'decimate [odd]';
+    t_shift = t_shift3;
+    CCmax = CCmax3;
+    lag = lag3;
+    CC = CC3;
 end
-% remove any data that lag is beyond +- maximum margin
-CC(abs(lag) > seconds(maxmargin)) = 0;
-% find best CC and timeshift
-[CCmax, IImax] = max(CC);
-t_shift = lag(IImax);
+
+[t_shift4,CCmax4,lag4,CC4] = ccshift(x_rawd20_even,x_sac,dt_begin_even,dt_B,fs,...
+                                     maxmargin);
+if CCmax4 > CCmax
+    best_method = 'decimate [even]';
+    t_shift = t_shift4;
+    CCmax = CCmax4;
+    lag = lag4;
+    CC = CC4;
+end
+
+% report the best method
+fprintf('Best method: %s\n', best_method);
+fprintf('Max CC     : %f\n', CCmax);
+
+% x_rawd20 = cat(1, x_rawd20, zeros(length(x_sac),1));
+% num_window = length(x_rawd20) - length(x_sac) + 1;
+% CC = zeros(1, num_window);
+% lag = seconds(dt_begin - dt_B):(1/fs):seconds(dt_end - dt_E);
+% % correct the length of lag
+% size_diff = length(CC) - length(lag);
+% if size_diff > 0
+%     lag_extension = (1:size_diff) / fs + lag(end);
+%     lag = [lag lag_extension];
+% elseif size_diff < 0
+%     lag = lag(1:length(CC));
+% end
+% for ii = 1:num_window
+%     x_raw_slice = x_rawd20((1:length(x_sac)) + ii - 1);
+%     CC(1,ii) = corr(detrend(x_raw_slice,1), detrend(x_sac,1));
+% end
+% % remove any data that lag is beyond +- maximum margin
+% CC(abs(lag) > seconds(maxmargin)) = 0;
+% % find best CC and timeshift
+% [CCmax, IImax] = max(CC);
+% t_shift = lag(IImax);
 
 %% compute correlation coefficients between filtered buffer and filtered SAC
 % at different windows
 if plotfilter
-    x_rawf = cat(1, x_rawf, zeros(length(x_sacf),1));
-    num_window = length(x_rawf) - length(x_sacf) + 1;
-    CCf = zeros(1, num_window);
-    lagf = seconds(dt_begin - dt_B):(1/(fs/d_factor)):seconds(dt_end - dt_E);
-    % correct the length of lagf
-    size_diff = length(CCf) - length(lagf);
-    if size_diff > 0
-        lagf_extension = (1:size_diff) / (fs/d_factor) + lagf(end);
-        lagf = [lagf lagf_extension];
-    elseif size_diff < 0
-        lagf = lagf(1:length(CCf));
-    end
-    for ii = 1:num_window
-        x_raw_slice = x_rawf((1:length(x_sacf)) + ii - 1);
-        CCf(1, ii) = corr(detrend(x_raw_slice,1), detrend(x_sacf,1));
-    end
-    % remove any data that lag is beyond +/- max_margin
-    CCf(abs(lagf) > seconds(maxmargin)) = 0;
-    % find best CC and time shift
-    [CCfmax, IIfmax] = max(CCf);
-    t_shiftf = lagf(IIfmax);
+    [t_shiftf,CCfmax,lagf,CCf] = ccshift(x_rawdf,x_sacf,dt_begin_odd,dt_B,fs,...
+                                         maxmargin);
+%     x_rawf = cat(1, x_rawf, zeros(length(x_sacf),1));
+%     num_window = length(x_rawf) - length(x_sacf) + 1;
+%     CCf = zeros(1, num_window);
+%     lagf = seconds(dt_begin - dt_B):(1/(fs/d_factor)):seconds(dt_end - dt_E);
+%     % correct the length of lagf
+%     size_diff = length(CCf) - length(lagf);
+%     if size_diff > 0
+%         lagf_extension = (1:size_diff) / (fs/d_factor) + lagf(end);
+%         lagf = [lagf lagf_extension];
+%     elseif size_diff < 0
+%         lagf = lagf(1:length(CCf));
+%     end
+%     for ii = 1:num_window
+%         x_raw_slice = x_rawf((1:length(x_sacf)) + ii - 1);
+%         CCf(1, ii) = corr(detrend(x_raw_slice,1), detrend(x_sacf,1));
+%     end
+%     % remove any data that lag is beyond +/- max_margin
+%     CCf(abs(lagf) > seconds(maxmargin)) = 0;
+%     % find best CC and time shift
+%     [CCfmax, IIfmax] = max(CCf);
+%     t_shiftf = lagf(IIfmax);
 end
 %% plots
 if plt
@@ -277,7 +345,7 @@ if plt
     plot(t_shift, CCmax, 'Marker', '+', 'Color', 'r', 'MarkerSize', 8);
     hold off
     grid on
-    title('Correlation Coefficient [raw]');
+    title(sprintf('Correlation Coefficient [raw], Method: %s', best_method));
     xlabel('time shift [s]');
     ylabel('CC');
     if and(t_shift > -1, t_shift < 1)
@@ -314,8 +382,8 @@ if plt
     else
         ax9 = subplot('Position',[0.05 1/7 0.9 1/7-0.06]);
     end
-    ax9 = signalplot(x_rawd20, fs, dt_begin-seconds(t_shift), ax9, '', ...
-        'left', 'blue');
+    ax9 = signalplot(x_rawd20_odd, fs, dt_begin_odd-seconds(t_shift), ...
+         ax9, '', 'left', 'blue');
     hold on
     ax_title = sprintf('Shifted Buffer and Reported [raw]');
     ax9 = signalplot(x_sac, fs, dt_B, ax9, ax_title, 'left', 'black');
@@ -331,7 +399,7 @@ if plt
     if plotfilter
         ax10 = subplot('Position',[0.53 1/7 0.42 1/7-0.06]);
         ax10 = signalplot(x_rawf, fs/d_factor, ...
-            dt_begin-seconds(t_shiftf), ax10, '', 'left', 'blue');
+            dt_begin_odd-seconds(t_shiftf), ax10, '', 'left', 'blue');
         hold on
         ax_title = sprintf('Shifted Buffer and Reported [filtered]');
         ax10 = signalplot(x_sacf, fs/d_factor, dt_B, ax10, ax_title, ...
