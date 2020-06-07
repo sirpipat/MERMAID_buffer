@@ -35,11 +35,13 @@ dt_begin.Format = 'uuuu-MM-dd''T''HH:mm:ss.SSSSSS';
 
 % dt bp2-10
 yf1 = bandpass(detrend(y,1), fs, 2, 10, 2, 2, 'butter', 'linear');
+[yf1_trigs, yf1_dtrigs] = findarrivals(yf1, fs, 10, 100, false);
 
 % dt dc5 dt bp0.05-0.1
 d_factor = 5;
 yd = detrend(decimate(detrend(y,1), d_factor),1);
 yf2 = bandpass(yd, fs/d_factor, 0.05, 0.10, 2, 2, 'butter', 'linear');
+[yf2_trigs, yf2_dtrigs] = findarrivals(yf2, fs/d_factor, 30, 300, false);
 
 %% Create figure
 figure(2)
@@ -146,9 +148,15 @@ yf1_sq = yf1 .^ 2;
 mov_rms = movmean(yf1_sq, round(fs * 30)) .^ 0.5;
 hold on
 plot(t_plot, mov_rms, 'Color', [0.8 0.25 0.25], 'LineWidth', 1);
+% add trigger times and detrigger times
+for ii = 1:length(yf1_trigs)
+    vline(ax4, dt_begin + seconds(yf1_trigs(ii)), '--', 1, [0.9 0.5 0.2]);
+    vline(ax4, dt_begin + seconds(yf1_dtrigs(ii)), '--', 1, [0.2 0.5 0.9]);
+end
 hold off
 title('Filtered: bp2-10 -- green = mov avg, red = mov rms, win = 30 s')
 ax4.TickDir = 'both';
+
 % set ylimit to exclude outliers
 r = rms(yf1);
 ylim([-10*r 10*r]);
@@ -179,6 +187,13 @@ ax5.TickDir = 'both';
 % set ylimit to exclude outliers
 r = rms(yf2);
 ylim([-5*r 5*r]);
+% add trigger times and detrigger times
+hold on
+for ii = 1:length(yf2_trigs)
+    vline(ax5, dt_begin + seconds(yf2_trigs(ii)), '--', 1, [0.9 0.5 0.2]);
+    vline(ax5, dt_begin + seconds(yf2_dtrigs(ii)), '--', 1, [0.2 0.5 0.9]);
+end
+hold off
 % add subplot label
 [x_pos, y_pos] = norm2trueposition(ax5, 1/12, 7/8);
 text(x_pos, y_pos, 'e', 'FontSize', 12);
