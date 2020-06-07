@@ -1,4 +1,4 @@
-function [dt_B, dt_E, CCmax, CCfmax, t_shift, t_shiftf] = matchsac(sacfile, oneyeardir, savedir, maxmargin, plt, plotfilter)
+function [dt_B, dt_E, CCmaxs, CCfmax, t_shifts, t_shiftf] = matchsac(sacfile, oneyeardir, savedir, maxmargin, plt, plotfilter)
 % [dt_B, dt_E, Cmax, Cfmax, t_shift, t_shiftf] = MATCHSAC(sacfile, oneyeardir, savedir, plt)
 % Finds a section in OneYearData that SAC file belongs to
 % Then plots xcorr and matched signals
@@ -18,10 +18,10 @@ function [dt_B, dt_E, CCmax, CCfmax, t_shift, t_shiftf] = matchsac(sacfile, oney
 % OUTPUT:
 % dt_B          Beginning datetime of SAC data
 % dt_E          Ending datetime of SAC data
-% CCmax         Maximum cross correlation of raw signals
+% CCmaxs        Maximum cross correlation of raw signals
 % CCfmax        Maximum cross correlation of filtered signals: returns NaN
 %               if plotfilter is set to false
-% t_shift       Best-fitted time shift for raw signals
+% t_shifts      Best-fitted time shift for raw signals
 % t_shiftf      Best-fitted time shift for filtered signals: returns NaN if
 %               plotfilter is set to false
 %
@@ -45,7 +45,7 @@ filename = cell2mat(split_name(1));
 maxmargin = seconds(maxmargin);
 
 % reads data from SAC file
-[x_sac, Hdr, ~, ~, tims] = readsac(sacfile);
+[x_sac, Hdr, ~, ~, ~] = readsac(sacfile);
 dt_ref = datetime(Hdr.NZYEAR, 1, 0, Hdr.NZHOUR, Hdr.NZMIN, Hdr.NZSEC, ...
     Hdr.NZMSEC, 'TimeZone', 'UTC') + days(Hdr.NZJDAY);
 dt_B = dt_ref + seconds(Hdr.B);
@@ -63,7 +63,7 @@ fs_buffer = 2 * fs;
 
 % reads the section from raw file(s)
 % Assuming there is only 1 secion
-[x_raw, dt_begin, dt_end] = readsection(sections{1}, intervals{1}{1}, ...
+[x_raw, dt_begin, ~] = readsection(sections{1}, intervals{1}{1}, ...
     intervals{1}{2}, fs_buffer);
 
 %% reduce the sampling rate of buffer by a factor of 2
@@ -94,8 +94,8 @@ x_after = zeros(length(x_rawd20_odd) - length(x_before) - length(x_sac) , 1);
 x_sac_plot = cat(1, x_before, x_sac, x_after);
 
 % finds timeshift for raw SAC signal
-[C, lag] = xcorr(detrend(x_rawd20_odd,1), detrend(x_sac,1));
-[Cmax, Imax] = max(C);
+[C, ~] = xcorr(detrend(x_rawd20_odd,1), detrend(x_sac,1));
+[~, Imax] = max(C);
 t_shift = ((Imax - length(x_rawd20_odd)) / fs) - seconds(dt_B - dt_begin_odd);
 fprintf('shifted time [RAW]      = %f s\n', t_shift);
 
@@ -114,7 +114,7 @@ if plotfilter
     
     % finds timeshift for filtered SAC signal
     [Cf, lagf] = xcorr(detrend(x_rawf,1), detrend(x_sacf,1));
-    [Cfmax, Ifmax] = max(Cf);
+    [~, Ifmax] = max(Cf);
     t_shiftf = ((Ifmax - length(x_rawf)) / (fs / d_factor)) - seconds(dt_B - dt_begin);
     fprintf('shifted time [FILTERED] = %f s\n', t_shiftf);
 else
@@ -124,9 +124,9 @@ end
 % exit if the time shift is maximum margin
 if or(abs(t_shift) > seconds(maxmargin), abs(t_shiftf) > seconds(maxmargin))
     fprintf('Cannot match\n');
-    CCmax = 0;
-    CCfmax = 0;
-    t_shift = 9999;
+    CCmaxs = NaN(4,1);
+    CCfmax = NaN;
+    t_shifts = ones(4,1) * 9999;
     t_shiftf = 9999;
     return
 end
@@ -428,7 +428,7 @@ if plt
     text(8/9*ax11.XLim(1)+x_begin*ax11.XLim(2),1/4*ax11.YLim(1)+3/4*ax11.YLim(2),...
         sprintf('Time shift  = %7.3f seconds',t_shift),'FontSize',12);
     text(8/9*ax11.XLim(1)+x_begin*ax11.XLim(2),3/4*ax11.YLim(1)+1/4*ax11.YLim(2),...
-        sprintf('maximum cc = %5.3f',CCmax),'FontSize',12);
+        sprintf('maximum cc = %8.6f',CCmax),'FontSize',12);
     ax11.XAxis.Visible = 'off';
     ax11.YAxis.Visible = 'off';
 
@@ -439,7 +439,7 @@ if plt
         text(15/16*ax12.XLim(1)+1/16*ax12.XLim(2),1/4*ax12.YLim(1)+3/4*ax12.YLim(2),...
             sprintf('Time shift  = %7.3f seconds',t_shiftf),'FontSize',12);
         text(15/16*ax12.XLim(1)+1/16*ax12.XLim(2),3/4*ax12.YLim(1)+1/4*ax12.YLim(2),...
-            sprintf('maximum cc = %5.3f',CCfmax),'FontSize',12);
+            sprintf('maximum cc = %8.6f',CCfmax),'FontSize',12);
         ax12.XAxis.Visible = 'off';
         ax12.YAxis.Visible = 'off';
     end
@@ -508,6 +508,9 @@ if plt
     %% save the figure
     figdisp(filename,[],[],2,[],'epstopdf');
 end
+
+CCmaxs = [CCmax1; CCmax2; CCmax3; CCmax4];
+t_shifts = [t_shift1; t_shift2; t_shift3; t_shift4];
 
 if ~plotfilter
     CCfmax = NaN;

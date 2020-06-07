@@ -8,20 +8,64 @@ DUMMY_DATETIME = datetime(2000,1,1,0,0,0,'TimeZone','UTC');
 dt_B = DUMMY_DATETIME;
 dt_E = DUMMY_DATETIME;
 Cmax = zeros(1,sndex);
+Cmaxs = zeros(4,sndex);
 Cfmax = zeros(1,sndex);
 t_shift = zeros(1,sndex);
+t_shifts = zeros(4,sndex);
 t_shiftf = zeros(1,sndex);
 
 %% Plots SAC files with respect to raw buffers
 %savedir = '/home/sirawich/research/plots/interp_matched_SACs/';
 for ii = 1:sndex
-    [dt_B(1,ii), dt_E(1,ii), Cmax(1,ii), Cfmax(1,ii), ...
-        t_shift(1,ii), t_shiftf(1,ii)] = ...
-        matchsac(allsacfiles{ii}, getenv('ONEYEAR'), [], [], true, ...
+    [dt_B(1,ii), dt_E(1,ii), Cmaxs(:,ii), Cfmax(1,ii), ...
+        t_shifts(:,ii), t_shiftf(1,ii)] = ...
+        matchsac(allsacfiles{ii}, getenv('ONEYEAR'), [], [], false, ...
                  plotfilter);
 end
 
 keyboard;
+
+%% Compare the correlation coefficients of 4 methods. Then pick the best one
+for ii = 1:sndex
+    Cmax(1,ii) = max(Cmaxs(:,ii));
+    if isnan(Cmax(1,ii))
+        t_shift(1,ii) = NaN;
+    else
+        t_shift(1,ii) = t_shifts(Cmaxs(:,ii) == max(Cmaxs(:,ii)),ii);
+    end
+end
+
+% plot downsample - decimate
+diff = zeros(1,sndex);
+for ii = 1:sndex
+    if Cmaxs(1,ii) > Cmaxs(2,ii)
+        diff(1,ii) = Cmaxs(1,ii) - Cmaxs(3,ii);
+    else
+        diff(1,ii) = Cmaxs(2,ii) - Cmaxs(4,ii);
+    end
+end
+
+% plot downsample - decimate
+figure(4)
+set(gcf,'Units','inches','Position',[2 2 4.5 4]);
+scatter(1:sndex,diff,'Marker','d','MarkerEdgeColor','k',...
+    'MarkerFaceColor','b');
+grid on
+xlim([1 sndex]);
+xlabel('section number')
+ylabel('CC_{downsample} - CC_{decimate}');
+figdisp('downsample-decimate', [], [], 2, [], 'epstopdf');
+
+% plot |odd -even|
+figure(5)
+set(gcf,'Units','inches','Position',[2 2 4.5 4]);
+scatter(1:sndex,Cmaxs(1,:)-Cmaxs(2,:),'Marker','d','MarkerEdgeColor','k',...
+    'MarkerFaceColor','b');
+grid on
+xlim([1 sndex]);
+xlabel('section number')
+ylabel('|CC_{downsample,odd} - CC_{downsample,even}|');
+figdisp('odd-even', [], [], 2, [], 'epstopdf');
 
 %% plot the time shift vs hour since the beginning and CC vs hours since the beginning
 % find the begin datetime of the raw buffer including each SAC report
@@ -30,7 +74,7 @@ for ii = 1:sndex
     [sections, intervals] = getsections(getenv('ONEYEAR'),dt_B(1,ii),dt_E(1,ii),40);
     dt_begin(1,ii) = file2datetime(sections{1});
 end
-%%
+
 % the time since dt_begin to the beginning time of the SAC segment
 t_since = hours((dt_B - dt_begin) + seconds(t_shift));
 if plotfilter
@@ -109,7 +153,7 @@ end
 hold off
 grid on
 % legend('CC [Raw]','CC [Filtered]',P_label,Pf_label,'Location','southwest');
-ylim([0.998 1.0005]);
+ylim([0.9997 1.00005]);
 xlabel('Hours since the beginning of raw data section [hours]');
 ylabel('Correlation coefficients');
 delete(p7);
@@ -132,7 +176,7 @@ else
 end
 
 h = histogram(Cmax(where));
-h.BinWidth = 0.0005;
+h.BinWidth = 0.00005;
 grid on
 xlabel('Correlation coefficient');
 ylabel('Counts');
