@@ -9,7 +9,7 @@ function [x_out, dt_B, dt_E] = slicesection(x_in, dt_x1, dt_B, dt_E, fs)
 % dt_x1     Datetime of the first sample of the data
 % dt_B      Datetime of the beginning
 % dt_E      Datetime of the end
-% fs        Sampling rate in Hz [Default: 40]
+% fs        Sampling rate in Hz [Default: 40.01406]
 %
 % OUTPUT:
 % x_out     The data from the section
@@ -19,7 +19,7 @@ function [x_out, dt_B, dt_E] = slicesection(x_in, dt_x1, dt_B, dt_E, fs)
 % SEE ALSO:
 % READSECTION
 %
-% Last modified by Sirawich Pipatprathanporn: 04/20/2020
+% Last modified by Sirawich Pipatprathanporn: 06/10/2020
 
 defval('fs', 40.01406);
 
