@@ -16,7 +16,7 @@ function t = file2datetime(filename)
 % SEE ALSO:
 % REMOVEPATH
 %
-% Last modified by Sirawich Pipatprathanporn: 01/17/2020
+% Last modified by Sirawich Pipatprathanporn: 06/13/2020
 
 filename = removepath(filename);
 datestr = replace(filename,'_',':');
@@ -27,5 +27,5 @@ if ~contains(datestr,'.')
 end
 t = datetime(datestr,'InputFormat','uuuu-MM-dd''T''HH:mm:ss.SSSSSS',...
              'TimeZone', 'UTC');
-
+t.Format = 'uuuu-MM-dd''T''HH:mm:ss.SSSSSS';
 end
