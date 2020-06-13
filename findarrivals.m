@@ -1,7 +1,28 @@
-function [trigs,dtrigs] = findarrivals(t,x,fs,p)
-xf = bandpass(x,fs,2,10,2,2,'butter','linear');
+function [t_trigs,t_dtrigs] = findarrivals(x,fs,sta,lta,p)
+% [t_trigs,t_dtrigs] = FINDARRIVALS(x,fs,sta,lta,p)
+% Detect signal arrivals and return the trigger/detrigger times from the 
+% beginning. It plots the time-series of the signal with
+% triggers/detriggers when p is set to true.
+%
+% INPUT:
+% x         Vector containing the signal
+% fs        Sampling rate
+% sta       Short-term averaging window length (s)
+% lta       Long-term averaging window length (s)
+% p         Options to plot [true - plot, false - no plot]
+%
+% OUTPUT:
+% t_trigs   List of trigger times from the beginning
+% t_dtrigs   List of detrigger times from the beginning
+%
+% Last modified by Sirawich Pipatprathanporn: 06/01/2020
+
+t = (0:length(x)-1) / fs;
 [trigt,stav,ltav,ratio,tim1,tim2,tim3,trigs,dtrigs] = ...
-    stalta(xf,1/fs,[0 seconds(t(end)-t(1))],10,100,[],[],[],[],[],[]);
+    stalta(x,1/fs,[0 t(end)-t(1)],sta,lta,[],[],[],[],[],[]);
+
+t_trigs = t(trigs);
+t_dtrigs = t(dtrigs);
 
 if p
     figure(11)
