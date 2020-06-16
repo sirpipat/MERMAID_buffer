@@ -8,16 +8,19 @@ t_above_dtr = x > dtr;
 trigs = t(t_above_tr - circshift(t_above_tr,1) > 0) - bufwin;
 dtrigs = t(t_above_dtr - circshift(t_above_dtr,1) < 0) + bufwin;
 
-% check if trig-dtrig windows overlap each other
-if and(~isempty(trigs), ~isempty(dtrigs))
-    if dtrigs(1) < trigs(1)
-        trigs = [t(1), trigs];
-    end
-    if trigs(end) > dtrigs(end)
-        dtrigs = [dtrigs, t(end)];
-    end
+% set out-of-bound values to the bound
+trigs(trigs < t(1)) = t(1);
+dtrigs(dtrigs > t(end)) = t(end);
+
+
+if and(isempty(trigs), ~isempty(dtrigs)) && dtrigs(1) < trigs(1)
+    dtrigs = dtrigs(2:end);
+end
+if and(~isempty(trigs), isempty(dtrigs)) && trigs(end) > dtrigs(end)
+    dtrigs = [dtrigs, t(end)];
 end
 
+% check if trig-dtrig windows overlap each other
 for ii = 1:length(trigs)-1
     if dtrigs(ii) > trigs(ii+1)
         dtrigs(ii) = NaN;
