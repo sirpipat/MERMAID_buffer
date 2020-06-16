@@ -32,15 +32,24 @@ fprintf("hoursection_plot('%s')\n", filename);
 
 fprintf('size = %d, interval = %d, fs = %f\n', length(y), length(y)/fs, fs);
 
+% filter the signal
+yf1 = bandpass(y, fs, 2, 10, 2, 2, 'butter', 'linear');
+dc_factor = 5;
+yd = decimate(detrend(y(1:end-mod(length(y)-1, dc_factor)), 1), dc_factor);
+yf2 = bandpass(detrend(yd, 1), fs/dc_factor, 0.05, 0.10, 2, 2, 'butter', 'linear');
+
 % keep track of the current time
 dt_curr = dt_start;
 
 % slice first section then plot
 [x, dt_B, dt_E] = slicesection(y, dt_start, dt_curr, dt_curr + hours(1), fs);
+[xf1, ~, ~] = slicesection(yf1, dt_start, dt_curr, dt_curr + hours(1), fs);
+[xf2, ~, ~] = slicesection(yf2, dt_start, dt_curr, dt_curr + hours(1), fs/dc_factor);
+
 dt_B.Format = 'uuuu-MM-dd''T''HH:mm:ss.SSSSSS';
 % relative position of the sliced section in the file
 p = [(dt_B - dt_start) (dt_E - dt_start)] / (dt_end - dt_start) * 100;
-timfreqplot(x, dt_B, nfft, fs, lwin, olap, sfax, beg, unit, p);
+timfreqplot(x, xf1, xf2, dt_B, nfft, fs, lwin, olap, sfax, beg, unit, p);
 dt_curr = dt_curr + minutes(30);
 
 % slice later sections then plot
@@ -48,10 +57,14 @@ dt_curr = dt_curr + minutes(30);
 while dt_end - dt_curr > minutes(30)
     [x, dt_B, dt_E] = slicesection(y, dt_start, dt_curr, ...
         dt_curr + hours(1), fs);
+    [xf1, ~, ~] = slicesection(yf1, dt_start, dt_curr, ...
+        dt_curr + hours(1), fs);
+    [xf2, ~, ~] = slicesection(yf2, dt_start, dt_curr, ...
+        dt_curr + hours(1), fs/dc_factor);
     dt_B.Format = 'uuuu-MM-dd''T''HH:mm:ss.SSSSSS';
     % relative position of the sliced section in the file
     p = [(dt_B - dt_start) (dt_E - dt_start)] / (dt_end - dt_start) * 100;
-    timfreqplot(x, dt_B, nfft, fs, lwin, olap, sfax, beg, unit, p);
+    timfreqplot(x, xf1, xf2, dt_B, nfft, fs, lwin, olap, sfax, beg, unit, p);
     dt_curr = dt_curr + minutes(30);
 end
 
