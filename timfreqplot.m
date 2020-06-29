@@ -1,5 +1,6 @@
-function timfreqplot(y, yf1, yf2, dt_begin, nfft, fs, lwin, olap, sfax, beg, unit, p)
-% TIMFREQPLOT(y, dt_begin, nfft, fs, lwin, olap, sfax, beg, unit)
+function timfreqplot(y, yf1, yf2, yf1_trigs, yf1_dtrigs, dt_begin, nfft, fs, lwin, olap, sfax, beg, unit, p)
+% TIMFREQPLOT(y, yf1, yf2, yf1_trigs, yf1_dtrigs, dt_begin, nfft, fs, ...
+% lwin, olap, sfax, beg, unit, p)
 % plot seismogram, power spectral density, spectograms, and filtered
 % seismogram
 % 
@@ -21,7 +22,7 @@ function timfreqplot(y, yf1, yf2, dt_begin, nfft, fs, lwin, olap, sfax, beg, uni
 % OUTPUT
 % No output returned. The plot is saved in 
 % 
-% Last modified by Sirawich Pipatprathanporn: 06/13/2020
+% Last modified by Sirawich Pipatprathanporn: 06/29/2020
 
 % parameter list
 defval('fs', 40.01406);
@@ -47,7 +48,7 @@ if isempty(yf2)
     yd = detrend(decimate(detrend(y,1), d_factor),1);
     yf2 = bandpass(yd, fs/d_factor, 0.05, 0.10, 2, 2, 'butter', 'linear');
 end
-[yf2_trigs, yf2_dtrigs] = findarrivals(yf2, fs/d_factor, 60, 600, false);
+%[yf2_trigs, yf2_dtrigs] = findarrivals(yf2, fs/d_factor, 60, 600, false);
 
 %% Create figure
 figure(2)
@@ -181,11 +182,24 @@ ax4.TickDir = 'both';
 ylim([-10*r 10*r]);
 
 % add trigger times and detrigger times
-[yf1_trigs,yf1_dtrigs] = pickpeaks(mov_rms/r, fs, 1.5, 1.5, 60);
+if isempty(yf1_trigs) || isempty(yf1_dtrigs)
+    fprintf('Run pickpeaks in timfreqplot.m\n');
+    [yf1_trigs,yf1_dtrigs] = pickpeaks(mov_rms/r, fs, 1.5, 1.5, 60);
+    yf1_trigs = dt_begin + seconds(yf1_trigs);
+    yf1_dtrigs = dt_begin + seconds(yf1_dtrigs);
+end
+
+% remove trigger/detrigger times outside the section
+dt_end = dt_begin + seconds((length(y)-1)/fs);
+yf1_trigs = yf1_trigs(and(yf1_trigs >= dt_begin, yf1_trigs <= dt_end));
+yf1_dtrigs = yf1_dtrigs(and(yf1_dtrigs >= dt_begin, yf1_dtrigs <= dt_end));
+
 hold on
 for ii = 1:length(yf1_trigs)
-    vline(ax4, dt_begin + seconds(yf1_trigs(ii)), '--', 1, [0.9 0.5 0.2]);
-    vline(ax4, dt_begin + seconds(yf1_dtrigs(ii)), '--', 1, [0.2 0.5 0.9]);
+    vline(ax4, yf1_trigs(ii), '--', 1, [0.9 0.5 0.2]);
+end
+for ii = 1:length(yf1_dtrigs)
+    vline(ax4, yf1_dtrigs(ii), '--', 1, [0.2 0.5 0.9]);
 end
 hold off
 
@@ -220,14 +234,6 @@ ax5.TickDir = 'both';
 % set ylimit to exclude outliers
 r = rms(yf2);
 ylim([-5*r 5*r]);
-
-% add trigger times and detrigger times
-hold on
-for ii = 1:length(yf2_trigs)
-    vline(ax5, dt_begin + seconds(yf2_trigs(ii)), '--', 1, [0.9 0.5 0.2]);
-    vline(ax5, dt_begin + seconds(yf2_dtrigs(ii)), '--', 1, [0.2 0.5 0.9]);
-end
-hold off
 
 % add subplot label
 [x_pos, y_pos] = norm2trueposition(ax5, 1/12, 7/8);
