@@ -32,6 +32,22 @@ fprintf("hoursection_plot('%s')\n", filename);
 
 fprintf('size = %d, interval = %d, fs = %f\n', length(y), length(y)/fs, fs);
 
+% read the tphase files
+readdir = '/Users/sirawich/research/processed_data/tphases/';
+filename = strcat(readdir, 'rmsplot_', ...
+    replace(string(dt_start), ':', '_'), '.txt');
+fid = fopen(filename, 'r');
+str = fscanf(fid, '%c');
+fclose(fid);
+
+% convert the content to datetime
+datestr = split(str);
+dt_all = datetime(datestr, 'InputFormat', 'uuuu-MM-dd''T''HH:mm:ss.SSSSSS', ...
+    'TimeZone', 'UTC', 'Format', 'uuuu-MM-dd''T''HH:mm:ss.SSSSSS');
+dt_all = dt_all(~isnat(dt_all));
+dt_trigs = dt_all(1:2:end);
+dt_dtrigs = dt_all(2:2:end);
+
 % filter the signal
 yf1 = bandpass(y, fs, 2, 10, 2, 2, 'butter', 'linear');
 dc_factor = 5;
@@ -49,7 +65,8 @@ dt_curr = dt_start;
 dt_B.Format = 'uuuu-MM-dd''T''HH:mm:ss.SSSSSS';
 % relative position of the sliced section in the file
 p = [(dt_B - dt_start) (dt_E - dt_start)] / (dt_end - dt_start) * 100;
-timfreqplot(x, xf1, xf2, dt_B, nfft, fs, lwin, olap, sfax, beg, unit, p);
+timfreqplot(x, xf1, xf2, dt_trigs, dt_dtrigs, dt_B, nfft, fs, lwin, ...
+    olap, sfax, beg, unit, p);
 dt_curr = dt_curr + minutes(30);
 
 % slice later sections then plot
@@ -64,7 +81,8 @@ while dt_end - dt_curr > minutes(30)
     dt_B.Format = 'uuuu-MM-dd''T''HH:mm:ss.SSSSSS';
     % relative position of the sliced section in the file
     p = [(dt_B - dt_start) (dt_E - dt_start)] / (dt_end - dt_start) * 100;
-    timfreqplot(x, xf1, xf2, dt_B, nfft, fs, lwin, olap, sfax, beg, unit, p);
+    timfreqplot(x, xf1, xf2, dt_trigs, dt_dtrigs, dt_B, nfft, fs, lwin, ...
+        olap, sfax, beg, unit, p);
     dt_curr = dt_curr + minutes(30);
 end
 
