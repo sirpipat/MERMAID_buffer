@@ -16,7 +16,7 @@ function [sections, intervals] = getsections(dir, dt_begin, dt_end, fs)
 % SEE ALSO:
 % ONEYEARDATA, FILE2DATETIME, GETFNDEX, READONEYEARDATA
 %
-% Last modified by Sirawich Pipatprathanporn: 02/06/2020
+% Last modified by Sirawich Pipatprathanporn: 07/06/2020
 
 defval('dir', getenv('ONEYEAR'));
 defval('fs', 40);
@@ -24,7 +24,7 @@ defval('fs', 40);
 [allfiles, fndex] = oneyeardata(dir);
 
 % Gets all the start datetime of each file
-allbegins = cell(fndex);
+allbegins = cell(1,fndex);
 for ii = 1:fndex
     allbegins{ii} = file2datetime(allfiles{ii});
 end

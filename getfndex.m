@@ -8,13 +8,22 @@ function fndex = getfndex(cell, value)
 % OUTPUT:
 % fndex     index of the cell{index} closest to the value
 %
-% Last modified by Sirawich Pipatprathanporn: 01/23/2020
+% Last modified by Sirawich Pipatprathanporn: 07/06/2020
 
 a = size(cell);
 a_size = a(2);
 high_bound = a_size;
 low_bound = 1;
 curr_index = middle(high_bound, low_bound);
+
+% check if the value is beyond the limit of the array
+if value < cell{1}
+    fndex = 1;
+    return
+elseif value > cell{end}
+    fndex = length(cell);
+    return
+end
 
 while value ~= cell{curr_index}
     % check the high_bound and low_bound if there is nothing between
