@@ -19,7 +19,7 @@ function [x_out, dt_B, dt_E] = slicesection(x_in, dt_x1, dt_B, dt_E, fs)
 % SEE ALSO:
 % READSECTION
 %
-% Last modified by Sirawich Pipatprathanporn: 06/10/2020
+% Last modified by Sirawich Pipatprathanporn: 06/29/2020
 
 defval('fs', 40.01406);
 
@@ -29,6 +29,9 @@ dt_xend = dt_x1 + seconds((length(x_in) - 1) / fs);
 % check if dt_begin and dt_end is valid
 if dt_B >= dt_E || dt_B > dt_xend || dt_E < dt_x1
     fprintf('ERROR: invalid dt_begin or dt_end\n');
+    x_out = [];
+    dt_B = NaT;
+    dt_E = NaT;
     return
 end
 
