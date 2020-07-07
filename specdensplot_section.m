@@ -1,7 +1,9 @@
-function fig = specdensplot_section(dt_begin,dt_end,excdir,nfft,fs,...
-    lwin,olap,sfax,unt)
-% fig = SPECDENSPLOT_SECTION(dt_begin,dt_end,excdir,nfft,fs,...
-%    lwin,olap,sfax,unit)
+function [fig,up,np,F,SDbins,Swcounts,Swmean,Swstd,SwU,SwL] = ...
+    specdensplot_section(dt_begin,dt_end,excdir,nfft,fs,lwin,olap,sfax,...
+    scale,plt)
+% [fig, F, SDbins, Swcounts, Swmean, Swerr, SwU, SwL] = ...
+%   SPECDENSPLOT_SECTION(dt_begin,dt_end,excdir,nfft,fs,lwin,olap,sfax,...
+%   scale,plt)
 % plot spectral sensity heat map of a section from dt_begin and dt_end
 %
 % INPUT
@@ -13,29 +15,47 @@ function fig = specdensplot_section(dt_begin,dt_end,excdir,nfft,fs,...
 % lwin          length of windows, in samples [default: 256]
 % olap          overlap of data segments, in percent [default: 70]
 % sfax          Y-axis scaling factor [default: 10]
-% unt           string with the unit name [default: s]
+% scale         scale of X-axis (linear or log) [default: 'log']
+% plt           whether to plot or not [default: false]
 %
 % OUTPUT
-% fig           figure handling this plot
+% fig           figure handling this plot [return empty if plt is false]
+% up            percent of uptime
+% np            percent of noise time within the uptime
+% F             frequnencies (linearly or logarithmic spaced)
+% SDbins        spectral density bins
+% Swcounts      array of spectral densities [size=(nfft, length(SDbins)-1)]
+% Swmean        mean of spectral densities for each frequency
+% Swstd         standard deviation of spectral densities 
+% SwU           upper confidence limit
+% SwL           lower confidence limit
 %
-% Last modified by Sirawich Pipatprathanporn: 07/06/2020
+% Last modified by Sirawich Pipatprathanporn: 07/07/2020
 
 defval('nfft',256)
 defval('fs',40.01406)
 defval('lwin',nfft)
 defval('olap',70)
 defval('sfax',10)
-defval('unt','s')
+defval('scale','log')
+defval('plt',false);
 
 %% get data and remove all signals
 % find all raw buffer sections between dt_begin and dt_end
 [sections, intervals] = getsections(getenv('ONEYEAR'), dt_begin, dt_end, fs);
+
+% measure the amount of uptime
+uptime = seconds(0);
+
+% measure the amount of time of background noise
+noisetime = seconds(0);
 
 X = {};
 for ii = 1:length(sections)
     % read the buffer
     [y, dt_b, dt_e] = readsection(sections{ii}, intervals{ii}{1}, ...
         intervals{ii}{2}, fs);
+    uptime = uptime + (dt_e - dt_b);
     
     % convert the content to datetimes
     if ~isempty(excdir)
@@ -71,13 +91,19 @@ for ii = 1:length(sections)
     
     % slice the sections by sub-intervals
     for jj = 1:length(sub_intervals)
-        [yy, ~, ~] = slicesection(y, dt_b, ...
+        [yy, dt_B, dt_E] = slicesection(y, dt_b, ...
             sub_intervals{jj}{1}, sub_intervals{jj}{2}, fs);
         if ~isempty(yy) && length(yy) >= nfft * (2 - olap/100)
             X{length(X)+1} = yy;
+            noisetime = noisetime + (dt_E - dt_B);
         end
     end
 end
+
+% Uptime Percent
+up = seconds(uptime) / seconds(dt_end - dt_begin) * 100;
+% Noisetime Percent
+np = seconds(noisetime) / seconds(uptime) * 100;
 
 %% compute power spectral density
 % Overlap in samples
@@ -160,71 +186,59 @@ selekt = (1:floor(nfft/2)+1);
 F = (selekt-1)'*fs/nfft;
 Slog = Slog(selekt,:);
 
+% bootstraped mean and standard error
+%bootstat = bootstrp(100, @mean, Slog')';
+Swmean = mean(Slog, 2); %mean(bootstat, 2);
+Swstd = std(Slog, 0, 2); %std(bootstat, 0, 2);
+
+% compute Upper/Lower interval
+kcon = 1.96;
+SwU = Swmean + kcon * Swstd;
+SwL = Swmean - kcon * Swstd;
+
 % Bins for the number of spectral density lines going through
-binedges = 20:1:140;
-Swcounts = zeros(length(F), length(binedges)-1);
+SDbins = 20:1:140;
+Swcounts = zeros(length(F), length(SDbins)-1);
 for ii = 1:length(F)
-    Swcounts(ii,:) = histcounts(Slog(ii,:), 'BinEdges', binedges);
+    Swcounts(ii,:) = histcounts(Slog(ii,:), 'BinEdges', SDbins);
 end
 
-% Frequencies bin in log space
-Flog = logspace(log10(F(2)), log10(F(end)), length(F) -1);
+if strcmp(scale, 'log')
+    % Frequencies bin in log space
+    Flog = logspace(log10(F(2)), log10(F(end)), length(F) -1);
 
-% interpoate bin to log space frequency bins
-Slogcounts = interp1(F, Swcounts, Flog);
-
+    % interpoate bin to log space frequency bins
+    Slogcounts = interp1(F, Swcounts, Flog);
+    
+    % interpolate stats to log space frequency
+    Swmean = interp1(F, Swmean, Flog);
+    Swstd = interp1(F, Swstd, Flog);
+    SwU = interp1(F, SwU, Flog);
+    SwL = interp1(F, SwL, Flog);
+    
+    F = Flog;
+    Swcounts = Slogcounts;
+end
 %% create figure
-figure(3)
-set(gcf, 'Unit', 'inches', 'Position', [18 8 6.5 6.5]);
-clf
+if plt
+    figure(3)
+    set(gcf, 'Unit', 'inches', 'Position', [18 8 6.5 6.5]);
+    clf
 
-% plot title
-ax0 = subplot('Position',[0.05 0.93 0.9 0.02]);
-title(sprintf('%s - %s', string(dt_begin), string(dt_end)));
-set(ax0, 'FontSize', 12, 'Color', 'none');
-ax0.XAxis.Visible = 'off';
-ax0.YAxis.Visible = 'off';
+    % plot title
+    ax0 = subplot('Position',[0.05 0.93 0.9 0.02]);
+    title(sprintf('%s - %s', string(dt_begin), string(dt_end)));
+    set(ax0, 'FontSize', 12, 'Color', 'none');
+    ax0.XAxis.Visible = 'off';
+    ax0.YAxis.Visible = 'off';
 
-% make power spectral density plot
-ax = subplot('Position', [0.11 0.04 0.83 0.84]);
-p = imagesc([Flog(1) Flog(end)],[2 140], Slogcounts');
-axis xy
+    % make power spectral density plot
+    ax = subplot('Position', [0.11 0.04 0.83 0.84]);
+    [ax,axs,axb] = specdensplot_heatmap(ax, up, np, F, SDbins, Swcounts, Swmean, ...
+        SwU, SwL, scale, '');
 
-cmap = colormap('parula');
-cmap = [1 1 1; cmap];
-colormap(gcf, cmap);
-
-% add colorbar
-c = colorbar('southoutside');
-c.Label.String = sprintf('counts (total = %i)', size(Sw, 2));
-
-% fix x-label
-ax.XTick = log10([0.1 1 10] / Flog(1)) * Flog(end) / ...
-    log10(Flog(end)/Flog(1));
-ax.XTickLabel = {'0.1'; '1'; '10'};
-grid on
-
-% fix the precision of the time on XAxis label
-ax.XAxis.Label.String = sprintf('frequency (Hz): %d s window', round(nfft/fs));
-
-% fix the precision of the frequency on YAxis label
-yfreq = 'spectral density (energy/Hz)';
-y_label = ylabel(sprintf('%s ; %s = %.4f', yfreq, '\Delta\itf', fs/nfft));
-
-% add label on the top and right
-ax.TickDir = 'both';
-axs = doubleaxes(ax);
-
-% add axis label
-inverseaxis(axs.XAxis, 'Period (s)');
-
-% add frequency bands label
-hold on
-ax = vline(ax, log10([0.05, 0.1] / Flog(1)) * Flog(end) / ...
-    log10(Flog(end)/Flog(1)), '--', 1, rgbcolor('green'));
-ax = vline(ax, log10([2, 10] / Flog(1)) * Flog(end) / ...
-    log10(Flog(end)/Flog(1)), '--', 1, rgbcolor('brown'));
-hold off
-
-fig = gcf;
+    fig = gcf;
+else
+    fig = [];
+end
 end
