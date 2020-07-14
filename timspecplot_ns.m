@@ -35,9 +35,20 @@ defval('unt','s')
 % This is the calculation; the rest is plotting
 [Ba2,F,T,Bl10]=spectrogram(x,nfft,Fs,wlen,ceil(wolap*wlen),unt);
 
+% Frequencies bin in log space
+Flog = logspace(log10(F(2)), log10(F(end)), length(F) -1);
+
+% interpolate the spectrogram
+Bl10 = interp1(F, Bl10, Flog);
+
 % Conform to PCHAVE, SPECTRAL DENSITY, NOT POWER
-p=imagesc(beg+wlen/Fs/2+T,F,Bl10);
+p=imagesc(beg+wlen/Fs/2+T,Flog,Bl10);
 axis xy; colormap(jet)    
+
+% fix x-label for log scale
+ax = gca;
+ax.YTick = lin2logpos([0.1 1 10], Flog(1), Flog(end));
+ax.YTickLabel = {'0.1'; '1'; '10'};
 
 % Labeling
 xfreq=sprintf('time (%s)',unt);
