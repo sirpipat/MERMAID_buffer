@@ -19,7 +19,7 @@ ax2.XLim = ax.XLim;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % TODO: Make this statement independent from the origial plot
 if ax2.XScale == "log" && ax2.XLim(1) == 0
-    ax2.XLim(1) = ax.Children(1).XData(2);
+    ax2.XLim(1) = ax.Children(end-3).XData(2);
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ax2.XTick = ax.XTick;
