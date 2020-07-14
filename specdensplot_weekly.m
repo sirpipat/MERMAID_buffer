@@ -26,12 +26,14 @@ nfft = round(100 * fs);
 lwin = nfft;
 olap = 70;
 sfax = 10;
+midval = 'median';
+method = 'pct';
 scale = 'log';
 plt = true;
 
 for ii = 1:49
     specdensplot_section(dt(ii), dt(ii+1), excdir, nfft, fs, lwin, ...
-        olap, sfax, scale, plt);
+        olap, sfax, midval, method, scale, plt);
     % save figure
     savefile = strcat(mfilename, '_', replace(string(dt(ii)), ':', ...
         '_'),'.eps');

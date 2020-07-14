@@ -28,6 +28,8 @@ nfft = round(100 * fs);
 lwin = nfft;
 olap = 70;
 sfax = 10;
+midval = 'median';
+method = 'pct';
 scale = 'log';
 plt = false;
 
@@ -44,7 +46,7 @@ clf
 
 [~, up, np, F, SDbins, Swcounts, Swmean, ~, SwU, SwL] = ...
     specdensplot_section(dt(1), dt(2), excdir, nfft, fs, lwin, olap, ...
-    sfax, scale, plt);
+    sfax, midval, method, scale, plt);
 ax = subplot('Position',[0.05 2/3+0.05 1/4-0.07 1/3-0.1]);
 [ax,axs,axb] = specdensplot_heatmap(ax, up, np, F, SDbins, Swcounts, Swmean, SwU, ...
     SwL, scale, titles{1});
@@ -53,7 +55,7 @@ Swcounts_total = Swcounts;
 for ii = 2:12
     [~, up, np, F, ~, Swcounts, Swmean, ~, SwU, SwL] = ...
         specdensplot_section(dt(ii), dt(ii+1), excdir, nfft, fs, lwin, ...
-        olap, sfax, scale, plt);
+        olap, sfax, midval, method, scale, plt);
     Swcounts_total = Swcounts_total + Swcounts;
     
     % grid coordinates for panels (1,1) = bottom left, (4,3) = top right

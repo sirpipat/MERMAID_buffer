@@ -1,6 +1,6 @@
-function [fig,up,np,F,SDbins,Swcounts,Swmean,Swstd,SwU,SwL] = ...
+function [fig,up,np,F,SDbins,Swcounts,Swmid,Swstd,SwU,SwL] = ...
     specdensplot_section(dt_begin,dt_end,excdir,nfft,fs,lwin,olap,sfax,...
-    scale,plt)
+    midval,method,scale,plt)
 % [fig, F, SDbins, Swcounts, Swmean, Swerr, SwU, SwL] = ...
 %   SPECDENSPLOT_SECTION(dt_begin,dt_end,excdir,nfft,fs,lwin,olap,sfax,...
 %   scale,plt)
@@ -15,6 +15,8 @@ function [fig,up,np,F,SDbins,Swcounts,Swmean,Swstd,SwU,SwL] = ...
 % lwin          length of windows, in samples [default: 256]
 % olap          overlap of data segments, in percent [default: 70]
 % sfax          Y-axis scaling factor [default: 10]
+% midval        middle values ('mean' or 'median') [default: 'median']
+% method        method for confidence limit ('std' or 'pct') [default: 'pct']      
 % scale         scale of X-axis (linear or log) [default: 'log']
 % plt           whether to plot or not [default: false]
 %
@@ -25,12 +27,12 @@ function [fig,up,np,F,SDbins,Swcounts,Swmean,Swstd,SwU,SwL] = ...
 % F             frequnencies (linearly or logarithmic spaced)
 % SDbins        spectral density bins
 % Swcounts      array of spectral densities [size=(nfft, length(SDbins)-1)]
-% Swmean        mean of spectral densities for each frequency
+% Swmid         mean/median of spectral densities for each frequency
 % Swstd         standard deviation of spectral densities 
 % SwU           upper confidence limit
 % SwL           lower confidence limit
 %
-% Last modified by Sirawich Pipatprathanporn: 07/07/2020
+% Last modified by Sirawich Pipatprathanporn: 07/14/2020
 
 defval('nfft',256)
 defval('fs',40.01406)
@@ -38,6 +40,8 @@ defval('lwin',nfft)
 defval('olap',70)
 defval('sfax',10)
 defval('scale','log')
+defval('midval','median')
+defval('method','pct')
 defval('plt',false);
 
 %% get data and remove all signals
@@ -178,47 +182,54 @@ nwint = size(Pw,2);
 Sw = Pw/fs;
 
 % spectral density in log space
-Slog = log10(Sw) * sfax;
+Sd = log10(Sw) * sfax;
 
 % Calculate frequency vector for real signals
 % and get rid of periodicity in spectrum
 selekt = (1:floor(nfft/2)+1);
 F = (selekt-1)'*fs/nfft;
-Slog = Slog(selekt,:);
+Sd = Sd(selekt,:);
 
-% bootstraped mean and standard error
-%bootstat = bootstrp(100, @mean, Slog')';
-Swmean = mean(Slog, 2); %mean(bootstat, 2);
-Swstd = std(Slog, 0, 2); %std(bootstat, 0, 2);
+% mean and standard error
+if strcmp(midval, 'mean')
+    Swmid = mean(Sd, 2);
+else
+    Swmid = median(Sd, 2);
+end
+Swstd = std(Sd, 0, 2);
 
 % compute Upper/Lower interval
-kcon = 1.96;
-SwU = Swmean + kcon * Swstd;
-SwL = Swmean - kcon * Swstd;
-
-% Bins for the number of spectral density lines going through
-SDbins = 20:1:140;
-Swcounts = zeros(length(F), length(SDbins)-1);
-for ii = 1:length(F)
-    Swcounts(ii,:) = histcounts(Slog(ii,:), 'BinEdges', SDbins);
+if strcmp(method, 'std')
+    kcon = 1.96;
+    SwU = Swmid + kcon * Swstd;
+    SwL = Swmid - kcon * Swstd;
+else
+    SwU = prctile(Sd, 5);
+    SwL = prctile(Sd, 95);
 end
-
 if strcmp(scale, 'log')
     % Frequencies bin in log space
     Flog = logspace(log10(F(2)), log10(F(end)), length(F) -1);
 
     % interpoate bin to log space frequency bins
-    Slogcounts = interp1(F, Swcounts, Flog);
+    Sd = interp1(F, Sd, Flog);
     
     % interpolate stats to log space frequency
-    Swmean = interp1(F, Swmean, Flog);
+    Swmid = interp1(F, Swmid, Flog);
     Swstd = interp1(F, Swstd, Flog);
     SwU = interp1(F, SwU, Flog);
     SwL = interp1(F, SwL, Flog);
     
     F = Flog;
-    Swcounts = Slogcounts;
 end
+
+% Bins for the number of spectral density lines going through
+SDbins = 20:1:160;
+Swcounts = zeros(length(F), length(SDbins)-1);
+for ii = 1:length(F)
+    Swcounts(ii,:) = histcounts(Sd(ii,:), 'BinEdges', SDbins);
+end
+
 %% create figure
 if plt
     figure(3)
@@ -234,7 +245,7 @@ if plt
 
     % make power spectral density plot
     ax = subplot('Position', [0.11 0.04 0.83 0.84]);
-    [ax,axs,axb] = specdensplot_heatmap(ax, up, np, F, SDbins, Swcounts, Swmean, ...
+    [ax,axs,axb] = specdensplot_heatmap(ax, up, np, F, SDbins, Swcounts, Swmid, ...
         SwU, SwL, scale, '');
 
     fig = gcf;
