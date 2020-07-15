@@ -1,8 +1,35 @@
-function [ax,ax2,axb] = specdensplot_heatmap(ax,up,np,F,SDbins,Swcounts,...
-    Swmean,SwU,SwL,Fscale,plt_title)
+function [ax,ax2,axb] = specdensplot_heatmap(ax,up,np,F,Swbins,Swcounts,...
+    SwM,SwU,SwL,Fscale,plt_title)
+% [ax,ax2,axb] = SPECDENSPLOT_HEATMAP(ax,up,np,F,SDbins,Swcounts,...
+%    Swmean,SwU,SwL,Fscale,plt_title)
+% Plot the heatmap of spectral density bins.
+% 
+% INPUT
+% ax            axes to plot [default: gca]
+% up            percent of uptime
+% np            percent of noise time within the uptime
+% F             frequnencies (linearly or logarithmic equally spaced)
+% Swbins        spectral density bins
+% Swcounts      spectral densities counts (Swcounts(freq, Swbin number))
+% SwM           middle value of spectral densities for each frequency
+% SwU           upper confidence limit
+% SwL           lower confidence limit
+% Fscale        scale of X-axis (linear or log) [default: 'log']
+% plt_title     title for the plot
+% 
+% OUTPUT
+% ax            axes handling the heatmap
+% ax2           axes handling the period labels and rhs axis labels
+% axb           axes handling the uptime and signal percents report
+%
+% SEE ALSO
+% SPECDENSPLOT_SECTION
+%
+% Last modified by Sirawich Pipatprathanporn: 07/15/2020
 
-
-p = imagesc([F(1) F(end)],[SDbins(1) SDbins(end)], Swcounts');
+% plot the heatmap
+axes(ax)
+p = imagesc([F(1) F(end)],[Swbins(1) Swbins(end)], Swcounts');
 axis xy
 
 % make zero bins white
@@ -14,13 +41,18 @@ colormap(gcf, cmap);
 c = colorbar('southoutside');
 c.Label.String = sprintf('counts (total = %i)', sum(Swcounts(1,:), 2));
 
-% fix x-label for log scale
-if strcmp(Fscale, 'log')
-    ax.XTick = log10([0.1 1 10] / F(1)) * F(end) / ...
-        log10(F(end)/F(1));
-    ax.XTickLabel = {'0.1'; '1'; '10'};
-end
 grid on
+
+% fix x-label for log scale
+ax.XLim = [-0.0005 F(end)];
+if strcmp(Fscale, 'log')
+    ax.XTick = log10([0.01 0.1 1 10 20] / F(1)) * F(end) / ...
+        log10(F(end)/F(1));
+    ax.XTickLabel = {'0.01'; '0.1'; '1'; '10'; '20'};
+end
+
+% fix y-label
+ax.YTick = [20 40 60 80 100 120 140 160];
 
 % fix the precision of the time on XAxis label
 if strcmp(Fscale, 'linear')
@@ -39,7 +71,7 @@ ax.TickDir = 'both';
 ax2 = doubleaxes(ax);
 
 % add axis label
-inverseaxis(ax2.XAxis, 'Period (s)');
+inverseaxis(ax2.XAxis, 'period (s)');
 
 % add title
 ax2.Title.String = plt_title;
@@ -47,14 +79,14 @@ ax2.Title.String = plt_title;
 % add mean and upper and lower interval lines
 hold on
 if strcmp(Fscale, 'log')
-    plot(lin2logpos(F, F(1), F(end)), Swmean, 'LineWidth', 1, ...
+    plot(lin2logpos(F, F(1), F(end)), SwM, 'LineWidth', 1, ...
         'Color', rgbcolor('red'));
     plot(lin2logpos(F, F(1), F(end)), SwU, 'LineWidth', 1, ...
         'Color', rgbcolor('white'));
     plot(lin2logpos(F, F(1), F(end)), SwL, 'LineWidth', 1, ...
         'Color', rgbcolor('white'));
 else
-    plot(F, Swmean, 'LineWidth', 1, 'Color', rgbcolor('red'));
+    plot(F, SwM, 'LineWidth', 1, 'Color', rgbcolor('red'));
     plot(F, SwU, 'LineWidth', 1, 'Color', rgbcolor('white'));
     plot(F, SwL, 'LineWidth', 1, 'Color', rgbcolor('white'));
 end
