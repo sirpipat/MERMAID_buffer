@@ -28,15 +28,28 @@ olap = 70;
 sfax = 10;
 midval = 'median';
 method = 'pct';
-scale = 'log';
+scale = 'linear';
 plt = true;
 
+savedir = '/Users/sirawich/research/processed_data/monthly_SD_profiles/';
+% titles of spectral density profile output
+titles = {'2018_09', '2018_10', '2018_11', '2018_12', '2019_01', ...
+          '2019_02', '2019_03', '2019_04', '2019_05', '2019_06', ...
+          '2019_07', '2019_08'};
+
 for ii = 1:12
-    specdensplot_section(dt(ii), dt(ii+1), excdir, nfft, fs, lwin, ...
+    [~,~,~,F,~,~,Swmid,Swstd,SwU,SwL] = specdensplot_section(dt(ii), dt(ii+1), excdir, nfft, fs, lwin, ...
         olap, sfax, midval, method, scale, plt);
     % save figure
     savefile = strcat(mfilename, '_', replace(string(dt(ii)), ':', ...
         '_'),'.eps');
     figdisp(savefile, [], [], 2, [], 'epstopdf');
+    
+    % write data
+    fid = fopen(strcat(savedir,mfilename,'_',titles{ii},'.txt'),'w');
+    % the columns: F     median   std   SwU(95%)     SwL(5%)
+    data = [F, Swmid, Swstd, SwU, SwL]';
+    fprintf(fid, '%10.6f %10.6f %10.6f %10.6f %10.6f\n', data);
+    fclose(fid);
 end
 end
