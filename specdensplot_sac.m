@@ -2,6 +2,10 @@ function specdensplot_sac()
 
 [allsacfiles,sndex] = sacdata(getenv('SAC'));
 
+% reference spectral density files
+SDdir = '/Users/sirawich/research/processed_data/monthly_SD_profiles/';
+[allSDs,dndex] = allfile(SDdir);
+
 for ii = 1:sndex
     [~,Hdr,~,~,~] = readsac(allsacfiles{ii});
     dt_ref = datetime(Hdr.NZYEAR, 1, 0, Hdr.NZHOUR, Hdr.NZMIN, Hdr.NZSEC, ...
@@ -15,7 +19,7 @@ for ii = 1:sndex
     
     % finds raw file(s) containing dt_B and dt_E
     [sections,intervals] = getsections(getenv('ONEYEAR'),...
-        dt_B-seconds(100),dt_E+seconds(300),fs);
+        dt_B-seconds(100),dt_E+seconds(1800),fs);
     
     % reads the section from raw file(s)
     % Assuming there is only 1 secion
@@ -30,42 +34,27 @@ for ii = 1:sndex
     lwin = nfft;
     
     timfreqplot(x,[],[],[],[],dt_b,nfft,fs,lwin,70,10,0,'s',p,false);
-%     figure(3);
-%     set(gcf,'Unit','inches','Position',[2 2 6.5 6.5]);
-%     clf
-%     ax = subplot('Position', [0.1 0.5 0.82 0.34]);
-%     
-%     p = specdensplot(x,nfft,fs,lwin,70,10,'s');
-%     p(1).Color = [0.8 0.4 0];
-%     p(2).Color = [1 1 1];
-%     p(3).Color = [1 1 1];
-%     grid on
-%     ylim([40 140]);
-%     
-%     % fix the precision of the time on XAxis label
-%     ax.XAxis.Label.String = sprintf('frequency (Hz): %d s window', round(nfft/fs));
-%     
-%     % fix the precision of the frequency on YAxis label
-%     y_label = ax.YAxis.Label.String;
-%     y_split = split(y_label, '=');
-%     f_string = sprintf(' %.4f', fs/nfft);
-%     y_label = strcat(y_split{1}, ' =', f_string);
-%     ax.YAxis.Label.String = y_label;
-% 
-%     % add label on the top and right
-%     ax.TickDir = 'both';
-%     axs = doubleaxes(ax);
-% 
-%     % add axis label
-%     inverseaxis(axs.XAxis, 'Period (s)');
-%     
-%     % add title
-%     axs.Title.String = strcat(string(dt_begin),' -- ', string(dt_end));
     
+    % add title
     fig = gcf;
     fig.Children(9).Title.String = strcat(string(dt_b),' -- ', ...
         string(dt_e));
-
+    
+    % read spectral density refernce data
+    % September 2018 --> 1, August 2019 --> 12
+    index = (dt_b.Year - 2018) * 12 + dt_b.Month - 8;
+    fid = fopen(allSDs{index},'r');
+    data = fscanf(fid,'%f %f %f %f %f',[5 Inf]);
+    fclose(fid);
+    % add reference spectral density of the month
+    ax = fig.Children(4);
+    axes(ax)
+    hold on
+    semilogx(data(1,:),data(2,:),'Color',rgbcolor('deep sky blue'));
+    semilogx(data(1,:),data(4,:),'Color',rgbcolor('gray'));
+    semilogx(data(1,:),data(5,:),'Color',rgbcolor('gray'));
+    hold off
+    
     % save figure
     filename = strcat('specdensplot_event_',removepath(allsacfiles{ii}));
     figdisp(filename,[],[],2,[],'epstopdf');
