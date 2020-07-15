@@ -1,4 +1,4 @@
-function [fig,up,np,F,SDbins,Swcounts,Swmid,Swstd,SwU,SwL] = ...
+function [fig,up,np,F,Swbins,Swcounts,Swmid,Swstd,SwU,SwL] = ...
     specdensplot_section(dt_begin,dt_end,excdir,nfft,fs,lwin,olap,sfax,...
     midval,method,scale,plt)
 % [fig, F, SDbins, Swcounts, Swmean, Swerr, SwU, SwL] = ...
@@ -25,7 +25,7 @@ function [fig,up,np,F,SDbins,Swcounts,Swmid,Swstd,SwU,SwL] = ...
 % up            percent of uptime
 % np            percent of noise time within the uptime
 % F             frequnencies (linearly or logarithmic spaced)
-% SDbins        spectral density bins
+% Swbins        spectral density bins
 % Swcounts      array of spectral densities [size=(nfft, length(SDbins)-1)]
 % Swmid         mean/median of spectral densities for each frequency
 % Swstd         standard deviation of spectral densities 
@@ -204,8 +204,8 @@ if strcmp(method, 'std')
     SwU = Swmid + kcon * Swstd;
     SwL = Swmid - kcon * Swstd;
 else
-    SwU = prctile(Sd, 5);
-    SwL = prctile(Sd, 95);
+    SwU = prctile(Sd, 95, 2);
+    SwL = prctile(Sd, 5, 2);
 end
 if strcmp(scale, 'log')
     % Frequencies bin in log space
@@ -224,10 +224,10 @@ if strcmp(scale, 'log')
 end
 
 % Bins for the number of spectral density lines going through
-SDbins = 20:1:160;
-Swcounts = zeros(length(F), length(SDbins)-1);
+Swbins = 20:1:160;
+Swcounts = zeros(length(F), length(Swbins)-1);
 for ii = 1:length(F)
-    Swcounts(ii,:) = histcounts(Sd(ii,:), 'BinEdges', SDbins);
+    Swcounts(ii,:) = histcounts(Sd(ii,:), 'BinEdges', Swbins);
 end
 
 %% create figure
@@ -245,7 +245,7 @@ if plt
 
     % make power spectral density plot
     ax = subplot('Position', [0.11 0.04 0.83 0.84]);
-    [ax,axs,axb] = specdensplot_heatmap(ax, up, np, F, SDbins, Swcounts, Swmid, ...
+    [ax,axs,axb] = specdensplot_heatmap(ax, up, np, F, Swbins, Swcounts, Swmid, ...
         SwU, SwL, scale, '');
 
     fig = gcf;
