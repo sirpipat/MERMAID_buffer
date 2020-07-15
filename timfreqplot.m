@@ -104,7 +104,7 @@ text(x_pos, y_pos, 'a', 'FontSize', 12);
 ax2 = subplot('Position', [0.61 4/7 0.33 3/7-0.12]);
 [p,xl,yl,F,SD,Ulog,Llog]=specdensplot(y,nfft,fs,lwin,olap,sfax,unit);
 grid on
-ylim([40 140]);
+ylim([40 145]);
 
 % change color line
 p(1).Color = [0.8 0.25 0.25];
