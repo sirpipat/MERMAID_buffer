@@ -2,7 +2,7 @@ function E = energy(F_ranges,sfax,option)
 % E = ENGERGY(F_ranges,sfax,option)
 % Integrates spectral density over frequency ranges over 12 months of
 % MERMAID buffer. Then, plot the result.
-% E(a-->b) = \int_a^b s(f) df where s(f) is spectral density.
+% E(a <= f <= b) = \int_a^b s(f) df where s(f) is spectral density.
 %
 % INPUT
 % F_ranges      frequency ranges e.g.
