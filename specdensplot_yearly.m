@@ -14,7 +14,7 @@ function specdensplot_yearly()
 % SEE ALSO:
 % SPECDENSPLOT_SECTION
 % 
-% Last modified by Sirawich Pipatprathanporn: 07/06/2020
+% Last modified by Sirawich Pipatprathanporn: 07/19/2020
 
 % dt_begin and dt_end for specdensplot_section
 dt_0 = datetime(2018, 9, 1, 'TimeZone', 'UTC', 'Format', ...
@@ -49,7 +49,7 @@ clf
     sfax, midval, method, scale, plt);
 ax = subplot('Position',[0.05 2/3+0.05 1/4-0.07 1/3-0.1]);
 [ax,axs,axb] = specdensplot_heatmap(ax, up, np, F, SDbins, Swcounts, Swmean, SwU, ...
-    SwL, scale, titles{1});
+    SwL, sfax, scale, titles{1});
 
 Swcounts_total = Swcounts;
 for ii = 2:12
@@ -63,7 +63,7 @@ for ii = 2:12
     xx = ii - 4 * ceil(ii/4) + 3;
     ax = subplot('Position',[xx/4+0.05 yy/3+0.05 1/4-0.07 1/3-0.1]);
     [ax,axs,axb] = specdensplot_heatmap(ax, up, np, F, SDbins, Swcounts, Swmean, ...
-        SwU, SwL, scale, titles{ii});
+        SwU, SwL, sfax, scale, titles{ii});
 end
 figdisp('yearly_summary', [], [], 2, [], 'epstopdf');
 end

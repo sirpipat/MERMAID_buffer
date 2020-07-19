@@ -1,5 +1,5 @@
 function [ax,ax2,axb] = specdensplot_heatmap(ax,up,np,F,Swbins,Swcounts,...
-    SwM,SwU,SwL,Fscale,plt_title)
+    SwM,SwU,SwL,sfax,Fscale,plt_title)
 % [ax,ax2,axb] = SPECDENSPLOT_HEATMAP(ax,up,np,F,SDbins,Swcounts,...
 %    Swmean,SwU,SwL,Fscale,plt_title)
 % Plot the heatmap of spectral density bins.
@@ -14,6 +14,7 @@ function [ax,ax2,axb] = specdensplot_heatmap(ax,up,np,F,Swbins,Swcounts,...
 % SwM           middle value of spectral densities for each frequency
 % SwU           upper confidence limit
 % SwL           lower confidence limit
+% sfax          Y-axis scaling factor [default: 10]
 % Fscale        scale of X-axis (linear or log) [default: 'log']
 % plt_title     title for the plot
 % 
@@ -25,7 +26,10 @@ function [ax,ax2,axb] = specdensplot_heatmap(ax,up,np,F,Swbins,Swcounts,...
 % SEE ALSO
 % SPECDENSPLOT_SECTION
 %
-% Last modified by Sirawich Pipatprathanporn: 07/15/2020
+% Last modified by Sirawich Pipatprathanporn: 07/19/2020
+
+defval('sfax',10)
+defval('Fscale','log')
 
 % plot the heatmap
 axes(ax)
@@ -64,7 +68,7 @@ ax.XAxis.Label.String = sprintf('frequency (Hz): %d s window', winlen);
 
 % fix the precision of the frequency on YAxis label
 yfreq = 'spectral density (energy/Hz)';
-y_label = ylabel(sprintf('%s ; %s = %.4f', yfreq, '\Delta\itf', 1/winlen));
+y_label = ylabel(sprintf('%g %s%s', sfax, 'log_{10}',  yfreq));
 
 % add label on the top and right
 ax.TickDir = 'both';

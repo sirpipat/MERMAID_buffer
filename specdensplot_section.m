@@ -32,7 +32,7 @@ function [fig,up,np,F,Swbins,Swcounts,Swmid,Swstd,SwU,SwL] = ...
 % SwU           upper confidence limit
 % SwL           lower confidence limit
 %
-% Last modified by Sirawich Pipatprathanporn: 07/14/2020
+% Last modified by Sirawich Pipatprathanporn: 07/19/2020
 
 defval('nfft',256)
 defval('fs',40.01406)
@@ -246,7 +246,7 @@ if plt
     % make power spectral density plot
     ax = subplot('Position', [0.11 0.04 0.83 0.84]);
     [ax,axs,axb] = specdensplot_heatmap(ax, up, np, F, Swbins, Swcounts, Swmid, ...
-        SwU, SwL, scale, '');
+        SwU, SwL, sfax, scale, '');
 
     fig = gcf;
 else
