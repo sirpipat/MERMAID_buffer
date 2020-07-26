@@ -20,7 +20,7 @@ function [trigs,dtrigs,ratio] = pickpeaks(x,fs,tr,dtr,bufwin)
 % ratio     adjusted ratio used for determining trigger and detrigger
 %           points
 %
-% Last modified by Sirawich Pipatprathanporn: 06/29/2020
+% Last modified by Sirawich Pipatprathanporn: 07/26/2020
 
 % make all values positive
 x = abs(x);
@@ -61,15 +61,8 @@ if ~isempty(trigs) && (isempty(dtrigs) || trigs(end) > dtrigs(end))
     dtrigs = [dtrigs, t(end)];
 end
 
-% check if trig-dtrig windows overlap each other
-for ii = 1:length(trigs)-1
-    if dtrigs(ii) > trigs(ii+1)
-        dtrigs(ii) = NaN;
-        trigs(ii+1) = NaN;
-    end
-end
-trigs = trigs(~isnan(trigs));
-dtrigs = dtrigs(~isnan(dtrigs));
+% simplify overlapping trig-dtrig windows
+[trigs, dtrigs] = simplifyintervals(trigs, dtrigs);
 
 % add dtrigs at the end if original dtrigs is beyond the section
 if length(trigs) - length(dtrigs) == 1

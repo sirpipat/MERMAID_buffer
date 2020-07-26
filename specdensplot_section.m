@@ -81,6 +81,9 @@ for ii = 1:length(sections)
         dt_dtrigs = datetime.empty(1,0);
     end
     
+    % simplify dt_trigs and dt_dtrigs
+    [dt_trigs,dt_dtrigs] = simplifyintervals(dt_trigs,dt_dtrigs);
+    
     % remove t-phases and separate into sub-intervals
     if ~isempty(dt_trigs)
         sub_intervals = cell(1,length(dt_trigs)+1);
