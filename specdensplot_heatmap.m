@@ -50,9 +50,9 @@ grid on
 % fix x-label for log scale
 ax.XLim = [-0.0005 F(end)];
 if strcmp(Fscale, 'log')
-    ax.XTick = log10([0.01 0.1 1 10 20] / F(1)) * F(end) / ...
+    ax.XTick = log10([0.0001 0.001 0.01 0.1 1 10 20] / F(1)) * F(end) / ...
         log10(F(end)/F(1));
-    ax.XTickLabel = {'0.01'; '0.1'; '1'; '10'; '20'};
+    ax.XTickLabel = {'0.0001'; '0.001'; '0.01'; '0.1'; '1'; '10'; '20'};
 end
 
 % fix y-label
