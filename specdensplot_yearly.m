@@ -1,12 +1,12 @@
-function specdensplot_yearly()
-% SPECDENSPLOT_YEARLY()
+function specdensplot_yearly(win)
+% SPECDENSPLOT_YEARLY(win)
 % Makes a yearly summary of monthly spectral densities of ocean
 % noise recorded by a MERMAID P023 from Sep 2018 to Aug 2019. Do not
 % attempt to call SPECDENSPLOT_SECTION on an enitre year section or your
 % machine will run out of memory.
 %
 % INPUT
-% no input
+% win       Length of the window in seconds
 %
 % OUTPUT
 % no output beside figures saved at $EPS
@@ -14,7 +14,7 @@ function specdensplot_yearly()
 % SEE ALSO:
 % SPECDENSPLOT_SECTION
 % 
-% Last modified by Sirawich Pipatprathanporn: 07/19/2020
+% Last modified by Sirawich Pipatprathanporn: 07/26/2020
 
 % dt_begin and dt_end for specdensplot_section
 dt_0 = datetime(2018, 9, 1, 'TimeZone', 'UTC', 'Format', ...
@@ -24,7 +24,7 @@ dt = dt_0 + calmonths(0:12);
 % input parameters for specdensplot_section
 excdir = '/Users/sirawich/research/processed_data/tphases/';
 fs = 40.01406;
-nfft = round(100 * fs);
+nfft = round(win * fs);
 lwin = nfft;
 olap = 70;
 sfax = 10;
