@@ -7,12 +7,14 @@ function specdensplot_monthly()
 % no input
 %
 % OUTPUT
-% no output beside figures saved at $EPS
+% figures saved at $EPS and
+% SD profiles saved at ...
+% /Users/sirawich/research/processed_data/monthly_SD_profiles/
 %
 % SEE ALSO:
 % SPECDENSPLOT_SECTION
 % 
-% Last modified by Sirawich Pipatprathanporn: 07/06/2020
+% Last modified by Sirawich Pipatprathanporn: 07/29/2020
 
 % dt_begin and dt_end for specdensplot_section
 dt_0 = datetime(2018, 9, 1, 'TimeZone', 'UTC', 'Format', ...
