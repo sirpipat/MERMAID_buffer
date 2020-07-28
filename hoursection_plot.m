@@ -3,7 +3,6 @@ function hoursection_plot(filename, nfft, fs, lwin, olap, sfax, beg, unit)
 %
 % INPUT
 % filename      The name of raw MERMAID data file
-% dt_begin      Beginning datetime
 % nfft          Number of FFT points [default: lwin]
 % fs            Sampling frequency [Default: 40.01406]
 % lwin          Window length, in samples [default: 256]
@@ -14,7 +13,7 @@ function hoursection_plot(filename, nfft, fs, lwin, olap, sfax, beg, unit)
 %
 % NO OUTPUT (the plot saved at $EPS)
 %
-% Last modified by Sirawich Pipatprathanporn: 05/31/2020
+% Last modified by Sirawich Pipatprathanporn: 07/26/2020
 
 % default parameter list
 defval('nfft', 1024);
