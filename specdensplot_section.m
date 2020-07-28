@@ -81,6 +81,20 @@ for ii = 1:length(sections)
         dt_dtrigs = datetime.empty(1,0);
     end
     
+    % read the event signals which will be excluded
+    [ev_b,ev_e,~,~] = readeventlist();
+    keep = or(and(ev_b >= dt_b, ev_b <= dt_e), ...
+        and(ev_e >= dt_b, ev_e <= dt_e));
+    ev_b = ev_b(keep);
+    ev_e = ev_e(keep);
+    if ~isempty(dt_trigs)
+        dt_trigs = [dt_trigs; ev_b];
+        dt_dtrigs = [dt_dtrigs; ev_e];
+    else
+        dt_trigs = ev_b;
+        dt_dtrigs = ev_e;
+    end
+    
     % simplify dt_trigs and dt_dtrigs
     [dt_trigs,dt_dtrigs] = simplifyintervals(dt_trigs,dt_dtrigs);
     
