@@ -19,6 +19,10 @@ defval('linewidth',0.5);
 defval('linecolor','r');
 defval('label','');
 
+if size(x,1) > 1
+    x = reshape(x,1,size(x,1));
+end
+
 axes(ax)
 v = plot([x; x], [ax.YLim(1) ax.YLim(2)], 'LineStyle', linestyle, ...
     'LineWidth', linewidth, 'Color', linecolor);
