@@ -42,9 +42,10 @@ t_above_tr = ratio > tr;
 t_above_dtr = ratio > dtr;
 
 % locate trigs and drigs
-trigs = t(t_above_tr - circshift(t_above_tr,1) > 0) - bufwin;
-dtrigs = t(t_above_dtr - circshift(t_above_dtr,1) < 0) + bufwin;
+trigs = t([t_above_tr(1); t_above_tr(2:end) - t_above_tr(1:end-1)] > 0) - bufwin;
+dtrigs = t([t_above_dtr(1); t_above_dtr(2:end) - t_above_dtr(1:end-1)] < 0) + bufwin;
 
+% remove the trigger at the beginning (first sample)
 if t_above_tr(1)
     trigs = trigs(2:end);
     dtrigs = dtrigs(2:end);
