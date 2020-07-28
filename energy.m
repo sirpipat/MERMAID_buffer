@@ -1,6 +1,6 @@
-function E = energy(F_ranges,sfax,option)
-% E = ENGERGY(F_ranges,sfax,option)
-% Integrates spectral density over frequency ranges over 12 months of
+function [t,E] = energy(F_ranges,sfax,option,scale)
+% [t,E] = ENGERGY(F_ranges,sfax,option,scale)
+% Integrates spectral density over frequency ranges over one year of
 % MERMAID buffer. Then, plot the result.
 % E(a <= f <= b) = \int_a^b s(f) df where s(f) is spectral density.
 %
@@ -9,28 +9,39 @@ function E = energy(F_ranges,sfax,option)
 %               [0.4  0.75] : 1 range from 0.4 to 0.75 Hz
 %               [1  2; 5 8] : 2 ranges from 1 to 2 Hz and 5 to 8 Hz
 % sfax          Y-axis scaling factor [default: 10]
-% option        scaling of energy output [default: 1]
+% option        either 'weekly' or 'monthly'
+% scale         scaling of energy output [default: 1]
 %               1 -- log scale multiplied by sfax
 %               2 -- linear scale
 %
 % OUTPUT
+% t             time
 % E             energy over frequency ranges and 12 months.
-%               size(E) == [12 num_range]
+%               size(E) == [12 num_range] for 'monthly' option
+%               size(E) == [48 num_range] for 'weekly' option
 %
-% Last modified by Sirawich Pipatprathanporn: 07/15/2020
+% Last modified by Sirawich Pipatprathanporn: 07/29/2020
 
 defval('sfax',10)
-defval('option',1)
+defval('scale',1)
 
 num_ranges = size(F_ranges,1);
 
 % read precomputed spectral densities from files 
-SDdir = '/Users/sirawich/research/processed_data/monthly_SD_profiles/';
+if strcmp(option,'monthly')
+    SDdir = '/Users/sirawich/research/processed_data/monthly_SD_profiles/';
+elseif strcmp(option,'weekly')
+    SDdir = '/Users/sirawich/research/processed_data/weekly_SD_profiles/';
+else
+    fprintf('Invalid Input\n');
+    return
+end
 [allSDs,dndex] = allfile(SDdir);
 
 % compute energy by integrating spectral density over frequency ranges
-E = zeros(12,num_ranges);
-for ii = 1:12
+E = zeros(dndex,num_ranges);
+
+for ii = 1:dndex
     % read data from files
     fid = fopen(allSDs{ii},'r');
     data = fscanf(fid,'%f %f %f %f %f',[5 Inf]);
@@ -47,7 +58,7 @@ for ii = 1:12
 end
 
 % make Y-axis log scale
-if option == 1
+if scale == 1
     E = sfax * log10(E);
 end
 
@@ -58,12 +69,17 @@ for ii = 1:num_ranges
 end
 
 % plot results
-x = datetime(2018,9,1,'Format','uuuu-MM-dd''T''HH:mm:ss.SSSSSS',...
-    'TimeZone','UTC') + calmonths(0:11);
+if strcmp(option,'monthly')
+    t = datetime(2018,9,1,'Format','uuuu-MM-dd''T''HH:mm:ss.SSSSSS',...
+        'TimeZone','UTC') + calmonths(0:11);
+elseif strcmp(option,'weekly')
+    t = datetime(2018,9,13,'Format','uuuu-MM-dd''T''HH:mm:ss.SSSSSS',...
+        'TimeZone','UTC') + calweeks(0:48);
+end
 figure;
-plot(x,E,'LineWidth',1);
+plot(t,E,'LineWidth',1);
 grid on
-if option == 1
+if scale == 1
     ylabel(sprintf('%g log_{10} (Energy)', sfax))
 else
     ylabel('Energy')
