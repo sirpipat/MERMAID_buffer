@@ -104,6 +104,10 @@ text(x_pos, y_pos, 'a', 'FontSize', 12);
 ax2 = subplot('Position', [0.61 4/7 0.33 3/7-0.12]);
 [p,xl,yl,F,SD,Ulog,Llog]=specdensplot(y,nfft,fs,lwin,olap,sfax,unit);
 grid on
+
+xlim([0.0095 F(end)]);
+xticks([0.01 0.1 1 10]);
+xticklabels({'0.01', '0.1', '1', '10'});
 ylim([40 145]);
 
 % change color line
@@ -126,7 +130,7 @@ ax2.TickDir = 'both';
 ax2s = doubleaxes(ax2);
 
 % add axis label
-inverseaxis(ax2s.XAxis, 'Period (s)');
+inverseaxis(ax2s.XAxis, 'period (s)');
 
 % add subplot label
 [x_pos, y_pos] = norm2trueposition(ax2, 1/800, 7/8);
@@ -156,6 +160,7 @@ hold on
 plot(t_plot, mov_rms, 'Color', [0.8 0.25 0.25], 'LineWidth', 1);
 hold off
 title('Raw buffer -- green = mov avg, red = mov rms, win = 30 s')
+ax3.TitleFontSizeMultiplier = 1.0;
 ax3.TickDir = 'both';
 
 % set ylimit to exclude outliers
@@ -189,6 +194,7 @@ hold on
 plot(t_plot, mov_rms, 'Color', [0.8 0.25 0.25], 'LineWidth', 1);
 hold off
 title('Filtered: bp2-10 -- green = mov avg, red = mov rms, win = 30 s')
+ax4.TitleFontSizeMultiplier = 1.0;
 ax4.TickDir = 'both';
 
 % set ylimit to exclude outliers
@@ -242,6 +248,7 @@ hold on
 plot(t_plot, mov_rms, 'Color', [0.8 0.25 0.25], 'LineWidth', 1);
 hold off
 title('Filtered: dc5 dt bp0.05-0.1 -- green = mov avg, red = mov rms, win = 150 s')
+ax5.TitleFontSizeMultiplier = 1.0;
 ax5.TickDir = 'both';
 
 % set ylimit to exclude outliers
