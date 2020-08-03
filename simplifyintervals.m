@@ -12,6 +12,11 @@ function [b_out,e_out] = simplifyintervals(b_in,e_in)
 % transform to col vectors
 b_in = reshape(b_in,length(b_in),1);
 e_in = reshape(e_in,length(e_in),1);
+
+if size(b_in,1) ~= size(e_in,1)
+    error('Error. Input must be equal in length.');
+end
+
 all_values = [b_in; e_in];
 
 % keep track of beginnings and endings
