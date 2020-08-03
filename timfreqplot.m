@@ -73,7 +73,7 @@ set(ax0, 'FontSize', 12, 'Color', 'none');
 ax0.XAxis.Visible = 'off';
 ax0.YAxis.Visible = 'off';
 
-%% plot spectogram
+%% plot spectrogram
 ax1 = subplot('Position', [0.07 4/7 0.42 3/7-0.12]);
 timspecplot_ns(y,nfft,fs,lwin,wolap,beg,unit);
 title('');
