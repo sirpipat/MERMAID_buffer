@@ -55,10 +55,8 @@ end
 trigs(trigs < t(1)) = t(1);
 dtrigs(dtrigs > t(end)) = t(end);
 
-if ~isempty(dtrigs) && (isempty(trigs)|| dtrigs(1) < trigs(1))
-    dtrigs = dtrigs(2:end);
-end
-if ~isempty(trigs) && (isempty(dtrigs) || trigs(end) > dtrigs(end))
+% add dtrigs = t(end) if the detrigger of the last peak is beyond the end
+if t_above_dtr(end)
     dtrigs = [dtrigs, t(end)];
 end
 
