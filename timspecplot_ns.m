@@ -1,8 +1,7 @@
 function [p,xl,yl,Bl10,F,T]=timspecplot_ns(x,nfft,Fs,wlen,wolap,beg,unt)
-% [p,xl,yl,Bl10,F,T]=TIMSPECPLOT(x,h,nfft,Fs,wlen,wolap,beg,unt)
+% [p,xl,yl,Bl10,F,T]=TIMSPECPLOT_NS(x,h,nfft,Fs,wlen,wolap,beg,unt)
 %
-% Plots spectrogram of data using the SPECTROGRAM algorithm and maybe,
-% performs an analysis of it using BFT.  
+% Plots spectrogram of data using the SPECTROGRAM algorithm
 %
 % INPUT:
 % 
@@ -11,7 +10,7 @@ function [p,xl,yl,Bl10,F,T]=timspecplot_ns(x,nfft,Fs,wlen,wolap,beg,unt)
 % Fs       Sampling frequency
 % wlen     Window length, in samples [default: 256]
 % wolap    Window overlap, as a fraction [default: 0.7]
-% beg      Signal beginning - actually, can get this from h
+% beg      Signal beginning [Default: 0]
 % unt      String with the unit name [default: s]
 %
 % OUTPUT:
@@ -24,7 +23,7 @@ function [p,xl,yl,Bl10,F,T]=timspecplot_ns(x,nfft,Fs,wlen,wolap,beg,unt)
 % Used by SIGNALS and SIGNALS2, see also
 % TIMDOMPLOT, SPECDENSPLOT
 %
-% Last modified by Sirawich Pipatprathanporn, 11/15/2019
+% Last modified by Sirawich Pipatprathanporn, 07/30/2020
 
 defval('beg',0)
 defval('wlen',256)
@@ -45,7 +44,7 @@ Bl10 = interp1(F, Bl10, Flog);
 p=imagesc(beg+wlen/Fs/2+T,Flog,Bl10);
 axis xy; colormap(jet)    
 
-% fix x-label for log scale
+% fix y-label for log scale
 ax = gca;
 ax.YTick = lin2logpos([0.1 1 10], Flog(1), Flog(end));
 ax.YTickLabel = {'0.1'; '1'; '10'};
