@@ -13,7 +13,7 @@ function inverseaxis(axis, label)
 % OUTPUT:
 % none (axis object will be modified)
 %
-% Last modified by Sirawich Pipatprathanporn: 01/27/2020
+% Last modified by Sirawich Pipatprathanporn: 08/04/2020
 
 axis.Label.String = label;
 new_labels = {};
@@ -27,7 +27,7 @@ for ii = 1:length(axis.TickLabels)
         d = str2double(erase(erase(label_str, "10^{"), "}"));
         new_labels{ii} = sprintf('10^{%d}', -d);
     else
-        new_labels{ii} = string(1/value);
+        new_labels{ii} = sprintf('%.3g',1/value);
     end
 end
 axis.TickLabels = new_labels;
