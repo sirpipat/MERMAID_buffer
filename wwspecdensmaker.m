@@ -20,7 +20,7 @@ defval('midval','pct')
 % get all p2l files
 [allp2ls, pndex] = allfile(strcat(getenv('NCFILES'),'p2l/'));
 
-% 
+% output location
 savedir = '/Users/sirawich/research/processed_data/monthly_WWSD_profiles/';
 % titles of spectral density profile output
 titles = {'2018_09', '2018_10', '2018_11', '2018_12', '2019_01', ...
