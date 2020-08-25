@@ -15,7 +15,8 @@ function logpos = lin2logpos(linval,minval,maxval)
 % SEE ALSO
 % SPECDENSPLOT_HEATMAP
 %
-% Last modified by Sirawich Pipatprathanporn: 07/07/2020
+% Last modified by Sirawich Pipatprathanporn: 08/24/2020
 
-logpos = log10(linval / minval) * maxval / log10(maxval / minval);
+logpos = minval + log10(linval / minval) / log10(maxval / minval) * ...
+        (maxval - minval);
 end
