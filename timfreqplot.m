@@ -29,7 +29,7 @@ function fig = timfreqplot(y, yf1, yf2, yf1_trigs, yf1_dtrigs, dt_begin, ...
 %
 % If save is true, the output file is saved as $EPS.
 % 
-% Last modified by Sirawich Pipatprathanporn: 07/14/2020
+% Last modified by Sirawich Pipatprathanporn: 08/31/2020
 
 % parameter list
 defval('fs', 40.01406);
