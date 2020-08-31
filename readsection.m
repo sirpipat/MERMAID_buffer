@@ -7,7 +7,7 @@ function [x, dt_begin, dt_end] = readsection(file, dt_begin, dt_end, fs)
 % file      Full filename
 % dt_begin  Datetime of the beginning
 % dt_end    Datetime of the end
-% fs        Sampling rate in Hz [Default: 40]
+% fs        Sampling rate in Hz [Default: 40.01406]
 %
 % OUTPUT:
 % x         The data from the section
@@ -17,9 +17,9 @@ function [x, dt_begin, dt_end] = readsection(file, dt_begin, dt_end, fs)
 % SEE ALSO:
 % READONEYEARDATA
 %
-% Last modified by Sirawich Pipatprathanporn: 03/29/2020
+% Last modified by Sirawich Pipatprathanporn: 08/31/2020
 
-defval('fs', 40);
+defval('fs', 40.01406);
 
 % reads the file
 [x, dt_file_begin, dt_file_end] = readOneYearData(file, fs);
