@@ -17,7 +17,7 @@ function specdensplot_weekly(win,option)
 % SEE ALSO:
 % SPECDENSPLOT_SECTION, SPECDENSPLOT_HEATMAP
 % 
-% Last modified by Sirawich Pipatprathanporn: 08/03/2020
+% Last modified by Sirawich Pipatprathanporn: 08/10/2020
 
 defval('win', 100)
 defval('option', 'plot')
@@ -44,10 +44,10 @@ sfax = 10;
 midval = 'median';
 method = 'pct';
 if strcmp(option, 'save')
-    scale = 'log';
+    scale = 'linear';
     plt = false;
 else
-    scale = 'linear';
+    scale = 'log';
     plt = true;
 end
 
