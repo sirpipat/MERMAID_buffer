@@ -65,7 +65,7 @@ dt_B.Format = 'uuuu-MM-dd''T''HH:mm:ss.SSSSSS';
 % relative position of the sliced section in the file
 p = [(dt_B - dt_start) (dt_E - dt_start)] / (dt_end - dt_start) * 100;
 timfreqplot(x, xf1, xf2, dt_trigs, dt_dtrigs, dt_B, nfft, fs, lwin, ...
-    olap, sfax, beg, unit, p);
+    olap, sfax, beg, unit, p, true, true);
 dt_curr = dt_curr + minutes(30);
 
 % slice later sections then plot
@@ -81,7 +81,7 @@ while dt_end - dt_curr > minutes(30)
     % relative position of the sliced section in the file
     p = [(dt_B - dt_start) (dt_E - dt_start)] / (dt_end - dt_start) * 100;
     timfreqplot(x, xf1, xf2, dt_trigs, dt_dtrigs, dt_B, nfft, fs, lwin, ...
-        olap, sfax, beg, unit, p);
+        olap, sfax, beg, unit, p, true, true);
     dt_curr = dt_curr + minutes(30);
 end
 
