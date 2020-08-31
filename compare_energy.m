@@ -1,4 +1,4 @@
-function compare_energy(option)
+function compare_energy(option, Fscale)
 % COMPARE_ENERGY(option)
 % compares energy of WAVEWATCH surface equivalent pressure and 
 % spectral density of 1500-m depth pressure recorded by MERMAID.
@@ -6,12 +6,14 @@ function compare_energy(option)
 %
 % INPUT
 % option        1 - weekly
-%               2 - monthly
+%               2 - biweekly (every 2 weeks)
+%               3 - monthly
+% Fscale        scale of frequency axes ['linear' or 'log' (default)]
 %
 % OUTOUT
 % no output beside figures saved at $EPS
 % 
-% Last modified by Sirawich Pipatprathanporn: 08/05/2020
+% Last modified by Sirawich Pipatprathanporn: 08/25/2020
 
 %% get all filenames
 % WAVEWATCH spectral density files
@@ -25,6 +27,15 @@ if option == 1
         'TimeZone','UTC') + calweeks(0:48);
     title = 'Energy correlation coefficient (weekly scale, bin = 0.01 x 0.01 Hz)';
     savetitle = strcat(mfilename, '_weekly_cc.eps');
+elseif option == 2
+    WWdir = '/Users/sirawich/research/processed_data/biweekly_WWSD_profiles/';
+    SDdir = '/Users/sirawich/research/processed_data/biweekly_SD_profiles/';
+    SD_shift = 56.8158;
+    f_scale = 2.2503;
+    t = datetime(2018,9,13,'Format','uuuu-MM-dd''T''HH:mm:ss.SSSSSS',...
+        'TimeZone','UTC') + calweeks(0:2:48);
+    title = 'Energy correlation coefficient (biweekly scale, bin = 0.01 x 0.01 Hz)';
+    savetitle = strcat(mfilename, '_biweekly_cc.eps');    
 else
     WWdir = '/Users/sirawich/research/processed_data/monthly_WWSD_profiles/';
     SDdir = '/Users/sirawich/research/processed_data/monthly_SD_profiles/';
@@ -45,9 +56,19 @@ E = zeros(pndex, 1);
 m_E = zeros(pndex, 1);
 
 % energies in different frequency bands
-binwidth = 0.001;
-f_limit = 0.041:binwidth:0.304;
-m_f_limit = 0.040:binwidth:1.000;
+if strcmp(Fscale, 'linear')
+    % linear scale
+    binwidth = 0.001;
+    f_limit = 0.041:binwidth:0.304;
+    m_f_limit = 0.040:binwidth:1.000;
+else
+    % log scale
+    binscale = 1.01;
+    f_limit = logspace(log10(0.041),log10(0.304),...
+                       round(log(0.304/0.040)/log(binscale)));
+    m_f_limit = logspace(log10(0.040),log10(1.000),...
+                         round(log(1.000/0.040)/log(binscale)));
+end
 Ebands = zeros(pndex, size(f_limit,2)-1);       % E = E(idt, ifreq)
 m_Ebands = zeros(pndex, size(m_f_limit,2)-1);     % m_E = m_E(idt, ifreq)
 for idt = 1:pndex
@@ -90,23 +111,20 @@ end
 % E = Ebands(:,iE);
 % m_E = m_Ebands(:,imE);
 
-E = 10 * log10(E) + SD_shift;
-m_E = 10 * log10(m_E);
+% E = 10 * log10(E) + SD_shift;
+% m_E = 10 * log10(m_E);
 
 % plot results
-figure;
-plot(t,E,'LineWidth',1);
-hold on
-plot(t,m_E,'LineWidth',1);
-hold off
-grid on
-ylabel(sprintf('%g log_{10} (Energy)', 10))
-legend('WAVEWATCH','MERMAID','Location','best')
+% figure;
+% plot(t,E,'LineWidth',1);
+% hold on
+% plot(t,m_E,'LineWidth',1);
+% hold off
+% grid on
+% ylabel(sprintf('%g log_{10} (Energy)', 10))
+% legend('WAVEWATCH','MERMAID','Location','best')
 
 %% compute correlations between WAVEWATCH energy bands and MERMAID energy bands
-Ebands = detrend(Ebands, 0);
-m_Ebands = detrend(m_Ebands, 0);
-
 cc = corr(m_Ebands,Ebands);
 
 % plot
@@ -115,25 +133,44 @@ f_MM = 0.5 * (m_f_limit(1:end-1) + m_f_limit(2:end));
 figure;
 clf;
 set(gcf, 'Unit', 'inches', 'Position', [18 10 6.5 6.5]);
-ax = subplot('Position', [0.08 0.08 0.8 0.8]);
-imagesc(f_WW, f_MM, cc);
+ax = subplot('Position', [0.10 0.08 0.8 0.8]);
+imagesc(f_WW, f_MM, cc, [-1 1]);
 axis xy
+colormap('jet');
 c = colorbar('SouthOutside');
 c.Label.String = 'correlation coefficient';
 c.Label.FontSize = 11;
-
-xlim([f_WW(1) f_WW(end)])
-ylim([f_MM(1) f_MM(end)])
+c.TickDirection = 'both';
 
 xlabel('WAVEWATCH frequency (Hz)')
 ylabel('MERMAID frequency (Hz)')
+
+% fix x-label for log scale
+xlim([f_limit(1) f_limit(end)])
+if strcmp(Fscale, 'log')
+    ax.XTick = lin2logpos([0.041 0.05 0.1 0.2 0.3], f_limit(1), f_limit(end));
+    ax.XTickLabel = {'0.041'; '0.05'; '0.1'; '0.2'; '0.3'};
+end
+
+% fix y-label for log scale
+ylim([m_f_limit(1) m_f_limit(end)])
+if strcmp(Fscale, 'log')
+    ax.YTick = lin2logpos([0.04 0.05 0.1 0.2 0.4 0.8 1.0], m_f_limit(1), ...
+        m_f_limit(end));
+    ax.YTickLabel = {'0.04'; '0.05'; '0.1'; '0.2'; '0.4'; '0.8'; '1.0'};
+end
 
 ax.TickDir = 'both';
 grid on
 
 % add f(MERMAID) = 2 * f(WAVEWATCH) line
 hold on
-plot([0.05 0.3], [0.1 0.6], '--r', 'LineWidth', 2);
+if strcmp(Fscale, 'linear')
+    plot([0.05 0.3], [0.1 0.6], '--w', 'LineWidth', 2.5);
+else
+    plot(lin2logpos([0.04 0.3], f_limit(1), f_limit(end)), ...
+         lin2logpos([0.08 0.6], m_f_limit(1), m_f_limit(end)), '--w', 'LineWidth', 2.5);
+end
 hold off
 
 % add period axes
@@ -141,8 +178,15 @@ ax2 = doubleaxes(ax);
 inverseaxis(ax2.YAxis, 'MERMAID period (s)');
 inverseaxis(ax2.XAxis, 'WAVEWATCH period (s)');
 
+% fix axes misalignment
+ax2.Position = ax.Position;
+
 % add title
 ax2.Title.String = title;
+
+% figure;
+% [ct,ht] = contour(f_WW,f_MM,cc,[-0.2 0 0.2 0.4 0.6 0.8],'Color','k','LineWidth',1);
+% clog = plotlogcontour(ax,ct,ht,f_WW(1),f_WW(end),f_MM(1),f_MM(end));
 
 % save figure
 figdisp(savetitle, [], [], 2, [], 'epstopdf');

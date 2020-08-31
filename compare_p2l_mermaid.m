@@ -5,18 +5,22 @@ function compare_p2l_mermaid(option)
 %
 % INPUT
 % option        1 - weekly
-%               2 - monthly
+%               2 - biweekly
+%               3 - monthly
 %
 % OUTOUT
 % no output beside figures saved at $EPS
 % 
-% Last modified by Sirawich Pipatprathanporn: 08/05/2020
+% Last modified by Sirawich Pipatprathanporn: 08/12/2020
 
 % WAVEWATCH spectral density files
 % MERMAID spectral density files
 if option == 1
     WWdir = '/Users/sirawich/research/processed_data/weekly_WWSD_profiles/';
     SDdir = '/Users/sirawich/research/processed_data/weekly_SD_profiles/';
+elseif option == 2
+    WWdir = '/Users/sirawich/research/processed_data/biweekly_WWSD_profiles/';
+    SDdir = '/Users/sirawich/research/processed_data/biweekly_SD_profiles/';
 else
     WWdir = '/Users/sirawich/research/processed_data/monthly_WWSD_profiles/';
     SDdir = '/Users/sirawich/research/processed_data/monthly_SD_profiles/';
@@ -30,6 +34,12 @@ if option == 1
     dt_0 = datetime(2018, 9, 13, 'TimeZone', 'UTC', 'Format', ...
         'uuuu_MM_dd');
     dt_week = dt_0 + calweeks(0:48);
+    save_titles = string(dt_week);
+    titles = replace(save_titles, '_', '-');
+elseif option == 2
+    dt_0 = datetime(2018, 9, 13, 'TimeZone', 'UTC', 'Format', ...
+        'uuuu_MM_dd');
+    dt_week = dt_0 + calweeks(0:2:48);
     save_titles = string(dt_week);
     titles = replace(save_titles, '_', '-');
 else

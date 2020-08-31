@@ -4,7 +4,7 @@ function Clog = plotlogcontour(ax, C, H, xmin, xmax, ymin, ymax)
 % label is logarithmic. (See SPECDENSPLOT_HEATMAP for examples of such
 % plots.)
 %
-% INPUT:
+% INPUT
 % ax        axes to plot
 % C         contour matrix
 % H         coutour object
@@ -13,10 +13,10 @@ function Clog = plotlogcontour(ax, C, H, xmin, xmax, ymin, ymax)
 % ymin      minimum value of y-axis
 % ymax      maximum value of y-axis
 % 
-% OUTPUT:
+% OUTPUT
 % Clog      contour object containing logarithmic position on the plot
 %
-% SEE ALSO:
+% SEE ALSO
 % CONTOUR, LIN2LOGPOS, SPECDENSPLOT_HEATMAP
 %
 % Last modified by Sirawich Pipatprathanporn: 08/25/2020
