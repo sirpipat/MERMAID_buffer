@@ -24,31 +24,25 @@ defval('model', 'iasp91');
 
 axes(ax)
 
-% draw earth
+%% draw earth
 R_earth = 6371;
+R_moho = R_earth - 35;
 R_210 = R_earth - 210;
 R_410 = R_earth - 440;
 R_660 = R_earth - 660;
 R_outcore = R_earth - 2891.50;
 R_incore = R_earth - 5153.50;
+Rs = [R_earth R_moho R_210 R_410 R_660 R_outcore R_incore];
 
-d = (0:0.01:1)' * 2 * pi;
-C_surface = R_earth * [sin(d), cos(d)];
-C_210 = R_210 * [sin(d), cos(d)];
-C_410 = R_410 * [sin(d), cos(d)];
-C_660 = R_660 * [sin(d), cos(d)];
-C_outcore = R_outcore * [sin(d), cos(d)];
-C_incore = R_incore * [sin(d), cos(d)];
+d = (0:0.001:1)' * 2 * pi;
+Cxs = Rs .* sin(d);
+Cys = Rs .* cos(d);
 
-plot(C_surface(:,1), C_surface(:,2), 'LineWidth', 1.5, 'Color', rgbcolor('gray'));
+plot(Cxs(:,1), Cys(:,1), 'LineWidth', 1.5, 'Color', rgbcolor('gray'));
 hold on
-plot(C_210(:,1), C_210(:,2), 'LineWidth', 1, 'Color', rgbcolor('gray'));
-plot(C_410(:,1), C_410(:,2), 'LineWidth', 1, 'Color', rgbcolor('gray'));
-plot(C_660(:,1), C_660(:,2), 'LineWidth', 1, 'Color', rgbcolor('gray'));
-plot(C_outcore(:,1), C_outcore(:,2), 'LineWidth', 1, 'Color', rgbcolor('gray'));
-plot(C_incore(:,1), C_incore(:,2), 'LineWidth', 1, 'Color', rgbcolor('gray'));
+plot(Cxs(:,2:end), Cys(:,2:end), 'LineWidth', 1, 'Color', rgbcolor('gray'));
 
-% calculate ray paths
+%% draw ray paths
 paths = taupPath(model, depth, phase, varargin{:});
 color = {'1','2','3','4','5','6','7'};
 lines = [];
@@ -57,15 +51,24 @@ for ii = 1:size(paths,2)
     radius = R_earth - paths(1,ii).path.depth;
     angle = paths(1,ii).path.distance * pi / 180;
     path = [radius .* sin(angle), radius .* cos(angle)];
-    % draw ray paths
     l = plot(path(:,1), path(:,2), 'LineWidth', 2, 'Color', ...
          rgbcolor(color{mod(ii,7)+1}));
     lines = [lines, l];
     phaselist{size(phaselist,2)+1} = paths(ii).phaseName;
 end
-legend(lines,phaselist);
 
-% plot event and station
-
+%% plot event and station
+scatter(0, R_earth - depth, 150, 'Marker', 'p', 'MarkerEdgeColor', 'k', ...
+        'MarkerFaceColor', 'y');
+scatter(radius(end) * sin(angle(end)), radius(end) * cos(angle(end)), ...
+        100, 'Marker', 'v', 'MarkerEdgeColor', 'k', 'MarkerFaceColor', 'r');
 hold off
+
+%% adjust axes details
+legend(lines,phaselist);
+axis equal
+
+ax.Color = 'none';
+ax.XAxis.Visible = 'off';
+ax.YAxis.Visible = 'off';
 end
