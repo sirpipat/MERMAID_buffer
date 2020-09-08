@@ -30,29 +30,15 @@ if size(tag,1) >= 1
         arrivals = [arrivals; data_arrivals(strcmp(data_tags,tag{ii}))];
         tags = [tags; data_tags(strcmp(data_tags,tag{ii}))];
     end
+else
+    begins = data_begins;
+    ends = data_ends;
+    arrivals = data_arrivals;
+    tags = data_tags;
 end
 
 [begins, sorted_index] = sort(begins);
 ends = ends(sorted_index);
 arrivals = arrivals(sorted_index);
 tags = tags(sorted_index);
-
-% figure(1);
-% clf
-% hold on
-% for ii = 1:size(begins,1)
-%     plot([begins(ii) ends(ii)], [ii ii], 'k', 'LineWidth', 2);
-% end
-% scatter(arrivals, 1:size(arrivals,1), 10, 'or');
-% hold off
-% grid on
-% 
-% figure(2);
-% clf
-% hold on
-% scatter(begins - arrivals, 1:size(begins), 'or');
-% scatter(ends - arrivals, 1:size(begins), 'ob');
-% vline(gca,seconds(0),'--',1,'k');
-% hold off
-% grid on
 end
