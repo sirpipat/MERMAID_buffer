@@ -13,7 +13,7 @@ function fig = timfreqplot(y, yf1, yf2, yf1_trigs, yf1_dtrigs, dt_begin, ...
 % yf1_dtrigs    Detriggers in yf1           [optional]
 % dt_begin      Beginning datetime
 % nfft          Number of FFT points        [default: 1024]
-% fs            Sampling frequency          [Default: 40.01406]
+% fs            Sampling frequency          [default: 40.01406]
 % lwin          Window length, in samples   [default: nfft]
 % olap          Window overlap, in percent  [default: 70]
 % sfax          Y-axis scaling factor       [default: 10]
@@ -29,7 +29,7 @@ function fig = timfreqplot(y, yf1, yf2, yf1_trigs, yf1_dtrigs, dt_begin, ...
 %
 % If save is true, the output file is saved as $EPS.
 % 
-% Last modified by Sirawich Pipatprathanporn: 08/31/2020
+% Last modified by Sirawich Pipatprathanporn: 09/08/2020
 
 % parameter list
 defval('fs', 40.01406);
