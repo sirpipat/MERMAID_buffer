@@ -6,7 +6,7 @@ function [sections, intervals] = getsections(dir, dt_begin, dt_end, fs)
 % dir           Directory of the one year data [Default: $ONEYEAR]
 % dt_begin      Beginning datetime
 % dt_end        End datetime
-% fs            Sampling rate [Default: 40]
+% fs            Sampling rate [Default: 40.01406]
 %
 % OUTPUT:
 % sections      Cell containing full-filenames of the sections overlapping
@@ -16,10 +16,10 @@ function [sections, intervals] = getsections(dir, dt_begin, dt_end, fs)
 % SEE ALSO:
 % ONEYEARDATA, FILE2DATETIME, GETFNDEX, READONEYEARDATA
 %
-% Last modified by Sirawich Pipatprathanporn: 07/06/2020
+% Last modified by Sirawich Pipatprathanporn: 09/01/2020
 
 defval('dir', getenv('ONEYEAR'));
-defval('fs', 40);
+defval('fs', 40.01406);
 
 [allfiles, fndex] = oneyeardata(dir);
 
