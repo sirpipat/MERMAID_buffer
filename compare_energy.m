@@ -13,7 +13,7 @@ function compare_energy(option, Fscale)
 % OUTOUT
 % no output beside figures saved at $EPS
 % 
-% Last modified by Sirawich Pipatprathanporn: 08/25/2020
+% Last modified by Sirawich Pipatprathanporn: 09/04/2020
 
 %% get all filenames
 % WAVEWATCH spectral density files
@@ -25,7 +25,7 @@ if option == 1
     f_scale = 2.2583;
     t = datetime(2018,9,13,'Format','uuuu-MM-dd''T''HH:mm:ss.SSSSSS',...
         'TimeZone','UTC') + calweeks(0:48);
-    title = 'Energy correlation coefficient (weekly scale, bin = 0.01 x 0.01 Hz)';
+    title = 'Energy correlation coefficient (weekly scale)';
     savetitle = strcat(mfilename, '_weekly_cc.eps');
 elseif option == 2
     WWdir = '/Users/sirawich/research/processed_data/biweekly_WWSD_profiles/';
@@ -34,7 +34,7 @@ elseif option == 2
     f_scale = 2.2503;
     t = datetime(2018,9,13,'Format','uuuu-MM-dd''T''HH:mm:ss.SSSSSS',...
         'TimeZone','UTC') + calweeks(0:2:48);
-    title = 'Energy correlation coefficient (biweekly scale, bin = 0.01 x 0.01 Hz)';
+    title = 'Energy correlation coefficient (biweekly scale)';
     savetitle = strcat(mfilename, '_biweekly_cc.eps');    
 else
     WWdir = '/Users/sirawich/research/processed_data/monthly_WWSD_profiles/';
@@ -43,7 +43,7 @@ else
     f_scale = 2.446;
     t = datetime(2018,9,1,'Format','uuuu-MM-dd''T''HH:mm:ss.SSSSSS',...
         'TimeZone','UTC') + calmonths(0:11);
-    title = 'Energy correlation coefficient (monthly scale, bin = 0.01 x 0.01 Hz)';
+    title = 'Energy correlation coefficient (monthly scale)';
     savetitle = strcat(mfilename, '_monthly_cc.eps');
 end
 
@@ -86,6 +86,9 @@ for idt = 1:pndex
         Ebands(idt,ifreq) = boundtrapz(f, 10 .^ (sd/10), ...
             f_limit(ifreq), f_limit(ifreq+1));
     end
+    % fix NaN value at the boundary
+    Ebands(:,1) = Ebands(:,2);
+    Ebands(:,end) = Ebands(:,end-1);
     
     % read MERMAID spectral density
     fid = fopen(allSDs{idt},'r');
@@ -127,16 +130,15 @@ end
 %% compute correlations between WAVEWATCH energy bands and MERMAID energy bands
 cc = corr(m_Ebands,Ebands);
 
-% plot
-f_WW = 0.5 * (f_limit(1:end-1) + f_limit(2:end));
-f_MM = 0.5 * (m_f_limit(1:end-1) + m_f_limit(2:end));
 figure;
 clf;
 set(gcf, 'Unit', 'inches', 'Position', [18 10 6.5 6.5]);
 ax = subplot('Position', [0.10 0.08 0.8 0.8]);
-imagesc(f_WW, f_MM, cc, [-1 1]);
+imagesc(f_limit, m_f_limit, cc, [-1 1]);
 axis xy
-colormap('jet');
+colors = jet(7);
+colors = [0.25*ones(3,3); colors];
+colormap(colors);
 c = colorbar('SouthOutside');
 c.Label.String = 'correlation coefficient';
 c.Label.FontSize = 11;
@@ -166,10 +168,10 @@ grid on
 % add f(MERMAID) = 2 * f(WAVEWATCH) line
 hold on
 if strcmp(Fscale, 'linear')
-    plot([0.05 0.3], [0.1 0.6], '--w', 'LineWidth', 2.5);
+    plot([0.05 0.3], [0.1 0.6], '--k', 'LineWidth', 2.5);
 else
     plot(lin2logpos([0.04 0.3], f_limit(1), f_limit(end)), ...
-         lin2logpos([0.08 0.6], m_f_limit(1), m_f_limit(end)), '--w', 'LineWidth', 2.5);
+         lin2logpos([0.08 0.6], m_f_limit(1), m_f_limit(end)), '--k', 'LineWidth', 2.5);
 end
 hold off
 
@@ -183,10 +185,6 @@ ax2.Position = ax.Position;
 
 % add title
 ax2.Title.String = title;
-
-% figure;
-% [ct,ht] = contour(f_WW,f_MM,cc,[-0.2 0 0.2 0.4 0.6 0.8],'Color','k','LineWidth',1);
-% clog = plotlogcontour(ax,ct,ht,f_WW(1),f_WW(end),f_MM(1),f_MM(end));
 
 % save figure
 figdisp(savetitle, [], [], 2, [], 'epstopdf');
