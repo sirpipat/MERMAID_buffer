@@ -18,7 +18,7 @@ function taupPlotRayPath(ax, model, depth, phase, varargin)
 % SEE ALSO
 % TAUPPATH
 %
-% Last modified by Sirawich Pipatprathanporn: 09/05/2020
+% Last modified by Sirawich Pipatprathanporn: 09/08/2020
 
 defval('model', 'iasp91');
 
@@ -48,13 +48,20 @@ color = {'1','2','3','4','5','6','7'};
 lines = [];
 phaselist = cell(0);
 for ii = 1:size(paths,2)
+    phaselist{size(phaselist,2)+1} = paths(ii).phaseName;
+end
+
+% remove redundant phases
+[phaselist,ip,~] = unique(phaselist,'stable');
+paths = paths(ip);
+
+for ii = 1:size(paths,2)
     radius = R_earth - paths(1,ii).path.depth;
     angle = paths(1,ii).path.distance * pi / 180;
     path = [radius .* sin(angle), radius .* cos(angle)];
     l = plot(path(:,1), path(:,2), 'LineWidth', 2, 'Color', ...
          rgbcolor(color{mod(ii,7)+1}));
     lines = [lines, l];
-    phaselist{size(phaselist,2)+1} = paths(ii).phaseName;
 end
 
 %% plot event and station
@@ -65,7 +72,7 @@ scatter(radius(end) * sin(angle(end)), radius(end) * cos(angle(end)), ...
 hold off
 
 %% adjust axes details
-legend(lines,phaselist);
+legend(lines, phaselist, 'Location', 'southwest');
 axis equal
 
 ax.Color = 'none';
