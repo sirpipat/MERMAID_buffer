@@ -40,6 +40,9 @@ function focalmech(ax, fm, centerX, centerY, diam, varargin)
 %   (Speed gains of 4-10x).
 %   9/10/2019 Added an option to do focal mechanism in XYZ coords (e.g.,
 %   Stein and Wysession, 2003, pg244)
+%   9/08/2020 Added axes parameter to specify the axes to plot the 
+%   beachball and prevent color bleaching to other axes.
+%
 % defaults
 fillcolor = [0 0 0];  % black for tensional region(s)
 unitratio = 1;      % axis equal
