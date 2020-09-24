@@ -1,11 +1,12 @@
-function plotevent(arrival, event, fs)
-% PLOTEVENT(arrival, event, fs)
+function plotevent(arrival, arrival_type, event, endtime, fs)
+% PLOTEVENT(arrival, arrival_type, event, endtime, fs)
 % display phase arrivals on a seismogram of filtered buffer 0.05-0.1 Hz
 % accompanied with spectrograms, source-reveiver map (with beachball 
 % diagram if possible) and ray paths on a cross-section of Earth.
 %
 % INPUT
 % arrival       arrival datetime
+% arrival_type  either 'body' or 'surface' [default: 'body']
 % event         an event struct returned from FINDEVENTS
 % fs            sampling rate of the raw buffer [default: 40.01406 Hz]
 %
@@ -16,10 +17,18 @@ function plotevent(arrival, event, fs)
 % FINDEVENTS
 %
 % Last modified by Sirawich Pipatprathanporn: 09/08/2020
+defval('arrival_type', 'body')
 defval('fs', 40.01406)
 
 %% read seismogram
-last_minute = event.distance/180 * pi * 6371 / 2.8 / 60;
+if strcmp(arrival_type, 'surface')
+    arrival = event.expArrivalTime(1);
+end
+if isempty(endtime)
+    last_minute = event.distance/180 * pi * 6371 / 1.0 / 60;
+else
+    last_minute = minutes(endtime - arrival) + 60;
+end
 [sections, intervals] = getsections(getenv('ONEYEAR'), ...
                                     arrival - minutes(5), ...
                                     arrival + minutes(last_minute), ...
@@ -67,23 +76,27 @@ c.Position = [0.0897 0.8359 0.8600 0.0178];
 c.TickDirection = 'both';
 
 % fix the precision of the time on XAxis label
-ax1.XAxis.Label.String = sprintf('time (s): %d s window', round(nfft/fs));
+ax1.XAxis.Label.String = sprintf('time since origin (hh:mm:ss): %d s window', round(nfft/fs));
 
 %% plot filtered seismogram 0.05-0.1 Hz
 ax2 = subplot('Position', [0.09 0.39 0.86 0.1]);
-ax2 = signalplot(xf2, fs/d_factor, dt_B, ax2, '', 'left');
-ax2.XLim = dt_B + seconds(ax1.XLim);
+% time since origin
+dur_B = dt_B - dt_origin;
+ax2 = signalplot(xf2, fs/d_factor, dur_B, ax2, '', 'left');
+ax2.XLim = dur_B + seconds(ax1.XLim);
+ax2.XAxis.Label.String = 'time since origin (hh:mm:ss)';
 
 % add label on the top and right
 ax1.TickDir = 'both';
-ax1.XTick = seconds(ax2.XTick - dt_B);
+ax1.XTick = seconds(ax2.XTick - dur_B);
+ax1.XTick = ax1.XTick(ax1.XTick > seconds(0));
 ax1.XTickLabel = ax2.XTickLabel;
 ax1s = doubleaxes(ax1);
 axes(ax2)
 
 % add moving average
 mov_mean = movmean(xf2, round(fs/d_factor * 150));
-t_plot = dt_B + seconds((0:length(xf2)-1) / (fs/d_factor));
+t_plot = dur_B + seconds((0:length(xf2)-1) / (fs/d_factor));
 hold on
 plot(t_plot, mov_mean, 'Color', [0.2 0.6 0.2], 'LineWidth', 1);
 hold off
@@ -103,11 +116,11 @@ r = rms(xf2);
 ylim([-5*r 5*r]);
 
 % add expected arrival for each phase
-vline(ax2, event.expArrivalTime, '--', 1, rgbcolor('deep sky blue'));
+vline(ax2, event.expArrivalTime - dt_origin, '--', 1, rgbcolor('deep sky blue'));
 ynorm = 0.9;
-dt_curr = dt_B;
+t_curr = dur_B;
 for ii = 1:size(event.expArrivalTime,2)
-    if ii == 1 || (event.expArrivalTime(ii) - dt_curr > 1/8 * ...
+    if ii == 1 || (event.expArrivalTime(ii) - dt_origin - t_curr > 1/8 * ...
             (ax2.XLim(2) - ax2.XLim(1)))
         ynorm = 0.9;
     else
@@ -118,16 +131,16 @@ for ii = 1:size(event.expArrivalTime,2)
         end
     end
     [~,y] = norm2trueposition(ax2,0,ynorm);
-    text(event.expArrivalTime(ii)+seconds(3),y,event.phase{ii});
-    dt_curr = event.expArrivalTime(ii);
+    t_curr = event.expArrivalTime(ii) - dt_origin;
+    text(t_curr+seconds(3),y,event.phase{ii});
 end
 
 % add surface wave arrival
-R_speed = [5 4 3];
-R_arrival = dt_origin + seconds(event.distance/180 * pi * 6371 ./ R_speed);
+R_speed = [5 4 3 1.5];
+R_arrival = seconds(event.distance/180 * pi * 6371 ./ R_speed);
 vline(ax2, R_arrival, '--', 1, rgbcolor('orange'));
 for ii = 1:size(R_arrival,2)
-    if (R_arrival(ii) - dt_curr > 1/8 * (ax2.XLim(2) - ax2.XLim(1)))
+    if (R_arrival(ii) - t_curr > 1/8 * (ax2.XLim(2) - ax2.XLim(1)))
         ynorm = 0.9;
     else
         if ynorm == 0.9
@@ -138,7 +151,7 @@ for ii = 1:size(R_arrival,2)
     end
     [~,y] = norm2trueposition(ax2,0,ynorm);
     text(R_arrival(ii)+seconds(3),y,sprintf('%3.1f km/s', R_speed(ii)));
-    dt_curr = R_arrival(ii);
+    t_curr = R_arrival(ii);
 end
 
 %% plot map with event focal mechanism and MERMAIDS
@@ -148,18 +161,78 @@ ax3 = subplot('Position', [0.09 0.04 0.60 0.25]);
 % plot plate boundaries
 [handlp, XYp] = plotplates([0 90], [360 -90], 1);
 handlp.Color = 'r';
+
+% zoom in the map
+lonmin = min(mod([150, event.evlo-10, event.stlo-10], 360));
+lonmax = max(mod([240, event.evlo+10, event.stlo+10], 360));
+latmin = min([-40, event.evla-5, event.stla-5]);
+latmax = max([10, event.evla+5, event.stla+5]);
+original_x2y_ratio = (ax3.XLim(2)-ax3.XLim(1))/(ax3.YLim(2)-ax3.YLim(1));
+new_x2y_ratio = (lonmax-lonmin)/(latmax-latmin);
+if new_x2y_ratio > original_x2y_ratio
+    latmid = (latmin + latmax) / 2;
+    latmin = latmid - (lonmax - lonmin) / original_x2y_ratio / 2;
+    latmax = latmid + (lonmax - lonmin) / original_x2y_ratio / 2;
+else
+    lonmid = (lonmin + lonmax) / 2;
+    lonmin = lonmid - (latmax - latmin) * original_x2y_ratio / 2;
+    lonmax = lonmid + (latmax - latmin) * original_x2y_ratio / 2;
+end
+ax3.XLim = [lonmin lonmax];
+ax3.YLim = [latmin latmax];
+
 % add stations
 [allvitfiles,vndex] = allfile('/Users/sirawich/research/raw_data/metadata/');
 mpos = NaN(0,2);
+station_numbers = cell(0,1);
 for ii = 1:vndex
+    station_name = removepath(allvitfiles{ii});
+    station_numbers{ii,1} = station_name(3:4);
     [mpos(ii,1),mpos(ii,2)] = mposition(dt_B, allvitfiles{ii});
 end
-scatter(ax3, mod(mpos(:,1),360), mpos(:,2), 20, 'Marker', 'v', ...
-        'MarkerEdgeColor', rgbcolor('k'), ...
-        'MarkerEdgeAlpha', 0.5, ...
-        'MarkerFaceColor', rgbcolor('gray'), ...
-        'MarkerFaceAlpha', 0.5);
-    
+% remove NaN data points
+station_numbers = station_numbers(~isnan(mpos(:,1)));
+mpos = mpos(~isnan(mpos(:,1)),:);
+
+% draw paths from event to stations
+plottrack(ax3, [event.evlo event.evla], [event.stlo event.stla], 0, ...
+          100, 'LineWidth', 0.5, 'Color', [0 0.5 0.9]);
+% color stations to green if they report the event
+all_filename = '/Users/sirawich/research/processed_data/events/all.txt';
+opts = detectImportOptions(all_filename);
+T = readtable(all_filename, opts);
+sacfiles = T.Var1;
+PublicID = T.Var11;
+sacfiles = sacfiles(PublicID == str2num(event.id));
+if isempty(sacfiles)
+    active_index = [];
+else
+    splitted_filenames = split(sacfiles, '.');
+    if size(sacfiles,1) == 1
+        splitted_filenames = splitted_filenames';
+    end
+    tags = splitted_filenames(:,4);
+    tags = strcell(tags);
+    where = (sum(tags == 'DET', 2) == 3);
+    station_no = split(splitted_filenames(:,2), '_');
+    station_no = station_no(:,1);
+    station_no = station_no(where);
+    [~, active_index, ~] = intersect(station_numbers, station_no);
+end
+
+for ii = 1:size(mpos,1)
+    if any(active_index == ii)
+        color = [0.5 0.9 0.2];
+    else
+        color = rgbcolor('gray');
+    end
+    scatter(ax3, mod(mpos(ii,1),360), mpos(ii,2), 20, 'Marker', 'v', ...
+            'MarkerEdgeColor', rgbcolor('k'), ...
+            'MarkerEdgeAlpha', 0.5, ...
+            'MarkerFaceColor', color, ...
+            'MarkerFaceAlpha', 0.5);
+end
+
 scatter(ax3, mod(event.stlo,360), event.stla, 60, 'Marker', 'v', ...
         'MarkerEdgeColor', 'k', 'MarkerFaceColor', 'r');
 
@@ -174,16 +247,18 @@ mblo = event.PreferredMagnitudeValue - 0.5;
 mbhi = event.PreferredMagnitudeValue + 0.5;
 depmin = event.PreferredDepth - 50;
 depmax = event.PreferredDepth + 50;
+
 % get the moment tensor
 [quake,Mw] = readCMT(fname, strcat(getenv('IFILES'),'CMT'), tbeg, tend, ...
     mblo, mbhi, depmin, depmax);
 if size(Mw,1) > 1
     fprintf('size(Mw,1) > 1\n');
 end
-% plot moment tensor
+% draw moment tensor
 if ~isempty(quake) && size(Mw,1) == 1
     M = quake(5:end);
-    focalmech(ax3, M, mod(event.evlo,360), event.evla, 15, 'b');
+    r = (ax3.XLim(2) - ax3.XLim(1)) / 24;   % radius of the beachball
+    focalmech(ax3, M, mod(event.evlo,360), event.evla, r, 'b');
 else
     scatter(ax3, mod(event.evlo,360), event.evla, 100, 'Marker', 'p', ...
         'MarkerEdgeColor', 'k', 'MarkerFaceColor', 'y');
@@ -192,14 +267,15 @@ end
 grid on
 
 % ticks label
-ax3.XTick = [0 60 120 180 240 300 360];
-ax3.XTickLabel = {'0', '60', '120', '180', '-120', '-60', '0'};
-ax3.YTick = [-90 -60 -30 0 30 60 90];
-ax3.YTickLabel = {'-90', '-60', '-30', '0', '30', '60', '90'};
+ax3.XTick = 0:30:360;
+ax3.XTickLabel = {'0', '30', '60', '90', '120', '150', '180', '-150', ...
+                  '-120', '-90', '-60', '-30', '0'};
+ax3.YTick = -90:15:90;
+ax3.YTickLabel = {'-90', '-75', '-60', '-45', '-30', '-15', '0', '15', ...
+                  '30', '45', '60', '75', '90'};
 ax3.TickDir = 'both';
 ax3s = doubleaxes(ax3);
 ax3s.TickDir = 'both';
-
 %% plot ray paths on an Earth cross-section
 ax4 = subplot('Position', [0.77 0.04 0.20 0.25]);
 % plot map
