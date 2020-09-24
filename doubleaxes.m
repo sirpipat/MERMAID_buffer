@@ -10,9 +10,12 @@ function ax2 = doubleaxes(ax)
 % OUTPUT
 % ax2   the second axes
 %
-% Last modified by Sirawich Pipatprathanporn: 04/13/2020
+% Last modified by Sirawich Pipatprathanporn: 09/15/2020
 
 ax2 = axes();
+ax2.Position = ax.Position;
+ax2.DataAspectRatio = ax.DataAspectRatio;
+ax2.DataAspectRatioMode = ax.DataAspectRatioMode;
 ax2.XAxisLocation = 'top';
 ax2.XScale = ax.XScale;
 ax2.XLim = ax.XLim;
@@ -32,7 +35,6 @@ ax2.YLim = ax.YLim;
 ax2.YTick = ax.YTick;
 ax2.YTickLabel = ax.YTickLabel;
 
-ax2.Position = ax.Position;
 ax2.Title.String = ax.Title.String;
 ax.Title.String = '';
 axes(ax);
