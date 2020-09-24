@@ -1,5 +1,5 @@
 function [dt_B, dt_E, CCmaxs, CCfmax, t_shifts, t_shiftf] = matchsac(sacfile, oneyeardir, savedir, maxmargin, plt, plotfilter)
-% [dt_B, dt_E, Cmax, Cfmax, t_shift, t_shiftf] = MATCHSAC(sacfile, oneyeardir, savedir, plt)
+% [dt_B, dt_E, Cmax, Cfmax, t_shift, t_shiftf] = MATCHSAC(sacfile, oneyeardir, savedir, plt, plotfilter)
 % Finds a section in OneYearData that SAC file belongs to
 % Then plots xcorr and matched signals
 %
@@ -28,7 +28,7 @@ function [dt_B, dt_E, CCmaxs, CCfmax, t_shifts, t_shiftf] = matchsac(sacfile, on
 % SEE ALSO:
 % READSAC, GETSECTIONS, READSECTION, 
 %
-% Last modified by Sirawich Pipatprathanporn, 05/25/2020
+% Last modified by Sirawich Pipatprathanporn, 09/22/2020
 
 defval('oneyeardir', getenv('ONEYEAR'));
 defval('savedir', getenv('EPS'));
