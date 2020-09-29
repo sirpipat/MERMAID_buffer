@@ -9,7 +9,7 @@ function compare_sac_mermaid(sfile, sacdir, dt, dim)
 % dt            origin time
 % dim           either 1D or 3D
 % 
-% Last modified by Sirawich Pipatprathanporn: 09/23/2020
+% Last modified by Sirawich Pipatprathanporn: 09/29/2020
 
 % determine MERMAID location
 [mlon, mlat] = mposition(dt);
@@ -18,31 +18,63 @@ function compare_sac_mermaid(sfile, sacdir, dt, dim)
 [stations, networks, dists] = neareststations(sfile, mlon, mlat, 1);
 fnames = findsacfiles(sacdir, stations{1}, networks{1});
 
-% plot figure
 t0 = seconds(0);
 t0.Format = 'hh:mm:ss';
+
+% read seismograms
+[xsacE, HdrE, ~, ~, timsE] = readsac(fnames{1});
+[xsacN, HdrN, ~, ~, timsN] = readsac(fnames{2});
+[xsacZ, HdrZ, ~, ~, timsZ] = readsac(fnames{3});
+dt_ref = datetime(HdrE.NZYEAR, 1, 0, HdrE.NZHOUR, HdrE.NZMIN, ...
+                  HdrE.NZSEC, HdrE.NZMSEC, 'TimeZone', 'UTC','Format',...
+                  'uuuu-MM-dd''T''HH:mm:ss.SSSSSS') + days(HdrE.NZJDAY);
+dt_B = dt_ref + seconds(HdrE.B);
+dt_E = dt_ref + seconds(HdrE.E);
+fs = (HdrE.NPTS - 1) / seconds(dt_E - dt_B);
+
+% rotate
+xsacR = cos(pi/180 * HdrN.BAZ) * xsacN + sin(pi/180 * HdrN.BAZ) * xsacE;
+xsacT = -sin(pi/180 * HdrN.BAZ) * xsacN + cos(pi/180 * HdrN.BAZ) * xsacE;
+
+% plot
 figure
-for ii = 1:3
-    names = split(removepath(fnames{ii}), '.');
-    channel = names{3};
-    title_name = sprintf('%s.%s.%s (%s)', networks{1}, stations{1}, ...
-                         channel, dim);
-    ax = subplot(4,1,ii);
-    [xsac, Hdr, ~, ~, tims] = readsac(fnames{ii});
-    dt_ref = datetime(Hdr.NZYEAR, 1, 0, Hdr.NZHOUR, Hdr.NZMIN, Hdr.NZSEC, ...
-                      Hdr.NZMSEC, 'TimeZone', 'UTC','Format',...
-                      'uuuu-MM-dd''T''HH:mm:ss.SSSSSS') + days(Hdr.NZJDAY);
-    dt_B = dt_ref + seconds(Hdr.B);
-    dt_E = dt_ref + seconds(Hdr.E);
-    fs = (Hdr.NPTS - 1) / seconds(dt_E - dt_B);
-    title_name = sprintf('%s (%7.4f, %7.4f, distance from P023 = %7.4f)', ...
-        title_name, Hdr.STLA, Hdr.STLO, dists(1));
-    signalplot(xsac, fs, t0, ax, title_name,[],'k');
-    grid on
-    nolabels(ax, 1);
-    ax.XAxis.Label.Visible = 'off';
-    ax.TickDir = 'both';
-end
+
+% Z component
+ax1 = subplot(4,1,1);
+title_name = sprintf('%s.%s.%s (%s)', networks{1}, stations{1}, ...
+                     'Z', dim);
+title_name = sprintf('%s (%7.4f, %7.4f, distance from P023 = %7.4f)', ...
+                     title_name, HdrE.STLA, HdrE.STLO, dists(1));
+signalplot(xsacZ, fs, t0, ax1, title_name, [], 'r');
+grid on
+nolabels(ax1, 1);
+ax1.XAxis.Label.Visible = 'off';
+ax1.TickDir = 'both';
+
+% R component
+ax2 = subplot(4,1,2);
+title_name = sprintf('%s.%s.%s (%s)', networks{1}, stations{1}, ...
+                     'R', dim);
+title_name = sprintf('%s (%7.4f, %7.4f, distance from P023 = %7.4f)', ...
+                     title_name, HdrE.STLA, HdrE.STLO, dists(1));
+signalplot(xsacR, fs, t0, ax2, title_name, [], rgbcolor('green'));
+grid on
+nolabels(ax2, 1);
+ax2.XAxis.Label.Visible = 'off';
+ax2.TickDir = 'both';
+
+% T component
+ax3 = subplot(4,1,3);
+title_name = sprintf('%s.%s.%s (%s)', networks{1}, stations{1}, ...
+                     'T', dim);
+title_name = sprintf('%s (%7.4f, %7.4f, distance from P023 = %7.4f)', ...
+                     title_name, HdrE.STLA, HdrE.STLO, dists(1));
+signalplot(xsacT, fs, t0, ax3, title_name, [], 'b');
+grid on
+nolabels(ax3, 1);
+ax3.XAxis.Label.Visible = 'off';
+ax3.TickDir = 'both';
+
 % plot mermaid
 ax = subplot(4,1,4);
 fs = 40.01406;
