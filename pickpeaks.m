@@ -1,15 +1,20 @@
-function [trigs,dtrigs,ratio] = pickpeaks(x,fs,tr,dtr,bufwin)
-% [trigs,dtrigs,ratio] = PICKPEAKS(x,fs,tr,dtr,bufwin)
-% identifies the peaks' locations
+function [trigs,dtrigs,ratio] = pickpeaks(x,fs,str,ltr,tr,dtr,bufwin)
+% [trigs,dtrigs,ratio] = PICKPEAKS(x,fs,str,ltr,tr,dtr,bufwin)
+% Identifies the peaks' locations in the signal. It is an alternative to
+% STA/LTA algorithm to find arrivals in the signal. However, this one is
+% not designed for automatic detection of earthquake arrivals. Instead, the
+% goal is to identify the peaks and remove them from the signal.
 %
-% Algorithm: makes all samples in the signal (x) positive. Then,
-% approximate local background level as if peaks are absent. Normalize the
-% signal with the background level to see the relative height of the peaks
-% relative to the background level.
+% Algorithm: compute short-term moving rms of x. Then, using the moving rms
+% to approximate local background level (long-term) as if peaks are absent. 
+% Normalize the moving rms with the background level to see the relative 
+% height of the peaks relative to the background level.
 %
 % INPUT
-% x         signal (normalized by the average)
+% x         signal
 % fs        sampling rate
+% str       short-term moving rms window length
+% ltr       long-term moving rms (reference) window length
 % tr        trigger value
 % dtr       detrigger value
 % bufwin    time buffer added to beginning and end of the section
@@ -20,24 +25,37 @@ function [trigs,dtrigs,ratio] = pickpeaks(x,fs,tr,dtr,bufwin)
 % ratio     adjusted ratio used for determining trigger and detrigger
 %           points
 %
-% Last modified by Sirawich Pipatprathanporn: 07/26/2020
+% SEE ALSO
+% STALTA
+%
+% Last modified by Sirawich Pipatprathanporn: 10/02/2020
 
-% make all values positive
-x = abs(x);
+defval('str',60)
+defval('ltr',10800)
+defval('tr',1.5)
+defval('dtr',1.5)
+defval('bufwin',60)
+
+% short-term moving rms normalized by the overall rms
+x_sq = x .^ 2;
+x_str = (movmean(x_sq, round(fs * str)) .^ 0.5) / 1;
 
 % time from the beginning of each sample
-t = (0:length(x)-1) / fs;
+t = (0:length(x_str)-1) / fs;
+
+% long-term window cannot be longer the signal
+ltr = min(t(end), ltr);
 
 % reference level of x as if the peaks are absent
-x_ref = movmean(x, round(fs * 10800));
-x_copy = x;
+x_ref = movmean(x_str, round(fs * ltr));
+x_copy = x_str;
 for ii = 1:2
     x_copy(x_copy ./ x_ref > 1) = 1 * x_ref(x_copy ./ x_ref > 1);
-    x_ref_new = movmean(x_copy, round(fs * 18000));
+    x_ref_new = movmean(x_copy, round(fs * ltr));
     x_ref = x_ref_new;
 end
 
-ratio = x ./ x_ref;
+ratio = x_str ./ x_ref;
 t_above_tr = ratio > tr;
 t_above_dtr = ratio > dtr;
 
