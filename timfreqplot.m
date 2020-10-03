@@ -29,7 +29,7 @@ function fig = timfreqplot(y, yf1, yf2, yf1_trigs, yf1_dtrigs, dt_begin, ...
 %
 % If save is true, the output file is saved as $EPS.
 % 
-% Last modified by Sirawich Pipatprathanporn: 09/08/2020
+% Last modified by Sirawich Pipatprathanporn: 10/02/2020
 
 % parameter list
 defval('fs', 40.01406);
@@ -211,7 +211,11 @@ ylim([-10*r 10*r]);
 % add trigger times and detrigger times
 if trig && (isempty(yf1_trigs) || isempty(yf1_dtrigs))
     fprintf('Run pickpeaks in timfreqplot.m\n');
-    [yf1_trigs,yf1_dtrigs] = pickpeaks(mov_rms/r, fs, 1.5, 1.5, 60);
+    [yf1_trigs,yf1_dtrigs] = pickpeaks(yf1, fs, 30, 600, 1.5, 1.5, 60);
+%     fprintf('Run stalta in timfreqplot.m\n');
+%     [trigt,~,~,ratio,~,~,~,~,~]=stalta(yf1 ,1/fs , ...
+%         [0 ((length(yf1)-1) / fs)], 30, 600, 1.5, 1.5, 180, 60, 30, 20);
+%     [yf1_trigs,yf1_dtrigs] = simplifyintervals(trigt(:,1), trigt(:,2));
     yf1_trigs = dt_begin + seconds(yf1_trigs);
     yf1_dtrigs = dt_begin + seconds(yf1_dtrigs);
 end
