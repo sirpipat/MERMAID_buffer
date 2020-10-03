@@ -1,5 +1,5 @@
-function rmsplot(x,fs,dt_begin,win,savedir,plt,plt_trigs)
-% RMSPLOT(x,fs,dt_begin,win,savedir,plt)
+function rmsplot(x,fs,dt_begin,win,longwin,method,savedir,plt,plt_trigs)
+% RMSPLOT(x,fs,dt_begin,win,longwin,method,savedir,plt,plt_trigs)
 % Plots moving rms of the signal. Then, identifies the peaks of moving rms
 % and writes into a text file saved to 'savedir' directory.
 % 
@@ -7,14 +7,21 @@ function rmsplot(x,fs,dt_begin,win,savedir,plt,plt_trigs)
 % x             signal
 % fs            sampling rate
 % dt_begin      beginning datetime
-% win           window length for moving average
+% win           window length for moving average (short-term)
+% longwin       window length for peaks identification (long-term)
+% method        a method of finding peaks [default: 'pickpeaks']
+%               - 'pickpeaks'
+%               - 'stalta'
 % savedir       saving directiory for the output file
 % plt           whether to plot or not
 % plt_trigs     whether to plot triggers and detriggers
 %
 % OUTPUT
 %
-% Last modified by Sirawich Pipatprathanporn: 06/29/2020
+% SEE ALSO
+% PICKPEAKS, STALTA
+%
+% Last modified by Sirawich Pipatprathanporn: 10/02/2020
 
 dt_begin.Format = 'uuuu-MM-dd''T''HH:mm:ss.SSSSSS';
 % calculation of mov rms
@@ -27,14 +34,22 @@ x_rms_mean = mean(x_mov_rms);
 base_line = ones(1,length(x)) * 1.5;
 
 % add trigger times and detrigger times
-if ((length(x)-1) / fs) < 200
-    lta = ((length(x)-1) / fs);
+lta = min((length(x)-1) / fs, longwin);
+if strcmp(method, 'stalta')
+    [trigt,~,~,ratio,~,~,~,~,~] = stalta(x, 1/fs, [0 ((length(x)-1) / fs)], ...
+        30, lta, 1.5, 1.5, 180, 60, 30, 20);
+    if isempty(trigt)
+        trigs = [];
+        dtrigs = [];
+    elseif isnan(trigt)
+        trigs = [];
+        dtrigs = [];
+    else
+        [trigs,dtrigs] = simplifyintervals(trigt(:,1), trigt(:,2));
+    end
 else
-    lta = 200;
+    [trigs,dtrigs,ratio] = pickpeaks(x,fs,30,lta,1.5,1.5,60);
 end
-% trigt = stalta(x, 1/fs, [0 ((length(x)-1) / fs)], ...
-%     10, lta, 1.2, 1.2, 180, 60, 300, 20);
-[trigs,dtrigs,ratio] = pickpeaks(x_mov_rms/x_rms_mean,fs,1.5,1.5,60);
 if ~isempty(trigs)
     trigs = dt_begin + seconds(trigs);
     dtrigs = dt_begin + seconds(dtrigs);
@@ -44,11 +59,11 @@ if plt
     figure(1)
     set(gcf,'Unit','inches','Position',[2 2 6.5 3]);
     clf
-    plot(t,x/x_rms_mean,'Color',rgbcolor('k'));
+    plot(t,x/x_total_rms,'Color',rgbcolor('k'));
     hold on
     plot(t,zero_line,'Color',rgbcolor('v'),'LineWidth',1.5);
     plot(t,base_line,'Color',rgbcolor('my blue'),'LineWidth',1.5);
-    plot(t,x_mov_rms/x_rms_mean,'Color',rgbcolor('r'),'LineWidth',1);
+    plot(t,x_mov_rms/x_total_rms,'Color',rgbcolor('r'),'LineWidth',1);
     plot(t,ratio,'Color',rgbcolor('green'),'LineWidth',1);
     % add trigger times and detrigger times
     if plt_trigs
@@ -64,8 +79,15 @@ if plt
     xlim([t(1) t(end)]);
     ylim([-1 1] * 10);
     xlabel('time')
-    ylabel('x / mean(x_{mov rms})')
-    title(sprintf('bp 2-10, Moving rms: window = %.2f s (red), adjusted moving rms (green)', win))
+    % label
+    if strcmp(method,'stalta')
+        tag = 'sta-lta ratio';
+        ylabel(sprintf('x / rms( x ), green: %s', tag))
+    else
+        tag = 'adjusted moving rms';
+        ylabel('x / rms( x )')
+    end
+    title(sprintf('bp 2-10, Moving rms: window = %.2f s (red), %s (green)', win, tag))
     set(gca,'Position',[0.10 0.16 0.88 0.76],'TickDir','both');
     %% save figure
     savefile = strcat(mfilename, '_', replace(string(dt_begin), ':', '_'), '.eps');
