@@ -17,6 +17,7 @@ ax2.Position = ax.Position;
 ax2.DataAspectRatio = ax.DataAspectRatio;
 ax2.DataAspectRatioMode = ax.DataAspectRatioMode;
 ax2.XAxisLocation = 'top';
+ax2.FontSize = ax.FontSize;
 ax2.XScale = ax.XScale;
 ax2.XLim = ax.XLim;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
