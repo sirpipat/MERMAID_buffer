@@ -78,6 +78,10 @@ c.TickDirection = 'both';
 % fix the precision of the time on XAxis label
 ax1.XAxis.Label.String = sprintf('time since origin (hh:mm:ss): %d s window', round(nfft/fs));
 
+% add subplot label
+[x_pos, y_pos] = norm2trueposition(ax1, 7/8, 7/8);
+text(x_pos, y_pos, 'a', 'FontSize', 12);
+
 %% plot filtered seismogram 0.05-0.1 Hz
 ax2 = subplot('Position', [0.09 0.39 0.86 0.1]);
 % time since origin
@@ -153,6 +157,10 @@ for ii = 1:size(R_arrival,2)
     text(R_arrival(ii)+seconds(3),y,sprintf('%3.1f km/s', R_speed(ii)));
     t_curr = R_arrival(ii);
 end
+
+% add subplot label
+[x_pos, y_pos] = norm2trueposition(ax2, 7/8, 7/8);
+text(x_pos, y_pos, 'b', 'FontSize', 12);
 
 %% plot map with event focal mechanism and MERMAIDS
 ax3 = subplot('Position', [0.09 0.04 0.60 0.25]);
@@ -254,10 +262,10 @@ depmax = event.PreferredDepth + 50;
 if size(Mw,1) > 1
     fprintf('size(Mw,1) > 1\n');
 end
-% draw moment tensor
+% draw moment tensor (beachball)
 if ~isempty(quake) && size(Mw,1) == 1
     M = quake(5:end);
-    r = (ax3.XLim(2) - ax3.XLim(1)) / 24;   % radius of the beachball
+    r = (ax3.XLim(2) - ax3.XLim(1)) / 18;   % radius of the beachball
     focalmech(ax3, M, mod(event.evlo,360), event.evla, r, 'b');
 else
     scatter(ax3, mod(event.evlo,360), event.evla, 100, 'Marker', 'p', ...
@@ -276,6 +284,14 @@ ax3.YTickLabel = {'-90', '-75', '-60', '-45', '-30', '-15', '0', '15', ...
 ax3.TickDir = 'both';
 ax3s = doubleaxes(ax3);
 ax3s.TickDir = 'both';
+
+% add box
+ax3.Box = 'on';
+
+% add subplot label
+[x_pos, y_pos] = norm2trueposition(ax3, 1/8, 7/8);
+text(x_pos, y_pos, 'c', 'FontSize', 12);
+
 %% plot ray paths on an Earth cross-section
 ax4 = subplot('Position', [0.77 0.04 0.20 0.25]);
 % plot map
@@ -283,6 +299,10 @@ taupPlotRayPath(ax4, 'ak135', max(0, event.PreferredDepth), ...
     'P,PP,PcP,PKP,PKiKP,PKIKP,Pdiff', 'evt', [event.evla event.evlo], ...
     'sta', [event.stla event.stlo]);
 ax4.YLim = [-2.5 1] * 6371;
+
+% add subplot label
+[x_pos, y_pos] = norm2trueposition(ax4, 1/8, 23/24);
+text(x_pos, y_pos, 'd', 'FontSize', 12);
 
 %% save figure
 savename = sprintf('%s_%s_%s_M%4.2f.eps', mfilename, ...
