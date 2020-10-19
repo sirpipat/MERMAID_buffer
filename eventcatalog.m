@@ -5,7 +5,7 @@ function eventcatalog(fname)
 % INPUT:
 % fname     full filename containing events
 % 
-% Last modified by Sirawich Pipatprathanporn: 09/30/2020
+% Last modified by Sirawich Pipatprathanporn: 10/06/2020
 
 defval('fname', ...
     '/Users/sirawich/research/processed_data/events/catalog_events.txt');
@@ -21,6 +21,8 @@ words = reshape(words, 15, size(words, 1) / 15)';
 
 mags = str2double(words(:,8));
 dists = str2double(words(:,9));
+tags = strcell(words(:,2));
+where = (sum(tags == 'DET', 2) == 3);
 
 % plot
 figure(2)
@@ -35,13 +37,20 @@ ax0.XAxis.Visible = 'off';
 ax0.YAxis.Visible = 'off';
 
 ax1 = subplot('Position', [0.1 0.1 0.6 0.6]);
-scatter(dists, mags, 'k');
+p_not_detect = scatter(dists(~where), mags(~where), 20, 'Marker', 'o', ...
+    'MarkerEdgeColor', 'k', 'MarkerFaceColor', rgbcolor('deep sky blue'));
+hold on
+p_detect = scatter(dists(where), mags(where), 80, 'Marker', 'p', ...
+    'MarkerEdgeColor', 'k', 'MarkerFaceColor', [.95 .95 0.1]);
 xlabel('epicentral distance (degree)');
 ylabel('magnitude');
-ax1.XLim = [20 180];
+ax1.XLim = [0 180];
+ax1.YLim = [4.5 8.7];
 ax1.Box = 'on';
 ax1.TickDir = 'both';
 grid on
+legend([p_detect p_not_detect], 'automatically reported by MERMAID', ...
+    'found manually in the buffer');
 
 ax2 = subplot('Position', [0.75 0.1 0.2 0.6]);
 histogram(mags, 'BinEdges', 4.45:0.1:8.05, 'Orientation', 'horizontal', ...
