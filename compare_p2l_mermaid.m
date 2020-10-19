@@ -4,21 +4,21 @@ function compare_p2l_mermaid(option)
 % spectral density of 1500-m depth pressure recorded by MERMAID.
 %
 % INPUT
-% option        1 - weekly
-%               2 - biweekly
-%               3 - monthly
+% option        'weekly'
+%               'biweekly'
+%               'monthly'
 %
 % OUTOUT
 % no output beside figures saved at $EPS
 % 
-% Last modified by Sirawich Pipatprathanporn: 08/12/2020
+% Last modified by Sirawich Pipatprathanporn: 10/05/2020
 
 % WAVEWATCH spectral density files
 % MERMAID spectral density files
-if option == 1
+if strcmp(option, 'weekly')
     WWdir = '/Users/sirawich/research/processed_data/weekly_WWSD_profiles/';
     SDdir = '/Users/sirawich/research/processed_data/weekly_SD_profiles/';
-elseif option == 2
+elseif strcmp(option, 'biweekly')
     WWdir = '/Users/sirawich/research/processed_data/biweekly_WWSD_profiles/';
     SDdir = '/Users/sirawich/research/processed_data/biweekly_SD_profiles/';
 else
@@ -30,13 +30,13 @@ end
 [allSDs, ~] = allfile(SDdir);
 
 % titles of specdensplot
-if option == 1
+if strcmp(option, 'weekly')
     dt_0 = datetime(2018, 9, 13, 'TimeZone', 'UTC', 'Format', ...
         'uuuu_MM_dd');
     dt_week = dt_0 + calweeks(0:48);
     save_titles = string(dt_week);
     titles = replace(save_titles, '_', '-');
-elseif option == 2
+elseif strcmp(option, 'biweekly')
     dt_0 = datetime(2018, 9, 13, 'TimeZone', 'UTC', 'Format', ...
         'uuuu_MM_dd');
     dt_week = dt_0 + calweeks(0:2:48);
@@ -121,11 +121,11 @@ for ii = 1:pndex
     ax2 = doubleaxes(ax);
     inverseaxis(ax2.XAxis, 'period (s)');
     
-    title(ax2,sprintf('%s (f-scale = %.3f, SD-shift = %.3f)', titles{ii}, ...
-        f_scale, y_shift));
+    title(ax2,sprintf('%s (%s) (f-scale = %.3f, SD-shift = %.3f)', ...
+        titles{ii}, option, f_scale, y_shift));
     
     % save figure
-    figdisp(strcat(mfilename,'_',save_titles{ii},'.eps'),...
+    figdisp(strcat(mfilename,'_',save_titles{ii},'_',option,'.eps'),...
         [],[],2,[],'epstopdf');
 end
 
