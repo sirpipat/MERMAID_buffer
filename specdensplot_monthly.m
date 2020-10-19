@@ -36,7 +36,7 @@ dt_0 = datetime(2018, 9, 1, 'TimeZone', 'UTC', 'Format', ...
 dt = dt_0 + calmonths(0:12);
 
 % input parameters for specdensplot_section
-excdir = '/Users/sirawich/research/processed_data/tphases/';
+excdir = [];%'/Users/sirawich/research/processed_data/tphases/';
 fs = 40.01406;
 nfft = round(100 * fs);
 lwin = nfft;
@@ -48,7 +48,7 @@ if strcmp(option, 'save')
     scale = 'log';
     plt = false;
 else
-    scale = 'linear';
+    scale = 'log';
     plt = true;
 end
 
