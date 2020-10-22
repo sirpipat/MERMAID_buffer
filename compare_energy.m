@@ -1,5 +1,5 @@
 function compare_energy(option, Fscale)
-% COMPARE_ENERGY(option)
+% COMPARE_ENERGY(option, Fscale)
 % compares energy of WAVEWATCH surface equivalent pressure and 
 % spectral density of 1500-m depth pressure recorded by MERMAID.
 % E(a <= f <= b) = \int_a^b s(f) df where s(f) is spectral density.
@@ -13,7 +13,7 @@ function compare_energy(option, Fscale)
 % OUTOUT
 % no output beside figures saved at $EPS
 % 
-% Last modified by Sirawich Pipatprathanporn: 09/04/2020
+% Last modified by Sirawich Pipatprathanporn: 10/23/2020
 
 %% get all filenames
 % WAVEWATCH spectral density files
