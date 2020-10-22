@@ -1,4 +1,23 @@
 function oneyear2sac(ofile, vfile, sacfile, fs)
+% ONEYEAR2SAC(ofile, vfile, sacfile, fs)
+% 
+% Writes binary (not alphanumeric SAC file from a oneyear file.
+%
+% INPUT:
+% ofile         Fullfile name of the oneyear file
+% vfile         vit file of the MERMAID
+% sacfile       Fullfile name of the output (SAC) file
+% fs            sampling rate [default: 40.01406 Hz]
+%
+% OUTPUT:
+% The SAC file saved at sacfile directory
+%
+% SEE ALSO:
+% WRITESAC, READSAC, MAKEHDR
+%
+% Last modified by Sirawich Pipatprathanporn, 10/23/2020
+
+
 defval('fs', 40.01406);
 [x, dt_begin, dt_end] = readOneYearData(ofile, fs);
 
@@ -22,6 +41,7 @@ badval = -12345;
 badalpha = '-12345..';
 
 % ----- floats -----
+HdrData = makehdr;
 HdrData.DELTA = 1 / fs;
 HdrData.DEPMIN = badval;
 HdrData.DEPMAX = badval;
@@ -140,29 +160,31 @@ HdrData.KSTNM = 'P023';
 
 HdrData.KEVNM = strcat(badalpha, badalpha);
 
+HdrData.KO = badalpha;
 
+HdrData.KA = badalpha;
 
 HdrData.KHOLE = badalpha;
 
-HdrData.K0 = badalpha;
+HdrData.KT0 = badalpha;
 
-HdrData.K1 = badalpha;
+HdrData.KT1 = badalpha;
 
-HdrData.K2 = badalpha;
+HdrData.KT2 = badalpha;
 
-HdrData.K3 = badalpha;
+HdrData.KT3 = badalpha;
 
-HdrData.K4 = badalpha;
+HdrData.KT4 = badalpha;
 
-HdrData.K5 = badalpha;
+HdrData.KT5 = badalpha;
 
-HdrData.K6 = badalpha;
+HdrData.KT6 = badalpha;
 
-HdrData.K7 = badalpha;
+HdrData.KT7 = badalpha;
 
-HdrData.K8 = badalpha;
+HdrData.KT8 = badalpha;
 
-HdrData.K9 = badalpha;
+HdrData.KT9 = badalpha;
 
 HdrData.KF = badalpha;
 
