@@ -1,20 +1,20 @@
 function ax = signalplot(x, fs, t, ax, title_name, position, color)
-% ax = SIGNALPLOT(x, fs, t, ax, title_name, position)
+% ax = SIGNALPLOT(x, fs, t, ax, title_name, position, color)
 % Make a plot of the signal
 %
 % INPUT
-% x         = input signal
-% fs        = sampling frequency
-% t         = time/datetime at the beginning
-% ax        = current axes
-% title     = title of the plot
-% position  = position of zero either left or center
-% color     = the color of the line
+% x             input signal
+% fs            sampling frequency
+% t             time/datetime at the beginning
+% ax            current axes
+% title_name    title of the plot
+% position      position of zero either left or center
+% color         the color of the line
 %
 % OUTPUT
 % ax        = handling axes of the plot
 %
-% Last modified by Sirawich Pipatprathanporn, 03/07/2020
+% Last modified by Sirawich Pipatprathanporn, 10/23/2020
 
 defval('title_name', 'signal');
 defval('position', 'left');
