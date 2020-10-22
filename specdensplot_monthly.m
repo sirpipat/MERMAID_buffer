@@ -18,7 +18,7 @@ function specdensplot_monthly(win,option)
 % SEE ALSO:
 % SPECDENSPLOT_SECTION, SPECDENSPLOT_HEATMAP
 % 
-% Last modified by Sirawich Pipatprathanporn: 08/03/2020
+% Last modified by Sirawich Pipatprathanporn: 10/22/2020
 
 defval('win', 100)
 defval('option', 'plot')
@@ -36,7 +36,7 @@ dt_0 = datetime(2018, 9, 1, 'TimeZone', 'UTC', 'Format', ...
 dt = dt_0 + calmonths(0:12);
 
 % input parameters for specdensplot_section
-excdir = [];%'/Users/sirawich/research/processed_data/tphases/';
+excdir = '/Users/sirawich/research/processed_data/tphases/';
 fs = 40.01406;
 nfft = round(100 * fs);
 lwin = nfft;
@@ -45,7 +45,7 @@ sfax = 10;
 midval = 'median';
 method = 'pct';
 if strcmp(option, 'save')
-    scale = 'log';
+    scale = 'linear';
     plt = false;
 else
     scale = 'log';
