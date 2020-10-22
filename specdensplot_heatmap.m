@@ -26,7 +26,7 @@ function [ax,ax2,axb] = specdensplot_heatmap(ax,up,np,F,Swbins,Swcounts,...
 % SEE ALSO
 % SPECDENSPLOT_SECTION
 %
-% Last modified by Sirawich Pipatprathanporn: 07/19/2020
+% Last modified by Sirawich Pipatprathanporn: 10/22/2020
 
 defval('sfax',10)
 defval('Fscale','log')
@@ -72,13 +72,6 @@ y_label = ylabel(sprintf('%g %s%s', sfax, 'log_{10}',  yfreq));
 
 % add label on the top and right
 ax.TickDir = 'both';
-ax2 = doubleaxes(ax);
-
-% add axis label
-inverseaxis(ax2.XAxis, 'period (s)');
-
-% add title
-ax2.Title.String = plt_title;
 
 % add mean and upper and lower interval lines
 hold on
@@ -108,6 +101,13 @@ else
     ax = vline(ax, [2, 10], '--', 1, rgbcolor('brown'));
 end
 hold off
+
+% add the second axes
+ax2 = doubleaxes(ax);
+inverseaxis(ax2.XAxis, 'period (s)');
+
+% add title
+ax2.Title.String = plt_title;
 
 % add annotation about uptime and noisetime
 axb = addbox(ax, [0.6 0.75 0.38 0.23]);
