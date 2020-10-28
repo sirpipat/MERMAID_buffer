@@ -32,7 +32,7 @@ function [fig,up,np,F,Swbins,Swcounts,Swmid,Swstd,SwU,SwL] = ...
 % SwU           upper confidence limit
 % SwL           lower confidence limit
 %
-% Last modified by Sirawich Pipatprathanporn: 07/19/2020
+% Last modified by Sirawich Pipatprathanporn: 10/28/2020
 
 defval('nfft',256)
 defval('fs',40.01406)
@@ -114,6 +114,8 @@ for ii = 1:length(sections)
     for jj = 1:length(sub_intervals)
         [yy, dt_B, dt_E] = slicesection(y, dt_b, ...
             sub_intervals{jj}{1}, sub_intervals{jj}{2}, fs);
+        % convert counts to Pa
+        yy = yy / 170176;
         if ~isempty(yy) && length(yy) >= nfft * (2 - olap/100)
             X{length(X)+1} = yy;
             noisetime = noisetime + (dt_E - dt_B);
