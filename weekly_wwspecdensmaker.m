@@ -26,6 +26,7 @@ spec = [];      % spec = spec(ifreq, idt)
 dts = [];       % dts  = dts(1, idt)
 for ii = 1:pndex
     [lon,lat,f,~,dt,p2l] = readp2l(allp2ls{ii});
+    dt.TimeZone = 'UTC';
     [mlon,mlat] = mposition(dt);
     
     % remove NaN locations
