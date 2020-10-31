@@ -37,7 +37,7 @@ base_line = ones(1,length(x)) * 1.5;
 lta = min((length(x)-1) / fs, longwin);
 if strcmp(method, 'stalta')
     [trigt,~,~,ratio,~,~,~,~,~] = stalta(x, 1/fs, [0 ((length(x)-1) / fs)], ...
-        30, lta, 1.5, 1.5, 180, 60, 30, 20);
+        10, lta, 1.5, 1.5, 60, 60, 5, 1);
     if isempty(trigt)
         trigs = [];
         dtrigs = [];
