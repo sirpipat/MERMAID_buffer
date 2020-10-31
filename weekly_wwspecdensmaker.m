@@ -11,7 +11,7 @@ function weekly_wwspecdensmaker(sfax, midval, intval)
 % OUTPUT
 % no output beside files in savedir
 %
-% Last modified by Sirawich Pipatprathanporn: 08/05/2020
+% Last modified by Sirawich Pipatprathanporn: 10/31/2020
 
 % weekly use +- 7 days from the central datetimes
 

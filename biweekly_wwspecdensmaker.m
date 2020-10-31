@@ -11,7 +11,7 @@ function biweekly_wwspecdensmaker(sfax, midval, intval)
 % OUTPUT
 % no output beside files in savedir
 %
-% Last modified by Sirawich Pipatprathanporn: 08/10/2020
+% Last modified by Sirawich Pipatprathanporn: 10/31/2020
 
 % get all p2l files
 [allp2ls, pndex] = allfile(strcat(getenv('NCFILES'),'p2l/'));
@@ -50,6 +50,10 @@ dts.TimeZone = 'UTC';
 dt_0 = datetime(2018, 9, 13, 'TimeZone', 'UTC', 'Format', ...
     'uuuu-MM-dd''T''HH:mm:ss.SSSSSS');
 dt_week = dt_0 + calweeks(0:2:49);
+
+% convert p2l to Pa2 s
+% Area \approx (0.5*111000)^2 (smaller at higher latitude)
+spec = log10((10 .^ spec) / (0.5*111000)^2 * 10^12);
 
 for ii = 1:size(dt_week,2)-1
     [~,idt_b] = min(abs(dts - dt_week(ii)));

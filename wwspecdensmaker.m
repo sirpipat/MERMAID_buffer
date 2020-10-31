@@ -11,7 +11,7 @@ function wwspecdensmaker(sfax, midval, intval)
 % OUTPUT
 % no output beside files in savedir
 %
-% Last modified by Sirawich Pipatprathanporn: 08/03/2020
+% Last modified by Sirawich Pipatprathanporn: 10/31/2020
 
 defval('sfax', 10)
 defval('midval','median')
@@ -50,6 +50,10 @@ for ii = 1:pndex
         end
     end
     spec = spec(:, keep);
+    
+    % convert p2l to Pa2 s
+    % Area \approx (0.5*111000)^2 (smaller at higher latitude)
+    spec = log10((10 .^ spec) / (0.5*111000)^2 * 10^12);
     
     % compute spectral density
     if strcmp(midval, 'mean')
