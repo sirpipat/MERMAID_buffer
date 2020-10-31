@@ -29,7 +29,7 @@ function fig = timfreqplot(y, yf1, yf2, yf1_trigs, yf1_dtrigs, dt_begin, ...
 %
 % If save is true, the output file is saved as $EPS.
 % 
-% Last modified by Sirawich Pipatprathanporn: 10/02/2020
+% Last modified by Sirawich Pipatprathanporn: 10/27/2020
 
 % parameter list
 defval('fs', 40.01406);
@@ -65,7 +65,7 @@ set(gcf, 'Unit', 'inches', 'Position', [18 8 6.5 7.5]);
 clf
 
 % plot title
-ax0 = subplot('Position',[0.05 0.93 0.9 0.02]);
+ax0 = subplot('Position',[0.05 0.94 0.9 0.02]);
 if length(p) == 2
     title(string(dt_begin));
 else
