@@ -85,4 +85,5 @@ else
     ylabel('Energy')
 end
 legend(labels,'Location','best')
+set(gca, 'FontSize', 14);
 end
