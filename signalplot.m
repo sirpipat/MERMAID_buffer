@@ -14,7 +14,7 @@ function ax = signalplot(x, fs, t, ax, title_name, position, color)
 % OUTPUT
 % ax        = handling axes of the plot
 %
-% Last modified by Sirawich Pipatprathanporn, 10/23/2020
+% Last modified by Sirawich Pipatprathanporn, 10/27/2020
 
 defval('title_name', 'signal');
 defval('position', 'left');
@@ -45,7 +45,7 @@ max_x = max([max(x) abs(min(x))]);
 axes(ax);
 plot(t_plot, x,'Color',color);
 title('Signal');       
-xlabel('Time')
+xlabel('time')
 if max_x == 0
     ylim([-1 1]);
 else
