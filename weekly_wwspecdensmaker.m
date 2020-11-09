@@ -56,7 +56,7 @@ dt_week = dt_0 + calweeks(0:49);
 
 % convert p2l to Pa2 s
 % Area \approx (0.5*111000)^2 (smaller at higher latitude)
-spec = log10((10 .^ spec) / (0.5*111000)^2 * 10^12);
+spec = spec + sfax * log10(1 / (0.5*111000)^2 * 10^12);
 
 for ii = 1:size(dt_week,2)-1
     [~,idt_b] = min(abs(dts - dt_week(ii)));

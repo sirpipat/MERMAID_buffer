@@ -29,6 +29,7 @@ titles = {'2018_09', '2018_10', '2018_11', '2018_12', '2019_01', ...
 for ii = 1:pndex
     % read p2lfile
     [lon,lat,f,~,dt,p2l] = readp2l(allp2ls{ii});
+    dt.TimeZone = 'UTC';
     
     % find location of MERMAID P023
     [mlon,mlat] = mposition(dt);
