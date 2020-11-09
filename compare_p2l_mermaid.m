@@ -114,7 +114,7 @@ for ii = 1:pndex
     xlim([0.01 2]);
     xlabel('frequency (Hz)');
     ylabel('10 log_{10} spectral density');
-    ylim([-20 140]);
+    ylim([-60 100]);
     legend([p1 p4], {'WAVEWATCH', 'MERMAID'}, 'Location', 'southeast')
     ax.TickDir = 'both';
     
