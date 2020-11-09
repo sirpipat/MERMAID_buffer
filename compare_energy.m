@@ -1,5 +1,5 @@
-function compare_energy(option, f_WW, f_MM, Escale)
-% COMPARE_ENERGY(option, f_WW, f_MM, Escale)
+function [t, E_WW, E_MM] = compare_energy(option, f_WW, f_MM, Escale, plt)
+% [t, E_WW, E_MM] = COMPARE_ENERGY(option, f_WW, f_MM, Escale, plt)
 % compares energy of WAVEWATCH surface equivalent pressure and 
 % spectral density of 1500-m depth pressure recorded by MERMAID.
 % E(a <= f <= b) = \int_a^b s(f) df where s(f) is spectral density.
@@ -10,14 +10,18 @@ function compare_energy(option, f_WW, f_MM, Escale)
 %               3 - monthly
 % f_WW          WAVEWATCH frequency band
 % f_MM          MERMAID frequency band
-% Escale       scale of energy axes ['raw' (default) or 'scaled']
+% Escale        scale of energy axes ['raw' (default) or 'scaled']
+% plt           whether to plot or not [true (default) or false]
 %
-% OUTOUT
-% no output beside figures saved at $EPS
+% OUTPUT
+% t             time
+% E_WW          WAVEWATCH energy (10 log (Energy))
+% E_MM          MERMAID energy   (10 log (Energy))
 % 
-% Last modified by Sirawich Pipatprathanporn: 10/27/2020
+% Last modified by Sirawich Pipatprathanporn: 11/02/2020
 
 defval('Escale', 'raw')
+defval('plt', true)
 
 %% get all filenames
 % WAVEWATCH spectral density files
@@ -56,8 +60,8 @@ end
 
 %% compute energies
 % energy from f(1) - f(end)
-E = zeros(pndex, 1);
-m_E = zeros(pndex, 1);
+E_WW = zeros(pndex, 1);
+E_MM = zeros(pndex, 1);
 
 for idt = 1:pndex
     % read WAVEWATCH spectral density
@@ -67,7 +71,7 @@ for idt = 1:pndex
     
     f = data(1,:);
     sd = data(2,:);
-    E(idt, 1) = boundtrapz(f, 10 .^ (sd/10), f_WW(1), f_WW(end));
+    E_WW(idt, 1) = boundtrapz(f, 10 .^ (sd/10), f_WW(1), f_WW(end));
     
     % read MERMAID spectral density
     fid = fopen(allSDs{idt},'r');
@@ -76,27 +80,34 @@ for idt = 1:pndex
     
     m_f = data(1,:);
     m_sd = data(2,:);
-    m_E(idt, 1) = boundtrapz(m_f, 10 .^ (m_sd/10), f_MM(1), f_MM(end));
+    E_MM(idt, 1) = boundtrapz(m_f, 10 .^ (m_sd/10), f_MM(1), f_MM(end));
 end
 
-%% plot overall energy level
-
-E = 10 * log10(E); %+ SD_shift;
-m_E = 10 * log10(m_E);
+% change energy to log-scale (dB)
+E_WW = 10 * log10(E_WW); %+ SD_shift;
+E_MM = 10 * log10(E_MM);
 
 % scaled option
 if strcmp(Escale, 'scaled')
-    E = (E - mean(E)) / std(E);
-    m_E = (m_E - mean(m_E)) / std(m_E);
+    E_WW = (E_WW - mean(E_WW)) / std(E_WW);
+    E_MM = (E_MM - mean(E_MM)) / std(E_MM);
 end
 
-% plot results
+% energy offset
+offset = E_MM - E_WW;
+mean_offset = mean(offset);
+
+if ~plt
+    return
+end
+
+%% plot overall energy level
 figure;
 set(gcf, 'Unit', 'inches', 'Position', [18 8 4 3.5]);
 ah = subplot(2,1,1);
-plot(t,E,'LineWidth',1.5);
+plot(t,E_WW,'LineWidth',1.5);
 hold on
-plot(t,m_E,'LineWidth',1.5);
+plot(t,E_MM,'LineWidth',1.5);
 hold off
 grid on
 xlim([t(1) t(end)])
@@ -105,14 +116,23 @@ if strcmp(Escale, 'raw')
 else
     ylabel(sprintf('z-score of %g log_{10} (Energy)', 10))
 end
-titlename = sprintf('%s, cc = %5.3f', titlename, corr(E,m_E));
+titlename = sprintf('%s, cc = %5.3f', titlename, corr(E_WW,E_MM));
 title(titlename)
 label_WW = sprintf('WAVEWATCH (%5.3f - %5.3f Hz)', f_WW(1), f_WW(end));
 label_MM = sprintf('MERMAID        (%5.3f - %5.3f Hz)', f_MM(1), f_MM(end));
-legend(label_WW,label_MM,'Location','best')
+legend(label_WW,label_MM,'Location','east')
 set(gca, 'FontSize', 10, 'TickDir', 'both');
-ax = gca;
-ax.Title.Position(2) = ax.Title.Position(2) + 0.2;
+ah.Title.Position(2) = ah.Title.Position(2) + 0.2;
+
+%% plot energy offset
+
+ag = subplot(2,1,2);
+plot(t,offset,'LineWidth',1.5)
+grid on
+xlim([t(1) t(end)]);
+ylabel('10 log_{10}(E_{MM}/E_{WW})');
+title(sprintf('Mean offset = %7.4f',mean_offset));
+set(gca, 'FontSize', 10, 'TickDir', 'both');
 
 savetitle = sprintf('%s_f_WW_%5.3f_%5.3f_f_MM_%5.3f_%5.3f.eps', ...
     savetitle, f_WW(1), f_WW(end), f_MM(1), f_MM(end));
