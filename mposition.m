@@ -11,9 +11,9 @@ function [lon,lat] = mposition(dt,fname)
 % lon       longitude
 % lat       latitude
 %
-% Last modified by Sirawich Pipatprathanporn: 10/01/2020
+% Last modified by Sirawich Pipatprathanporn: 11/10/2020
 
-defval('fname','/Users/sirawich/research/raw_data/metadata/P023_all.txt')
+defval('fname','/Users/sirawich/research/raw_data/metadata/vit/P023_all.txt')
 
 % read vit file
 T = readvit(fname);

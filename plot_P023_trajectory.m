@@ -3,8 +3,8 @@ function plot_P023_trajectory
 %
 % plot P023 trajectory during 13 Sep 2018 to 15 Aug 2019
 %
-% Last edited by Sirawich Pipatprathanporn, 10/09/2020
-    T = readvit('/Users/sirawich/research/raw_data/metadata/P023_all.txt');
+% Last edited by Sirawich Pipatprathanporn, 11/10/2020
+    T = readvit('/Users/sirawich/research/raw_data/metadata/vit/P023_all.txt');
     
     [C, ia] = unique(T.Date);
     TC = T(ia,:);
