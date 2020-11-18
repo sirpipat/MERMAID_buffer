@@ -11,7 +11,7 @@ function compare_p2l_mermaid(option)
 % OUTOUT
 % no output beside figures saved at $EPS
 % 
-% Last modified by Sirawich Pipatprathanporn: 10/05/2020
+% Last modified by Sirawich Pipatprathanporn: 11/18/2020
 
 % WAVEWATCH spectral density files
 % MERMAID spectral density files
@@ -94,35 +94,89 @@ for ii = 1:pndex
     y_shift = 0;
     f_scale = 1;
     
+    % read MERMAID gain curve
+    [f_curve, gain] = mermaidcurve;
+    
+    m_sd_interp = interp1(m_f, m_sd, 2 * f);
+    
+    % adjust MERMAID response
+    where = (f < 0.2);
+    m_sd_interp(where) = m_sd_interp(where) + (30 - ...
+        interp1(f_curve/2, gain, f(where)));
+    offset = m_sd_interp - sd;
+    
     % create figure
-    figure(1);
+    figure(5);
     clf;
-    set(gcf, 'Unit', 'inches', 'Position', [2 2 6.5 6.5]);
-    % plot
-    ax = subplot('Position',[0.1 0.09 0.85 0.8]);
-    p1 = semilogx(f * f_scale, sd + y_shift, '^-k', 'MarkerFaceColor', 'k');
-    hold on
+    set(gcf, 'Unit', 'inches', 'Position', [2 2 8.5 4]);
+    
+    % plot SD
+    ax1 = subplot('Position', [0.1 0.16 0.35 0.64]);
     p2 = semilogx(f * f_scale, sdU + y_shift, '^-', 'Color', ...
         rgbcolor('silver'), 'MarkerFaceColor', rgbcolor('silver'));
+    hold on
     p3 = semilogx(f * f_scale, sdL + y_shift, '^-', 'Color', ...
         rgbcolor('silver'), 'MarkerFaceColor', rgbcolor('silver'));
+    p1 = semilogx(f * f_scale, sd + y_shift, '^-k', 'MarkerFaceColor', 'k');
     p4 = semilogx(m_f, m_sd, '.-r');
     p5 = semilogx(m_f, m_sdU, '.-', 'Color', rgbcolor('gray'));
     p6 = semilogx(m_f, m_sdL, '.-', 'Color', rgbcolor('gray'));
+    % plot f_MH = 2 f_WW
+    where = and(m_f >= 2*f(1), m_f <= 2*f(end));
+    p7 = semilogx(m_f(where), m_sd(where), 'v-r', 'MarkerFaceColor', 'r');
+    p8 = semilogx(m_f(where), m_sdU(where), 'v-', 'Color', ...
+        rgbcolor('gray'), 'MarkerFaceColor', rgbcolor('gray'));
+    p9 = semilogx(m_f(where), m_sdL(where), 'v-', 'Color', ...
+        rgbcolor('gray'), 'MarkerFaceColor', rgbcolor('gray'));
     hold off
     grid on
-    xlim([0.01 2]);
+    xlim([0.0099 2.0001]);
+    ylim([-60 120]);
+    ax1.XTick = sort([0.01 0.02 0.04 0.1 0.2 0.4 1 2]);
+    ax1.XTickLabel = string(round(ax1.XTick, 2));
     xlabel('frequency (Hz)');
     ylabel('10 log_{10} spectral density');
-    ylim([-60 100]);
-    legend([p1 p4], {'WAVEWATCH', 'MERMAID'}, 'Location', 'southeast')
-    ax.TickDir = 'both';
     
-    ax2 = doubleaxes(ax);
-    inverseaxis(ax2.XAxis, 'period (s)');
+    % add limit marker
+    vline(ax1, [f(1) f(end)], '-', 1, [1 0.5 1]);
+    vline(ax1, 2 * [f(1) f(end)], '-', 1, [0.2 0.8 0.4]);
+    vline(ax1, 0.4, '--', 1, [1 0.5 0]);
+    hold on
+    plot([f(end) ax1.XLim(2)], sd(end) * [1 1], '--', 'LineWidth', 1, ...
+        'Color', [1 0.5 1]);
+    plot([m_f(61) ax1.XLim(2)], m_sd(61) * [1 1], '--', 'LineWidth', 1, ...
+        'Color', [0.2 0.8 0.4]);
+    legend([p1 p7], {'WAVEWATCH', 'MERMAID'}, 'Location', 'southeast')
+    ax1.TickDir = 'both';
     
-    title(ax2,sprintf('%s (%s) (f-scale = %.3f, SD-shift = %.3f)', ...
-        titles{ii}, option, f_scale, y_shift));
+    ax1s = doubleaxes(ax1);
+    inverseaxis(ax1s.XAxis, 'period (s)');
+    
+    title(ax1s,sprintf('%s (%s)\nspectral density', titles{ii}, option));
+    axeslabel(ax1, 0.1, 0.9, 'a', 'FontSize', 12);
+    
+    % plot offset
+    ax2 = subplot('Position', [0.6 0.16 0.35 0.64]); 
+    semilogx(f, offset, '^-k', 'MarkerFaceColor', 'k');
+    xlim([0.0099 2.0001]);
+    ylim([-80 -30]);
+    ax2.XTick = sort([0.01 0.1 0.2 1 2 f(1) f(end)]);
+    ax2.XTickLabel = string(round(ax2.XTick, 2));%{'0.01', '0.02', '0.05', '0.1', '0.2', '0.5', '1', '2'};
+    hold on
+    vline(ax2, [f(1) f(end)], '-', 1, [1 0.5 1]);
+    vline(ax2, 0.2, '--', 1, [1 0.5 0]);
+    hold off
+    grid on
+    xlabel('WAVEWATCH frequency (Hz)');
+    ylabel('10 log_{10} spectral density');
+    ax2.TickDir = 'both';
+    
+    ax2s = doubleaxes(ax2);
+    inverseaxis(ax2s.XAxis, 'WAVEWATCH period (s)');
+    
+    title(ax2s,sprintf('(f-scale = %.3f, SD-shift = %.3f)\nspectral density offset', ...
+        f_scale, y_shift));
+    axeslabel(ax2, 0.1, 0.9, 'b', 'FontSize', 12);
     
     % save figure
     figdisp(strcat(mfilename,'_',save_titles{ii},'_',option,'.eps'),...
