@@ -10,7 +10,7 @@ function ax2 = doubleaxes(ax)
 % OUTPUT
 % ax2   the second axes
 %
-% Last modified by Sirawich Pipatprathanporn: 11/08/2020
+% Last modified by Sirawich Pipatprathanporn: 11/10/2020
 
 ax2 = axes();
 ax2.Position = ax.Position;
@@ -28,7 +28,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ax2.XTick = ax.XTick;
 % remove ticks beyond the XLim
-where = and(ax2.XTick > ax2.XLim(1), ax2.XTick < ax2.XLim(end));
+where = and(ax2.XTick >= ax2.XLim(1), ax2.XTick <= ax2.XLim(end));
 ax2.XTick = ax2.XTick(where);
 ax2.XTickLabel = ax.XTickLabel;
 
