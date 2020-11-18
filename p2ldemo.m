@@ -11,15 +11,30 @@ function p2ldemo(h, f)
 %
 % Last modified by Sirawich Pipatprathanporn, 11/08/2020
 
+if size(h,1) > 1
+    h = reshape(h,1,size(h,1));
+end
+
+if size(f,1) > 1
+    f = reshape(f,1,size(f,1));
+end
+
+if size(h) ~= size(f)
+    error('ERROR: input sizes are not equal\n');
+end
+
 fs = 100;
 t_end = 10000;
 t = linspace(0, t_end, fs * t_end + 1);
 
 % wave height
-y = h * sin(2 * pi * f * t);
+y = 0 * t;
+for ii = 1:size(f,2)
+    y = y + h(ii) / size(f,2) * sin(2 * pi * f(ii) * t);
+end
 
 % noise
-n = h/10 * randn(size(t));
+n = mean(h)/10 * randn(size(t));
 y = y + n;
 
 % plot wave height
@@ -28,10 +43,10 @@ set(gcf, 'Unit', 'inches', 'Position', [0.5 8 4.8 6]);
 ax1 = subplot('Position', [0.16 0.63 0.76 0.32]);
 plot(t, y, 'LineWidth', 1);
 grid on
-xlim([0 5/f]);
+xlim([0 5/mean(f)]);
 xlabel('time (s)');
 ylabel('wave height (m)');
-title(sprintf('amplitude = %5.2f m, frequency = %5.2f Hz', h, f));
+title(sprintf('amplitude = %5.2f m, frequency = %5.2f Hz', mean(h), mean(f)));
 set(ax1, 'FontSize', 12, 'TickDir', 'both');
 
 % pressure: P = \rho g h
@@ -53,7 +68,7 @@ ax2.Children(2).LineWidth = 1;
 ax2.Children(3).LineWidth = 1;
 ax2.Children(4).LineWidth = 1;
 grid on
-xlim(f*[1/10.01 10.01]);
+xlim(mean(f)*[1/10.01 10.01]);
 ylim([0 100]);
 ylabel('10 log_{10} spectral density (energy/Hz)');
 set(ax2, 'FontSize', 12, 'TickDir', 'both');
@@ -61,6 +76,6 @@ ax2s = doubleaxes(ax2);
 inverseaxis(ax2s.XAxis, 'period (s)');
 
 % save figure
-fname = sprintf('%s_h=%.2f_f=%.2f.eps', mfilename, h, f);
+fname = sprintf('%s_h=%.2f_f=%.2f.eps', mfilename, mean(h), mean(f));
 figdisp(fname, [], [], 2, [], 'epstopdf');
 end
