@@ -11,8 +11,17 @@ function [x,y] = norm2trueposition(ax,x_norm,y_norm)
 % x         True x coordinate on the axes
 % y         True y coordinate on the axes
 %
-% Last modified by Sirawich Pipatprathanporn, 03/07/2020
+% Last modified by Sirawich Pipatprathanporn, 11/14/2020
 
-x = ax.XLim(1) + x_norm * (ax.XLim(2) - ax.XLim(1));
-y = ax.YLim(1) + y_norm * (ax.YLim(2) - ax.YLim(1));
+if strcmp(ax.XScale, 'linear')
+    x = ax.XLim(1) + x_norm * (ax.XLim(2) - ax.XLim(1));
+else
+    x = ax.XLim(1) * (ax.XLim(2) / ax.XLim(1)) ^ x_norm;
+end
+
+if strcmp(ax.YScale, 'linear')
+    y = ax.YLim(1) + y_norm * (ax.YLim(2) - ax.YLim(1));
+else
+    y = ax.YLim(1) * (ax.YLim(2) / ax.YLim(1)) ^ y_norm;
+end
 end
