@@ -16,8 +16,8 @@ function compare_p2l_mermaid(option)
 % WAVEWATCH spectral density files
 % MERMAID spectral density files
 if strcmp(option, 'weekly')
-    WWdir = '/Users/sirawich/research/processed_data/weekly_WWSD_profiles/';
-    SDdir = '/Users/sirawich/research/processed_data/weekly_SD_profiles/';
+    WWdir = '/Users/sirawich/research/processed_data/weekly_WWSD_profiles_before_conversion/';
+    SDdir = '/Users/sirawich/research/processed_data/weekly_SD_profiles_before_conversion/';
 elseif strcmp(option, 'biweekly')
     WWdir = '/Users/sirawich/research/processed_data/biweekly_WWSD_profiles/';
     SDdir = '/Users/sirawich/research/processed_data/biweekly_SD_profiles/';
@@ -131,7 +131,7 @@ for ii = 1:pndex
     hold off
     grid on
     xlim([0.0099 2.0001]);
-    ylim([-60 120]);
+    ylim([-20 140]);
     ax1.XTick = sort([0.01 0.02 0.04 0.1 0.2 0.4 1 2]);
     ax1.XTickLabel = string(round(ax1.XTick, 2));
     xlabel('frequency (Hz)');
@@ -140,12 +140,12 @@ for ii = 1:pndex
     % add limit marker
     vline(ax1, [f(1) f(end)], '-', 1, [1 0.5 1]);
     vline(ax1, 2 * [f(1) f(end)], '-', 1, [0.2 0.8 0.4]);
-    vline(ax1, 0.4, '--', 1, [1 0.5 0]);
+    %vline(ax1, 0.4, '--', 1, [1 0.5 0]);
     hold on
-    plot([f(end) ax1.XLim(2)], sd(end) * [1 1], '--', 'LineWidth', 1, ...
-        'Color', [1 0.5 1]);
-    plot([m_f(61) ax1.XLim(2)], m_sd(61) * [1 1], '--', 'LineWidth', 1, ...
-        'Color', [0.2 0.8 0.4]);
+    %plot([f(end) ax1.XLim(2)], sd(end) * [1 1], '--', 'LineWidth', 1, ...
+    %    'Color', [1 0.5 1]);
+    %plot([m_f(61) ax1.XLim(2)], m_sd(61) * [1 1], '--', 'LineWidth', 1, ...
+    %    'Color', [0.2 0.8 0.4]);
     legend([p1 p7], {'WAVEWATCH', 'MERMAID'}, 'Location', 'southeast')
     ax1.TickDir = 'both';
     
@@ -159,12 +159,12 @@ for ii = 1:pndex
     ax2 = subplot('Position', [0.6 0.16 0.35 0.64]); 
     semilogx(f, offset, '^-k', 'MarkerFaceColor', 'k');
     xlim([0.0099 2.0001]);
-    ylim([-80 -30]);
+    ylim([50 110]);
     ax2.XTick = sort([0.01 0.1 0.2 1 2 f(1) f(end)]);
-    ax2.XTickLabel = string(round(ax2.XTick, 2));%{'0.01', '0.02', '0.05', '0.1', '0.2', '0.5', '1', '2'};
+    ax2.XTickLabel = string(round(ax2.XTick, 2));
     hold on
     vline(ax2, [f(1) f(end)], '-', 1, [1 0.5 1]);
-    vline(ax2, 0.2, '--', 1, [1 0.5 0]);
+    %vline(ax2, 0.2, '--', 1, [1 0.5 0]);
     hold off
     grid on
     xlabel('WAVEWATCH frequency (Hz)');
