@@ -8,6 +8,7 @@ function plotevent(arrival, arrival_type, event, endtime, fs)
 % arrival       arrival datetime
 % arrival_type  either 'body' or 'surface' [default: 'body']
 % event         an event struct returned from FINDEVENTS
+% endtime       ending datetime for the plot
 % fs            sampling rate of the raw buffer [default: 40.01406 Hz]
 %
 % OUTPUT
@@ -16,8 +17,9 @@ function plotevent(arrival, arrival_type, event, endtime, fs)
 % SEE ALSO
 % FINDEVENTS
 %
-% Last modified by Sirawich Pipatprathanporn: 09/08/2020
+% Last modified by Sirawich Pipatprathanporn: 12/02/2020
 defval('arrival_type', 'body')
+defval('endtime', [])
 defval('fs', 40.01406)
 
 %% read seismogram
@@ -50,6 +52,7 @@ clf
 % plot title
 ax0 = subplot('Position',[0.05 0.9 0.9 0.05]);
 ax0.Title.String = sprintf('Arrival: %s, ID: %s', string(arrival), event.id);
+ax0.Title.FontWeight = 'normal';
 text(0.2,0.9,sprintf('%3s = %4.2f, distance = %6.2f degrees, depth = %6.2f km',...
      event.PreferredMagnitudeType, event.PreferredMagnitudeValue, ...
      event.distance, event.PreferredDepth));
@@ -111,8 +114,10 @@ mov_rms = movmean(xf2_sq, round(fs/d_factor * 150)) .^ 0.5;
 hold on
 plot(t_plot, mov_rms, 'Color', [0.8 0.25 0.25], 'LineWidth', 1);
 hold off
-title('Filtered: dc5 dt bp0.05-0.1 -- green = mov avg, red = mov rms, win = 150 s')
+title('Filtered: dc5 dt bp0.05-0.1 -- green = mov avg, red = mov rms, win = 150 s', ...
+    'FontWeight', 'normal')
 ax2.TitleFontSizeMultiplier = 1.0;
+ax2.Title.FontWeight = 'normal';
 ax2.TickDir = 'both';
 
 % set ylimit to exclude outliers
@@ -190,7 +195,7 @@ ax3.XLim = [lonmin lonmax];
 ax3.YLim = [latmin latmax];
 
 % add stations
-[allvitfiles,vndex] = allfile('/Users/sirawich/research/raw_data/metadata/');
+[allvitfiles,vndex] = allfile('/Users/sirawich/research/raw_data/metadata/vit/');
 mpos = NaN(0,2);
 station_numbers = cell(0,1);
 for ii = 1:vndex
@@ -296,9 +301,9 @@ text(x_pos, y_pos, 'c', 'FontSize', 12);
 ax4 = subplot('Position', [0.77 0.04 0.20 0.25]);
 % plot map
 taupPlotRayPath(ax4, 'ak135', max(0, event.PreferredDepth), ...
-    'P,PP,PcP,PKP,PKiKP,PKIKP,Pdiff', 'evt', [event.evla event.evlo], ...
+    'P,Pdiff', 'evt', [event.evla event.evlo], ...
     'sta', [event.stla event.stlo]);
-ax4.YLim = [-2.5 1] * 6371;
+ax4.YLim = [-2 1.5] * 6371;
 
 % add subplot label
 [x_pos, y_pos] = norm2trueposition(ax4, 1/8, 23/24);
