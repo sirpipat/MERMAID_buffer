@@ -33,6 +33,7 @@ for ii = 1:sndex
     nfft = round(100 * fs);
     lwin = nfft;
     
+    % make a standard timfreqplot for a SAC section
     timfreqplot(x,[],[],[],[],dt_b,nfft,fs,lwin,70,10,0,'s',p,false);
     
     % add title
