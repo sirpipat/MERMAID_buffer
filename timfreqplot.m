@@ -29,7 +29,7 @@ function fig = timfreqplot(y, yf1, yf2, yf1_trigs, yf1_dtrigs, dt_begin, ...
 %
 % If save is true, the output file is saved as $EPS.
 % 
-% Last modified by Sirawich Pipatprathanporn: 10/27/2020
+% Last modified by Sirawich Pipatprathanporn: 12/15/2020
 
 % parameter list
 defval('fs', 40.01406);
@@ -67,9 +67,10 @@ clf
 % plot title
 ax0 = subplot('Position',[0.05 0.94 0.9 0.02]);
 if length(p) == 2
-    title(string(dt_begin));
+    title(string(dt_begin), 'FontWeight', 'normal');
 else
-    title(sprintf('%s--%s', string(dt_begin), string(dt_end)));
+    title(sprintf('%s--%s', string(dt_begin), string(dt_end)), ...
+        'FontWeight', 'normal');
 end
 [x_pos, y_pos] = norm2trueposition(ax0, 3/8, 3/4);
 % report
@@ -82,7 +83,7 @@ ax0.XAxis.Visible = 'off';
 ax0.YAxis.Visible = 'off';
 
 %% plot spectrogram
-ax1 = subplot('Position', [0.07 4/7 0.42 3/7-0.12]);
+ax1 = subplot('Position', [0.075 4/7 0.42 3/7-0.12]);
 timspecplot_ns(y,nfft,fs,lwin,wolap,beg,unit);
 title('');
 
@@ -109,7 +110,7 @@ ax1s.YAxis.Visible = 'off';
 text(x_pos, y_pos, 'a', 'FontSize', 12);
 
 %% plot power spectral density profile
-ax2 = subplot('Position', [0.61 4/7 0.33 3/7-0.12]);
+ax2 = subplot('Position', [0.615 4/7 0.33 3/7-0.12]);
 [p,xl,yl,F,SD,Ulog,Llog]=specdensplot(y,nfft,fs,lwin,olap,sfax,unit);
 grid on
 
@@ -151,7 +152,7 @@ ax2 = vline(ax2, [2, 10], '--', 1, rgbcolor('brown'));
 hold off
 
 %% plot raw signal
-ax3 = subplot('Position', [0.07 2/6+0.02 0.87 1/6-0.06]);
+ax3 = subplot('Position', [0.075 2/6+0.03 0.87 1/6-0.06]);
 ax3 = signalplot(y, fs, dt_begin, ax3, '', 'left');
 
 % add moving average
@@ -167,7 +168,8 @@ mov_rms = movmean(y_sq, round(fs * 30)) .^ 0.5;
 hold on
 plot(t_plot, mov_rms, 'Color', [0.8 0.25 0.25], 'LineWidth', 1);
 hold off
-title('Raw buffer -- green = mov avg, red = mov rms, win = 30 s')
+title('Raw buffer -- green = mov avg, red = mov rms, win = 30 s', ...
+    'FontWeight', 'normal')
 ax3.TitleFontSizeMultiplier = 1.0;
 ax3.TickDir = 'both';
 
@@ -184,7 +186,7 @@ nolabels(ax3, 1);
 ax3.XAxis.Label.Visible = 'off';
 
 %% plot filered signal 2-10 Hz
-ax4 = subplot('Position', [0.07 1/6+0.04 0.87 1/6-0.06]);
+ax4 = subplot('Position', [0.075 1/6+0.05 0.87 1/6-0.06]);
 ax4 = signalplot(yf1, fs, dt_begin, ax4, '', 'left');
 
 % add moving average
@@ -201,7 +203,8 @@ mov_rms = movmean(yf1_sq, round(fs * 30)) .^ 0.5;
 hold on
 plot(t_plot, mov_rms, 'Color', [0.8 0.25 0.25], 'LineWidth', 1);
 hold off
-title('Filtered: bp2-10 -- green = mov avg, red = mov rms, win = 30 s')
+title('Filtered: bp2-10 -- green = mov avg, red = mov rms, win = 30 s', ...
+    'FontWeight', 'normal')
 ax4.TitleFontSizeMultiplier = 1.0;
 ax4.TickDir = 'both';
 
@@ -244,7 +247,7 @@ nolabels(ax4, 1);
 ax4.XAxis.Label.Visible = 'off';
 
 %% plot filtered signal 0.05-0.1 Hz
-ax5 = subplot('Position', [0.07 0.06 0.87 1/6-0.06]);
+ax5 = subplot('Position', [0.075 0.07 0.87 1/6-0.06]);
 ax5 = signalplot(yf2, fs/d_factor, dt_begin, ax5, '', 'left');
 
 % add moving average
@@ -260,7 +263,8 @@ mov_rms = movmean(yf2_sq, round(fs/d_factor * 150)) .^ 0.5;
 hold on
 plot(t_plot, mov_rms, 'Color', [0.8 0.25 0.25], 'LineWidth', 1);
 hold off
-title('Filtered: dc5 dt bp0.05-0.1 -- green = mov avg, red = mov rms, win = 150 s')
+title('Filtered: dc5 dt bp0.05-0.1 -- green = mov avg, red = mov rms, win = 150 s', ...
+    'FontWeight', 'normal')
 ax5.TitleFontSizeMultiplier = 1.0;
 ax5.TickDir = 'both';
 
