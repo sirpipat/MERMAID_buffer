@@ -1,5 +1,5 @@
-function hoursection_plot(filename, nfft, fs, lwin, olap, sfax, beg, unit)
-% HOURSECTION_PLOT(filename, nfft, fs, lwin, olap, sfax, beg, unit)
+function hoursection_plot(filename, nfft, fs, lwin, olap, sfax, beg, unit, fscale)
+% HOURSECTION_PLOT(filename, nfft, fs, lwin, olap, sfax, beg, unit, fscale)
 %
 % INPUT
 % filename      The name of raw MERMAID data file
@@ -10,10 +10,11 @@ function hoursection_plot(filename, nfft, fs, lwin, olap, sfax, beg, unit)
 % sfax          Y-axis scaling factor [default: 10]
 % beg           Signal beginning [Default: 0]
 % unit          String with the unit name [Default: 's']
+% fscale        Frequency axis scale of the spectrogram [Default: 'log']
 %
 % NO OUTPUT (the plot saved at $EPS)
 %
-% Last modified by Sirawich Pipatprathanporn: 08/31/2020
+% Last modified by Sirawich Pipatprathanporn: 12/21/2020
 
 % default parameter list
 defval('nfft', 1024);
@@ -23,6 +24,7 @@ defval('olap', 70);
 defval('sfax', 10);
 defval('beg', 0);
 defval('unit', 's');
+defval('fscale', 'log');
 
 fprintf("hoursection_plot('%s')\n", filename);
 
@@ -65,7 +67,7 @@ dt_B.Format = 'uuuu-MM-dd''T''HH:mm:ss.SSSSSS';
 % relative position of the sliced section in the file
 p = [(dt_B - dt_start) (dt_E - dt_start)] / (dt_end - dt_start) * 100;
 timfreqplot(x, xf1, xf2, dt_trigs, dt_dtrigs, dt_B, nfft, fs, lwin, ...
-    olap, sfax, beg, unit, p, true, true);
+    olap, sfax, beg, unit, p, true, true, fscale);
 dt_curr = dt_curr + minutes(30);
 
 % slice later sections then plot
@@ -81,7 +83,7 @@ while dt_end - dt_curr > minutes(30)
     % relative position of the sliced section in the file
     p = [(dt_B - dt_start) (dt_E - dt_start)] / (dt_end - dt_start) * 100;
     timfreqplot(x, xf1, xf2, dt_trigs, dt_dtrigs, dt_B, nfft, fs, lwin, ...
-        olap, sfax, beg, unit, p, true, true);
+        olap, sfax, beg, unit, p, true, true, fscale);
     dt_curr = dt_curr + minutes(30);
 end
 
