@@ -1,5 +1,5 @@
-function [p,xl,yl,Bl10,F,T]=timspecplot_ns(x,nfft,Fs,wlen,wolap,beg,unt)
-% [p,xl,yl,Bl10,F,T]=TIMSPECPLOT_NS(x,h,nfft,Fs,wlen,wolap,beg,unt)
+function [p,xl,yl,Bl10,F,T]=timspecplot_ns(x,nfft,Fs,wlen,wolap,beg,unt,fscale)
+% [p,xl,yl,Bl10,F,T]=TIMSPECPLOT_NS(x,h,nfft,Fs,wlen,wolap,beg,unt,fscale)
 %
 % Plots spectrogram of data using the SPECTROGRAM algorithm
 %
@@ -12,6 +12,8 @@ function [p,xl,yl,Bl10,F,T]=timspecplot_ns(x,nfft,Fs,wlen,wolap,beg,unt)
 % wolap    Window overlap, as a fraction [default: 0.7]
 % beg      Signal beginning [Default: 0]
 % unt      String with the unit name [default: s]
+% fscale   Scaling option for frequency axis: 
+%           'linear' or 'log' [default: 'log']
 %
 % OUTPUT:
 %
@@ -23,32 +25,37 @@ function [p,xl,yl,Bl10,F,T]=timspecplot_ns(x,nfft,Fs,wlen,wolap,beg,unt)
 % Used by SIGNALS and SIGNALS2, see also
 % TIMDOMPLOT, SPECDENSPLOT
 %
-% Last modified by Sirawich Pipatprathanporn, 07/30/2020
+% Last modified by Sirawich Pipatprathanporn, 12/16/2020
 
 defval('beg',0)
 defval('wlen',256)
 defval('nfft',wlen)
 defval('wolap',0.7)
 defval('unt','s')
+defval('fscale', 'log')
 
 % This is the calculation; the rest is plotting
 [Ba2,F,T,Bl10]=spectrogram(x,nfft,Fs,wlen,ceil(wolap*wlen),unt);
 
-% Frequencies bin in log space
-Flog = logspace(log10(F(2)), log10(F(end)), length(F) -1);
+if strcmp(fscale, 'log')
+    % Frequencies bin in log space
+    Flog = logspace(log10(F(2)), log10(F(end)), length(F) -1);
 
-% interpolate the spectrogram
-Bl10 = interp1(F, Bl10, Flog);
+    % interpolate the spectrogram
+    Bl10 = interp1(F, Bl10, Flog);
+    
+    % Conform to PCHAVE, SPECTRAL DENSITY, NOT POWER
+    p=imagesc(beg+wlen/Fs/2+T,Flog,Bl10);
+    axis xy; colormap(jet)    
 
-% Conform to PCHAVE, SPECTRAL DENSITY, NOT POWER
-p=imagesc(beg+wlen/Fs/2+T,Flog,Bl10);
-axis xy; colormap(jet)    
-
-% fix y-label for log scale
-ax = gca;
-ax.YTick = lin2logpos([0.1 1 10], Flog(1), Flog(end));
-ax.YTickLabel = {'0.1'; '1'; '10'};
-
+    % fix y-label for log scale
+    ax = gca;
+    ax.YTick = lin2logpos([0.1 1 10], Flog(1), Flog(end));
+    ax.YTickLabel = {'0.1'; '1'; '10'};
+else
+    p=imagesc(beg+wlen/Fs/2+T,F,Bl10);
+    axis xy; colormap(jet)
+end
 % Labeling
 xfreq=sprintf('time (%s)',unt);
 

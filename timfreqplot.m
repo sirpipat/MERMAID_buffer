@@ -1,7 +1,8 @@
 function fig = timfreqplot(y, yf1, yf2, yf1_trigs, yf1_dtrigs, dt_begin, ...
-    nfft, fs, lwin, olap, sfax, beg, unit, p, save, trig)
+    nfft, fs, lwin, olap, sfax, beg, unit, p, save, trig, fscale)
 % fig = TIMFREQPLOT(y, yf1, yf2, yf1_trigs, yf1_dtrigs, dt_begin, nfft, ...
-%                   fs, lwin, olap, sfax, beg, unit, p, save)
+%                   fs, lwin, olap, sfax, beg, unit, p, save, trig, ...
+%                   fscale)
 % plot seismogram, power spectral density, spectograms, and filtered
 % seismogram
 % 
@@ -23,13 +24,15 @@ function fig = timfreqplot(y, yf1, yf2, yf1_trigs, yf1_dtrigs, dt_begin, ...
 %               when y is a sliced section. Otherwise, leave it blank
 % save          whether to save the figure or not [Default: true]
 % trig          whether to plot the (de)triggers in yf1 [Default: false]
+% fscale        Scaling option for frequency axis: 
+%                   'linear' or 'log' [default: 'log']
 %
 % OUTPUT
 % fig           figure handling the plots
 %
 % If save is true, the output file is saved as $EPS.
 % 
-% Last modified by Sirawich Pipatprathanporn: 12/15/2020
+% Last modified by Sirawich Pipatprathanporn: 12/16/2020
 
 % parameter list
 defval('fs', 40.01406);
@@ -41,6 +44,7 @@ defval('beg', 0);
 defval('unit', 's');
 defval('save', true);
 defval('trig', false);
+defval('fscale', 'log');
 wolap = olap / 100;
 
 dt_begin.Format = 'uuuu-MM-dd''T''HH:mm:ss.SSSSSS';
@@ -84,7 +88,7 @@ ax0.YAxis.Visible = 'off';
 
 %% plot spectrogram
 ax1 = subplot('Position', [0.075 4/7 0.42 3/7-0.12]);
-timspecplot_ns(y,nfft,fs,lwin,wolap,beg,unit);
+timspecplot_ns(y,nfft,fs,lwin,wolap,beg,unit,fscale);
 title('');
 
 % insert colorbar
@@ -142,7 +146,7 @@ ax2s = doubleaxes(ax2);
 inverseaxis(ax2s.XAxis, 'period (s)');
 
 % add subplot label
-[x_pos, y_pos] = norm2trueposition(ax2, 1/800, 7/8);
+[x_pos, y_pos] = norm2trueposition(ax2, 1/10, 7/8);
 text(x_pos, y_pos, 'b', 'FontSize', 12);
 
 % add frequency bands label
@@ -170,12 +174,13 @@ plot(t_plot, mov_rms, 'Color', [0.8 0.25 0.25], 'LineWidth', 1);
 hold off
 title('Raw buffer -- green = mov avg, red = mov rms, win = 30 s', ...
     'FontWeight', 'normal')
+title('')
 ax3.TitleFontSizeMultiplier = 1.0;
 ax3.TickDir = 'both';
 
 % set ylimit to exclude outliers
 r = rms(y);
-ylim([-5*r 5*r]);
+ylim([-5.25*r 5.25*r]);
 
 % add subplot label
 [x_pos, y_pos] = norm2trueposition(ax3, 1/12, 7/8);
@@ -205,11 +210,12 @@ plot(t_plot, mov_rms, 'Color', [0.8 0.25 0.25], 'LineWidth', 1);
 hold off
 title('Filtered: bp2-10 -- green = mov avg, red = mov rms, win = 30 s', ...
     'FontWeight', 'normal')
+title('')
 ax4.TitleFontSizeMultiplier = 1.0;
 ax4.TickDir = 'both';
 
 % set ylimit to exclude outliers
-ylim([-10*r 10*r]);
+ylim([-10.5*r 10.5*r]);
 
 % add trigger times and detrigger times
 if trig && (isempty(yf1_trigs) || isempty(yf1_dtrigs))
@@ -265,12 +271,13 @@ plot(t_plot, mov_rms, 'Color', [0.8 0.25 0.25], 'LineWidth', 1);
 hold off
 title('Filtered: dc5 dt bp0.05-0.1 -- green = mov avg, red = mov rms, win = 150 s', ...
     'FontWeight', 'normal')
+title('')
 ax5.TitleFontSizeMultiplier = 1.0;
 ax5.TickDir = 'both';
 
 % set ylimit to exclude outliers
 r = rms(yf2);
-ylim([-5*r 5*r]);
+ylim([-5.25*r 5.25*r]);
 
 % add subplot label
 [x_pos, y_pos] = norm2trueposition(ax5, 1/12, 7/8);
