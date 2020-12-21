@@ -30,7 +30,7 @@ ax2.XTick = ax.XTick;
 % remove ticks beyond the XLim
 where = and(ax2.XTick >= ax2.XLim(1), ax2.XTick <= ax2.XLim(end));
 ax2.XTick = ax2.XTick(where);
-ax2.XTickLabel = ax.XTickLabel;
+ax2.XTickLabel = ax.XTickLabel(where);
 
 ax2.YAxisLocation = 'right';
 ax2.YScale = ax.YScale;
