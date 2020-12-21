@@ -55,7 +55,10 @@ fig.Children(7).XTickLabel = time_labels;
 fig.Children(7).XLabel.String = 'time since origin (hh:mm): 100 s window';
 fig.Children(8).XTick = seconds_since_origin;
 fig.Children(8).XTickLabel = time_labels;
-
+% remove unneccessary titles
+fig.Children(1).Title.String = '';
+fig.Children(2).Title.String = '';
+fig.Children(3).Title.String = '';
 % add the expected arrival time
 % TODO?
 
