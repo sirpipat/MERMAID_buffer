@@ -131,9 +131,9 @@ end
 
 %% plot z-score
 for ii = 1:3
-    y_pos = 0.17 * (3-ii);
-    y_shift = 0.02 * floor(ii/3);
-    ax1 = subplot('Position', [0.15 0.02+y_pos-y_shift 0.8 0.14+y_shift]);
+    y_pos = 0.15 * (3-ii);
+    y_shift = 0.08 * floor(ii/3);
+    ax1 = subplot('Position', [0.15 0.08+y_pos-y_shift 0.8 0.12+y_shift]);
     f_WW = F_WW(ii,:);
     f_MM = F_MM(ii,:);
     [t,E_WW,E_MM] = compare_energy(1, f_WW, f_MM, 'scaled', false);
@@ -151,7 +151,9 @@ for ii = 1:3
     title('')%title(titlename, 'FontWeight', 'normal')
     label_WW = sprintf('WAVEWATCH (%5.3f - %5.3f Hz)', f_WW(1), f_WW(end));
     label_MM = sprintf('MERMAID        (%5.3f - %5.3f Hz)', f_MM(1), f_MM(end));
-    legend(label_WW,label_MM,'Location','SouthOutside')
+    if ii == 3
+        legend('WAVEWATCH','MERMAID','Location','SouthOutside')
+    end
     set(gca, 'FontSize', 10, 'TickDir', 'both');
     ax1.Title.Position(2) = ax1.Title.Position(2) + 0.2;
     
