@@ -116,13 +116,14 @@ plot(t_plot, mov_rms, 'Color', [0.8 0.25 0.25], 'LineWidth', 1);
 hold off
 title('Filtered: dc5 dt bp0.05-0.1 -- green = mov avg, red = mov rms, win = 150 s', ...
     'FontWeight', 'normal')
+title('')
 ax2.TitleFontSizeMultiplier = 1.0;
 ax2.Title.FontWeight = 'normal';
 ax2.TickDir = 'both';
 
 % set ylimit to exclude outliers
 r = rms(xf2);
-ylim([-5*r 5*r]);
+ylim([-5.25*r 5.25*r]);
 
 % add expected arrival for each phase
 vline(ax2, event.expArrivalTime - dt_origin, '--', 1, rgbcolor('deep sky blue'));
