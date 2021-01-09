@@ -13,7 +13,7 @@ function [t, x] = sinewave(dt, amps, freqs, phases, fs)
 % t         equally-spaced time with sampling frequency of fs
 % x         sine waves signal
 %
-% Last modified by Sirawich Pipatprathanporn: 12/05/2020
+% Last modified by Sirawich Pipatprathanporn: 01/07/2021
 
 % convert all inputs to row vectors
 if size(amps, 2) > 1
@@ -28,7 +28,7 @@ end
 
 % creates sine functions
 t = 0:(1/fs):dt;
-x = amps' * sin(2 * pi * (freqs * t + phases));
+x = amps' * sin(2 * pi * (freqs * t) + phases);
 
 % normalizes the funciton
 x = x / length(freqs);
