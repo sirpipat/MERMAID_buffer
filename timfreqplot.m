@@ -32,7 +32,7 @@ function fig = timfreqplot(y, yf1, yf2, yf1_trigs, yf1_dtrigs, dt_begin, ...
 %
 % If save is true, the output file is saved as $EPS.
 % 
-% Last modified by Sirawich Pipatprathanporn: 12/16/2020
+% Last modified by Sirawich Pipatprathanporn: 12/22/2020
 
 % parameter list
 defval('fs', 40.01406);
@@ -102,7 +102,7 @@ t_ph.Format = 'HH:mm';
 ax1.XTickLabel = string(t_ph + seconds(0:900:7200));
 
 % fix the precision of the time on XAxis label
-ax1.XAxis.Label.String = sprintf('time (s): %d s window', round(nfft/fs));
+ax1.XAxis.Label.String = sprintf('time (hh:mm): %d s window', round(nfft/fs));
 
 % add label on the top and right
 ax1.TickDir = 'both';
@@ -255,6 +255,7 @@ ax4.XAxis.Label.Visible = 'off';
 %% plot filtered signal 0.05-0.1 Hz
 ax5 = subplot('Position', [0.075 0.07 0.87 1/6-0.06]);
 ax5 = signalplot(yf2, fs/d_factor, dt_begin, ax5, '', 'left');
+xlabel('time (hh:mm)')
 
 % add moving average
 mov_mean = movmean(yf2, round(fs/d_factor * 150));
