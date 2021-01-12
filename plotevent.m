@@ -17,7 +17,7 @@ function plotevent(arrival, arrival_type, event, endtime, fs)
 % SEE ALSO
 % FINDEVENTS
 %
-% Last modified by Sirawich Pipatprathanporn: 12/02/2020
+% Last modified by Sirawich Pipatprathanporn: 01/11/2021
 defval('arrival_type', 'body')
 defval('endtime', [])
 defval('fs', 40.01406)
@@ -31,15 +31,31 @@ if isempty(endtime)
 else
     last_minute = minutes(endtime - arrival) + 60;
 end
-[sections, intervals] = getsections(getenv('ONEYEAR'), ...
-                                    arrival - minutes(5), ...
-                                    arrival + minutes(last_minute), ...
-                                    fs);
-[x, dt_B, dt_E] = readsection(sections{1}, intervals{1}{1}, ...
-                                    intervals{1}{2}, fs);
+
 dt_origin = datetime(event.PreferredTime,...
    'TimeZone','UTC','Format','uuuu-MM-dd''T''HH:mm:ss.SSSSSS');
 
+% get the proper begin time
+% pick a section containing both origin time and arrival time if possible
+% if not, pick a section containing the arrival time
+% Note 2/fs is subtracted to guarantee 00:00:00 label
+[sections, intervals] = getsections(getenv('ONEYEAR'), ...
+                                    dt_origin - seconds(2/fs) , ...
+                                    arrival + minutes(last_minute), ...
+                                    fs);
+% determine the proper section
+proper_section_no = 1;
+while and(arrival > intervals{proper_section_no}{2}, ...
+          proper_section_no < length(sections))
+    proper_section_no = proper_section_no + 1;
+end
+% read the section
+[x, dt_B, dt_E] = readsection(sections{proper_section_no}, ...
+                              intervals{proper_section_no}{1}, ...
+                              intervals{proper_section_no}{2}, ...
+                              fs);
+
+% bandpass 0.05-0.10 Hz
 d_factor = 5;
 xd = detrend(decimate(detrend(x,1), d_factor),1);
 xf2 = bandpass(xd, fs/d_factor, 0.05, 0.10, 2, 2, 'butter', 'linear');
@@ -90,11 +106,11 @@ ax2 = subplot('Position', [0.09 0.39 0.86 0.1]);
 % time since origin
 dur_B = dt_B - dt_origin;
 ax2 = signalplot(xf2, fs/d_factor, dur_B, ax2, '', 'left');
-ax2.XLim = dur_B + seconds(ax1.XLim);
 ax2.XAxis.Label.String = 'time since origin (hh:mm:ss)';
 
 % add label on the top and right
 ax1.TickDir = 'both';
+ax1.XLim = seconds(ax2.XLim - dur_B);
 ax1.XTick = seconds(ax2.XTick - dur_B);
 ax1.XTick = ax1.XTick(ax1.XTick > seconds(0));
 ax1.XTickLabel = ax2.XTickLabel;
@@ -302,7 +318,7 @@ text(x_pos, y_pos, 'c', 'FontSize', 12);
 ax4 = subplot('Position', [0.77 0.04 0.20 0.25]);
 % plot map
 taupPlotRayPath(ax4, 'ak135', max(0, event.PreferredDepth), ...
-    'P,Pdiff', 'evt', [event.evla event.evlo], ...
+    'P,Pdiff,PKIKP', 'evt', [event.evla event.evlo], ...
     'sta', [event.stla event.stlo]);
 ax4.YLim = [-2 1.5] * 6371;
 
