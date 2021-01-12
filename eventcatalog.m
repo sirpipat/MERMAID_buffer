@@ -1,5 +1,5 @@
 function s = eventcatalog(fname, plt)
-% s = EVENTCATALOG(fname)
+% s = EVENTCATALOG(fname, plt)
 % Reads the event catalog and plots distributions of earthquake magnitudes 
 % and epicentral distances
 %
@@ -44,47 +44,41 @@ words = split(txt);
 words = words(1:end-1);
 words = reshape(words, 16, size(words, 1) / 16)';
 
-arrivals = datetime(words(:,1), 'InputFormat', ...
+arrivals = num2cell(datetime(words(:,1), 'InputFormat', ...
     'uuuu-MM-dd''T''HH:mm:ss.SSSSSS', 'TimeZone', 'UTC', ...
-    'Format', 'uuuu-MM-dd''T''HH:mm:ss.SSSSSS');
+    'Format', 'uuuu-MM-dd''T''HH:mm:ss.SSSSSS'));
 tags = words(:,2);
-stlos = str2double(words(:,3));
-stlas = str2double(words(:,4));
-evlos = str2double(words(:,5));
-evlas = str2double(words(:,6));
-depths = str2double(words(:,7));
+stlos = num2cell(str2double(words(:,3)));
+stlas = num2cell(str2double(words(:,4)));
+evlos = num2cell(str2double(words(:,5)));
+evlas = num2cell(str2double(words(:,6)));
+depths = num2cell(str2double(words(:,7)));
 magtypes = words(:,8);
-mags = str2double(words(:,9));
-dists = str2double(words(:,10));
+mags = num2cell(str2double(words(:,9)));
+dists = num2cell(str2double(words(:,10)));
 phases = words(:,11);
-origins = datetime(words(:,12), 'InputFormat', ...
+origins = num2cell(datetime(words(:,12), 'InputFormat', ...
     'uuuu-MM-dd''T''HH:mm:ss.SSSSSS', 'TimeZone', 'UTC', ...
-    'Format', 'uuuu-MM-dd''T''HH:mm:ss.SSSSSS');
-exparrivals = datetime(words(:,13), 'InputFormat', ...
+    'Format', 'uuuu-MM-dd''T''HH:mm:ss.SSSSSS'));
+exparrivals = num2cell(datetime(words(:,13), 'InputFormat', ...
     'uuuu-MM-dd''T''HH:mm:ss.SSSSSS', 'TimeZone', 'UTC', ...
-    'Format', 'uuuu-MM-dd''T''HH:mm:ss.SSSSSS');
-traveltimes = duration(words(:,14));
-diffs = duration(words(:,15));
+    'Format', 'uuuu-MM-dd''T''HH:mm:ss.SSSSSS'));
+traveltimes = num2cell(duration(words(:,14)));
+diffs = num2cell(duration(words(:,15)));
 ids = words(:,16);
 
-s.tags = tags;
-s.stlos = stlos;
-s.stlas = stlas;
-s.evlos = evlos;
-s.evlas = evlas;
-s.depths = depths;
-s.magtypes = magtypes;
-s.mags = mags;
-s.dists = dists;
-s.phases = phases;
-s.origins = origins;
-s.exparrivals = exparrivals;
-s.traveltimes = traveltimes;
-s.diffs = diffs;
-s.ids = ids;
+% convert to struct
+s = struct('arrivals', arrivals, 'tags', tags, 'stlos', stlos, ...
+           'stlas', stlas, 'evlos', evlos, 'evlas', evlas, ...
+           'depths', depths, 'magtypes', magtypes, 'mags', mags, ...
+           'dists', dists, 'phases', phases, 'origins', origins, ...
+           'exparrivals', exparrivals, 'traveltimes', traveltimes, ...
+           'diffs', diffs, 'ids', ids);
 
 if plt
     tags = strcell(words(:,2));
+    mags = str2double(words(:,9));
+    dists = str2double(words(:,10));
     where = (sum(tags == 'DET', 2) == 3);
     
     % plot
