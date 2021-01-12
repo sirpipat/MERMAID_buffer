@@ -31,7 +31,7 @@ function matchevents()
 % SEE ALSO:
 % READEVENTLIST, FINDEVENTS, PLOTEVENT
 %
-% Last modified by Sirawich Pipatprathanporn: 09/24/2020
+% Last modified by Sirawich Pipatprathanporn: 01/12/2021
 [b,e,a,tg] = readeventlist();
 
 % store information of events
@@ -44,6 +44,7 @@ stlas = [];
 evlos = [];
 evlas = [];
 depths = [];
+magtypes = cell(0);
 mags = [];
 phases = cell(0);
 dists = [];
@@ -88,6 +89,7 @@ for ii = 1:size(a,1)
             evlos = [evlos evlo];
             evlas = [evlas evla];
             depths = [depths depth];
+            magtypes{size(magtypes,2)+1} = events(jj).PreferredMagnitudeType;
             mags = [mags events(jj).PreferredMagnitudeValue];
             phases{size(phases,2)+1} = events(jj).phase{kk};
             dists = [dists events(jj).distance];
@@ -128,18 +130,21 @@ for ii = 1:size(arrivals,2)
     % 5.  event longitudes
     % 6.  event latitudes
     % 7.  event depths
-    % 8.  magnitudes
-    % 9.  distances
-    % 10. phases
-    % 11. event origin times
-    % 12. expected arrival times
-    % 13. travel times
-    % 14. difference
-    % 15. PublicId
+    % 8.  preferred magnitude types
+    % 9.  magnitudes
+    % 10. distances
+    % 11. phases
+    % 12. event origin times
+    % 13. expected arrival times
+    % 14. travel times
+    % 15. difference
+    % 16. PublicId
     %
-    fprintf(fid,'%s %3s %7.2f %7.2f %7.2f %7.2f %6.2f %5.2f %6.2f %+5s %+26s %+26s %+9s %+9s %+8s\n',...
-            string(arrivals(ii)),tags{ii},stlos(ii),stlas(ii),evlos(ii),evlas(ii),depths(ii),mags(ii),...
-            dists(ii),phases{ii},origin_strings(ii),exp_strings(ii),travel_time_strings(ii),diff_strings(ii),ids{ii});
+    fprintf(fid,'%s %3s %7.2f %7.2f %7.2f %7.2f %6.2f %4s %5.2f %6.2f %+5s %+26s %+26s %+9s %+9s %+8s\n',...
+            string(arrivals(ii)),tags{ii},stlos(ii),stlas(ii),...
+            evlos(ii),evlas(ii),depths(ii),magtypes{ii},...
+            mags(ii),dists(ii),phases{ii},origin_strings(ii),...
+            exp_strings(ii),travel_time_strings(ii),diff_strings(ii),ids{ii});
 end
 fclose(fid);
 end
