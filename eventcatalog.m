@@ -1,5 +1,5 @@
-function s = eventcatalog(fname, plt)
-% s = EVENTCATALOG(fname, plt)
+function [s, a, evs] = eventcatalog(fname, plt)
+% [s, a, evs] = EVENTCATALOG(fname, plt)
 % Reads the event catalog and plots distributions of earthquake magnitudes 
 % and epicentral distances
 %
@@ -9,25 +9,44 @@ function s = eventcatalog(fname, plt)
 %
 % OUTPUT:
 % s         struct with the following fields
-%           1.  arrivals        actual arrival times
-%           2.  tags            tags
-%           3.  stlos           station longitudes
-%           4.  stlas           station latitudes
-%           5.  evlos           event longitudes
-%           6.  evlas           event latitudes
-%           7.  depths          event depths
-%           8.  magtypes        preferred magnitude types
-%           9.  mags            magnitudes
-%           10. dists           distances
-%           11. phases          phases
-%           12. origins         event origin times
-%           13. exparrivals     expected arrival times
-%           14. traveltimes     travel times
-%           15. diffs           difference
-%           16. ids             PublicId
+%           1.  arrival         actual arrival time
+%           2.  tag             tag
+%           3.  stlo            station longitude
+%           4.  stla            station latitude
+%           5.  evlo            event longitude
+%           6.  evla            event latitude
+%           7.  depth           event depth
+%           8.  magtype         preferred magnitude type
+%           9.  mag             magnitude
+%           10. dist            distance
+%           11. phase           phase
+%           12. origin          event origin time
+%           13. exparrival      expected arrival time
+%           14. traveltime      travel time
+%           15. diff            difference
+%           16. id              PublicId
+% a         arriaval times
+% evs       event lists: a struct with the following fields
+%               PreferredTime
+%               PreferredLatitude
+%               PreferredLongitude
+%               PreferredDepth
+%               PreferredMagnitudeType
+%               PreferredMagnitudeValue
+%               Phase
+%               travelTime
+%               expArrivalTime
+%               diff
+%               stlo
+%               stla
+%               evlo
+%               evla
+%               distance
+%               id
+%           which is compatible for PLOTEVENT
 %
 % SEE ALSO:
-% MATCHEVENTS
+% MATCHEVENTS, FINDEVENT, PLOTEVENT
 % 
 % Last modified by Sirawich Pipatprathanporn: 01/12/2021
 
@@ -44,9 +63,11 @@ words = split(txt);
 words = words(1:end-1);
 words = reshape(words, 16, size(words, 1) / 16)';
 
-arrivals = num2cell(datetime(words(:,1), 'InputFormat', ...
+a = datetime(words(:,1), 'InputFormat', ...
     'uuuu-MM-dd''T''HH:mm:ss.SSSSSS', 'TimeZone', 'UTC', ...
-    'Format', 'uuuu-MM-dd''T''HH:mm:ss.SSSSSS'));
+    'Format', 'uuuu-MM-dd''T''HH:mm:ss.SSSSSS');
+
+arrivals = num2cell(a);
 tags = words(:,2);
 stlos = num2cell(str2double(words(:,3)));
 stlas = num2cell(str2double(words(:,4)));
@@ -67,13 +88,28 @@ traveltimes = num2cell(duration(words(:,14)));
 diffs = num2cell(duration(words(:,15)));
 ids = words(:,16);
 
-% convert to struct
-s = struct('arrivals', arrivals, 'tags', tags, 'stlos', stlos, ...
-           'stlas', stlas, 'evlos', evlos, 'evlas', evlas, ...
-           'depths', depths, 'magtypes', magtypes, 'mags', mags, ...
-           'dists', dists, 'phases', phases, 'origins', origins, ...
-           'exparrivals', exparrivals, 'traveltimes', traveltimes, ...
-           'diffs', diffs, 'ids', ids);
+% convert to struct (s)
+s = struct('arrival', arrivals, 'tag', tags, 'stlo', stlos, ...
+           'stla', stlas, 'evlo', evlos, 'evla', evlas, ...
+           'depth', depths, 'magtype', magtypes, 'mag', mags, ...
+           'dist', dists, 'phase', phases, 'origin', origins, ...
+           'exparrival', exparrivals, 'traveltime', traveltimes, ...
+           'diff', diffs, 'id', ids);
+% convert to struct (evs)
+evs = struct('PreferredTime', cellstr(string(origins)), ...
+             'PreferredLatitude', stlas, ...
+             'PreferredLongitude', stlos, ...
+             'PreferredDepth', depths, ...
+             'PreferredMagnitudeType', magtypes, ...
+             'PreferredMagnitudeValue', mags, ...
+             'phase', num2cell(phases), ...
+             'travelTime', num2cell(seconds(duration(words(:,14)))), ...
+             'expArrivalTime', exparrivals, ...
+             'diff', diffs, ...
+             'stlo', stlos, 'stla', stlas, ...
+             'evlo', evlos, 'evla', evlas, ...
+             'distance', dists, ...
+             'id', ids);
 
 if plt
     tags = strcell(words(:,2));
