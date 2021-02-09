@@ -2,13 +2,13 @@ function fndex = getfndex(cell, value)
 % index = GETFNDEX(cell, value)
 %
 % INPUT:
-% array     sorted cell
+% cell      sorted cell
 % value     value of interest, must be the same datatype as array's members
 %
 % OUTPUT:
 % fndex     index of the cell{index} closest to the value
 %
-% Last modified by Sirawich Pipatprathanporn: 07/06/2020
+% Last modified by Sirawich Pipatprathanporn: 02/09/2021
 
 a = size(cell);
 a_size = a(2);
