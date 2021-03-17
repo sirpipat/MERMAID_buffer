@@ -11,13 +11,15 @@ function compare_p2l_mermaid(option)
 % OUTOUT
 % no output beside figures saved at $EPS
 % 
-% Last modified by Sirawich Pipatprathanporn: 11/18/2020
+% Last modified by Sirawich Pipatprathanporn: 03/17/2021
 
 % WAVEWATCH spectral density files
 % MERMAID spectral density files
 if strcmp(option, 'weekly')
-    WWdir = '/Users/sirawich/research/processed_data/weekly_WWSD_profiles_before_conversion/';
-    SDdir = '/Users/sirawich/research/processed_data/weekly_SD_profiles_before_conversion/';
+    WWdir = '/Users/sirawich/research/processed_data/weekly_WWSD_profiles/';
+    SDdir = '/Users/sirawich/research/processed_data/weekly_SD_profiles/';
+    % WWdir = '/Users/sirawich/research/processed_data/weekly_WWSD_profiles_before_conversion/';
+    % SDdir = '/Users/sirawich/research/processed_data/weekly_SD_profiles_before_conversion/';
 elseif strcmp(option, 'biweekly')
     WWdir = '/Users/sirawich/research/processed_data/biweekly_WWSD_profiles/';
     SDdir = '/Users/sirawich/research/processed_data/biweekly_SD_profiles/';
@@ -131,7 +133,7 @@ for ii = 1:pndex
     hold off
     grid on
     xlim([0.0099 2.0001]);
-    ylim([-20 140]);
+    ylim([-60 120]);
     ax1.XTick = sort([0.01 0.02 0.04 0.1 0.2 0.4 1 2]);
     ax1.XTickLabel = string(round(ax1.XTick, 2));
     xlabel('frequency (Hz)');
@@ -170,7 +172,7 @@ for ii = 1:pndex
     xlabel('WAVEWATCH frequency (Hz)');
     ylabel('10 log_{10} spectral density');
     ax2.TickDir = 'both';
-    
+    ax2.YLim = [-110 -20];
     ax2s = doubleaxes(ax2);
     inverseaxis(ax2s.XAxis, 'WAVEWATCH period (s)');
     
