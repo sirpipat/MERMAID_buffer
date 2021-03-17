@@ -12,7 +12,7 @@ function ax = hline(ax,y,linestyle,linewidth,linecolor)
 % OUTPUT:
 % ax            The handling axes of the horizontal line
 %
-% Last modified by Sirawich Pipatprathanporn, 11/10/2020
+% Last modified by Sirawich Pipatprathanporn, 02/25/2021
 
 defval('linestyle','-');
 defval('linewidth',0.5);
@@ -29,5 +29,4 @@ h = plot([ax.XLim(1) ax.XLim(2)], [y; y], 'LineStyle', linestyle, ...
     'LineWidth', linewidth, 'Color', linecolor);
 % this last part is so that it doesn't show up on legends
 set(h,'tag','vline','handlevisibility','off');
-hold off
 end
