@@ -48,7 +48,7 @@ function [s, a, evs] = eventcatalog(fname, plt)
 % SEE ALSO:
 % MATCHEVENTS, FINDEVENT, PLOTEVENT
 % 
-% Last modified by Sirawich Pipatprathanporn: 01/12/2021
+% Last modified by Sirawich Pipatprathanporn: 03/18/2021
 
 defval('fname', ...
     '/Users/sirawich/research/processed_data/events/catalog_events.txt');
@@ -116,6 +116,7 @@ if plt
     mags = str2double(words(:,9));
     dists = str2double(words(:,10));
     where = (sum(tags == 'DET', 2) == 3);
+    where3 = (sum(tags == '***', 2) == 3);
     
     % plot
     figure(2)
@@ -135,6 +136,8 @@ if plt
     hold on
     p_detect = scatter(dists(where), mags(where), 80, 'Marker', 'p', ...
         'MarkerEdgeColor', 'k', 'MarkerFaceColor', [.95 .95 0.1]);
+    p_3 = scatter(dists(where3), mags(where3), 50, 'Marker', '^', ...
+        'MarkerEdgeColor', 'k', 'MarkerFaceColor', [.95 .1 0.1]);
     xlabel('epicentral distance (degree)');
     ylabel('magnitude');
     ax1.XLim = [0 180];
@@ -142,8 +145,8 @@ if plt
     ax1.Box = 'on';
     ax1.TickDir = 'both';
     grid on
-    legend([p_detect p_not_detect], 'automatically reported by MERMAID', ...
-        'found manually in the buffer');
+    legend([p_detect p_not_detect, p_3], 'automatically reported by MERMAID', ...
+        'found manually in the buffer', '3 stars');
 
     ax2 = subplot('Position', [0.75 0.1 0.2 0.6]);
     histogram(mags, 'BinEdges', 4.45:0.1:8.05, 'Orientation', 'horizontal', ...
