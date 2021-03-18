@@ -6,6 +6,9 @@ function ax = mapevents(s)
 % INPUT:
 % s         events struct
 %
+% OUTPUT:
+% ax        axes handle of the plot
+%
 % EXAMPLE:
 % [s, ~, ~] = eventcatalog();
 % ax = mapevents(s);
