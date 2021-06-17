@@ -26,7 +26,7 @@ function [ax,ax2,axb] = specdensplot_heatmap(ax,up,np,F,Swbins,Swcounts,...
 % SEE ALSO
 % SPECDENSPLOT_SECTION
 %
-% Last modified by Sirawich Pipatprathanporn: 10/22/2020
+% Last modified by Sirawich Pipatprathanporn: 06/17/2021
 
 defval('sfax',10)
 defval('Fscale','log')
@@ -93,12 +93,12 @@ hold off
 hold on
 if strcmp(Fscale, 'log')
     ax = vline(ax, log10([0.05, 0.1] / F(1)) * F(end) / ...
-        log10(F(end)/F(1)), '--', 1, rgbcolor('green'));
+        log10(F(end)/F(1)), '-', 1, rgbcolor('green'));
     ax = vline(ax, log10([2, 10] / F(1)) * F(end) / ...
-        log10(F(end)/F(1)), '--', 1, rgbcolor('brown'));
+        log10(F(end)/F(1)), '-', 1, rgbcolor('brown'));
 else
-    ax = vline(ax, [0.05, 0.1], '--', 1, rgbcolor('green'));
-    ax = vline(ax, [2, 10], '--', 1, rgbcolor('brown'));
+    ax = vline(ax, [0.05, 0.1], '-', 1, rgbcolor('green'));
+    ax = vline(ax, [2, 10], '-', 1, rgbcolor('brown'));
 end
 hold off
 
@@ -110,9 +110,9 @@ inverseaxis(ax2.XAxis, 'period (s)');
 ax2.Title.String = plt_title;
 
 % add annotation about uptime and noisetime
-axb = addbox(ax, [0.6 0.75 0.38 0.23]);
-[x_up, y_up] = norm2trueposition(axb, 0.05, 0.75);
-[x_np, y_np] = norm2trueposition(axb, 0.05, 0.35);
-text(x_up, y_up, sprintf('Uptime: %2.2f %%', up), 'FontSize', 9);
-text(x_np, y_np, sprintf('Signal: %2.2f %%', 100-np), 'FontSize', 9);
+axb = []; % addbox(ax, [0.6 0.75 0.38 0.23]);
+% [x_up, y_up] = norm2trueposition(axb, 0.05, 0.75);
+% [x_np, y_np] = norm2trueposition(axb, 0.05, 0.35);
+% text(x_up, y_up, sprintf('Uptime: %2.2f %%', up), 'FontSize', 9);
+% text(x_np, y_np, sprintf('Signal: %2.2f %%', 100-np), 'FontSize', 9);
 end
