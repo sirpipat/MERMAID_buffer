@@ -1,7 +1,7 @@
 function fig = timfreqplot(y, yf1, yf2, yf1_trigs, yf1_dtrigs, dt_begin, ...
-    nfft, fs, lwin, olap, sfax, beg, unit, p, save, trig, fscale)
+    nfft, fs, lwindow, olap, sfax, beg, unit, p, save, trig, fscale)
 % fig = TIMFREQPLOT(y, yf1, yf2, yf1_trigs, yf1_dtrigs, dt_begin, nfft, ...
-%                   fs, lwin, olap, sfax, beg, unit, p, save, trig, ...
+%                   fs, lwindow, olap, sfax, beg, unit, p, save, trig, ...
 %                   fscale)
 % plot seismogram, power spectral density, spectograms, and filtered
 % seismogram
@@ -15,8 +15,8 @@ function fig = timfreqplot(y, yf1, yf2, yf1_trigs, yf1_dtrigs, dt_begin, ...
 % dt_begin      Beginning datetime
 % nfft          Number of FFT points        [default: 1024]
 % fs            Sampling frequency          [default: 40.01406]
-% lwin          Window length, in samples   [default: nfft]
-% olap          Window overlap, in percent  [default: 70]
+% lwindow          window length, in samples   [default: nfft]
+% olap          window overlap, in percent  [default: 70]
 % sfax          Y-axis scaling factor       [default: 10]
 % beg           Signal beginning            [Default: 0]
 % unit          String with the unit name   [Default: 's']
@@ -32,12 +32,12 @@ function fig = timfreqplot(y, yf1, yf2, yf1_trigs, yf1_dtrigs, dt_begin, ...
 %
 % If save is true, the output file is saved as $EPS.
 % 
-% Last modified by Sirawich Pipatprathanporn: 12/22/2020
+% Last modified by Sirawich Pipatprathanporn: 06/17/2021
 
 % parameter list
 defval('fs', 40.01406);
 defval('nfft', 1024);
-defval('lwin', 1024);
+defval('lwindow', 1024);
 defval('olap', 70);
 defval('sfax', 10);
 defval('beg', 0);
@@ -88,7 +88,7 @@ ax0.YAxis.Visible = 'off';
 
 %% plot spectrogram
 ax1 = subplot('Position', [0.075 4/7 0.42 3/7-0.12]);
-timspecplot_ns(y,nfft,fs,lwin,wolap,beg,unit,fscale);
+timspecplot_ns(y,nfft,fs,lwindow,wolap,beg,unit,fscale);
 title('');
 
 % insert colorbar
@@ -115,7 +115,7 @@ text(x_pos, y_pos, 'a', 'FontSize', 12);
 
 %% plot power spectral density profile
 ax2 = subplot('Position', [0.615 4/7 0.33 3/7-0.12]);
-[p,xl,yl,F,SD,Ulog,Llog]=specdensplot(y,nfft,fs,lwin,olap,sfax,unit);
+[p,xl,yl,F,SD,Ulog,Llog]=specdensplot(y,nfft,fs,lwindow,olap,sfax,unit);
 grid on
 
 xlim([0.0095 F(end)]);
@@ -151,8 +151,8 @@ text(x_pos, y_pos, 'b', 'FontSize', 12);
 
 % add frequency bands label
 hold on
-ax2 = vline(ax2, [0.05, 0.1], '--', 1, rgbcolor('green'));
-ax2 = vline(ax2, [2, 10], '--', 1, rgbcolor('brown'));
+ax2 = vline(ax2, [0.05, 0.1], '-', 1, rgbcolor('green'));
+ax2 = vline(ax2, [2, 10], '-', 1, rgbcolor('brown'));
 hold off
 
 %% plot raw signal
@@ -172,9 +172,10 @@ mov_rms = movmean(y_sq, round(fs * 30)) .^ 0.5;
 hold on
 plot(t_plot, mov_rms, 'Color', [0.8 0.25 0.25], 'LineWidth', 1);
 hold off
-title('Raw buffer -- green = mov avg, red = mov rms, win = 30 s', ...
+title('raw buffer -- green = mov avg, red = mov rms, window = 30 s', ...
     'FontWeight', 'normal')
-title('')
+%title('')
+ylabel('counts')
 ax3.TitleFontSizeMultiplier = 1.0;
 ax3.TickDir = 'both';
 
@@ -208,9 +209,10 @@ mov_rms = movmean(yf1_sq, round(fs * 30)) .^ 0.5;
 hold on
 plot(t_plot, mov_rms, 'Color', [0.8 0.25 0.25], 'LineWidth', 1);
 hold off
-title('Filtered: bp2-10 -- green = mov avg, red = mov rms, win = 30 s', ...
+title('filtered: bp2-10 -- green = mov avg, red = mov rms, window = 30 s', ...
     'FontWeight', 'normal')
-title('')
+%title('')
+ylabel('counts')
 ax4.TitleFontSizeMultiplier = 1.0;
 ax4.TickDir = 'both';
 
@@ -236,10 +238,10 @@ if trig
 
     hold on
     for ii = 1:length(yf1_trigs)
-        vline(ax4, yf1_trigs(ii), '--', 1, [0.9 0.5 0.2]);
+        vline(ax4, yf1_trigs(ii), '-', 1, [0.9 0.5 0.2]);
     end
     for ii = 1:length(yf1_dtrigs)
-        vline(ax4, yf1_dtrigs(ii), '--', 1, [0.2 0.5 0.9]);
+        vline(ax4, yf1_dtrigs(ii), '-', 1, [0.2 0.5 0.9]);
     end
     hold off
 end
@@ -270,9 +272,10 @@ mov_rms = movmean(yf2_sq, round(fs/d_factor * 150)) .^ 0.5;
 hold on
 plot(t_plot, mov_rms, 'Color', [0.8 0.25 0.25], 'LineWidth', 1);
 hold off
-title('Filtered: dc5 dt bp0.05-0.1 -- green = mov avg, red = mov rms, win = 150 s', ...
+title('filtered: dc5 dt bp0.05-0.1 -- green = mov avg, red = mov rms, window = 150 s', ...
     'FontWeight', 'normal')
-title('')
+%title('')
+ylabel('counts')
 ax5.TitleFontSizeMultiplier = 1.0;
 ax5.TickDir = 'both';
 

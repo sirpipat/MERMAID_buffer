@@ -14,7 +14,7 @@ function fig = timfreqplot_event(ev, dt_begin)
 % SEE ALSO
 % TIMFREQPLOT
 %
-% Last modified by Sirawich Pipatprathanporn, 12/15/2020
+% Last modified by Sirawich Pipatprathanporn, 06/17/2021
 
 % reference spectral density files
 SDdir = '/Users/sirawich/research/processed_data/monthly_SD_profiles_before_conversion/';
@@ -31,7 +31,8 @@ unit = 's';
 p = [];
 
 % read the neccessary part of the buffer
-[sections, intervals] = getsections(getenv('ONEYEAR'), dt_begin, dt_begin + hours(1), fs);
+% Note 2/fs is subtracted to guarantee 00:00:00 label
+[sections, intervals] = getsections(getenv('ONEYEAR'), dt_begin - seconds(2/fs), dt_begin + hours(1), fs);
 [y, dt_begin, dt_end] = readsection(sections{1}, intervals{1}{1}, intervals{1}{2}, fs);
 
 % plot the spectrogram, power spectral density plot, and seismograms
@@ -39,7 +40,7 @@ fig = timfreqplot(y, [], [], [], [], dt_begin, nfft, fs, lwin, olap, ...
     sfax, beg, unit, p, false, false);
 
 % make time axis relative to the origin time
-dt_origin = datetime(ev.Origins.Time, 'TimeZone', 'UTC', 'Format', ...
+dt_origin = datetime(ev.PreferredTime, 'TimeZone', 'UTC', 'Format', ...
     'uuuu-MM-dd''T''HH:mm:ss.SSSSSS');
 time_labels = string(duration((0:5) * minutes(15), 'Format', 'hh:mm'));
 % make time axis relative to the origin time for seismograms
@@ -50,15 +51,17 @@ fig.Children(1).XTickLabel = time_labels;
 fig.Children(1).XLabel.String = 'time since origin (hh:mm)';
 % make time axis relative to the origin time for spectrogram
 seconds_since_origin = seconds(dt_origin + (0:5) * minutes(15) - dt_begin);
+fig.Children(7).XLim = seconds(fig.Children(1).XLim - dt_origin);
 fig.Children(7).XTick = seconds_since_origin;
 fig.Children(7).XTickLabel = time_labels;
 fig.Children(7).XLabel.String = 'time since origin (hh:mm): 100 s window';
+fig.Children(8).XLim = seconds(fig.Children(1).XLim - dt_origin);
 fig.Children(8).XTick = seconds_since_origin;
 fig.Children(8).XTickLabel = time_labels;
 % remove unneccessary titles
-fig.Children(1).Title.String = '';
-fig.Children(2).Title.String = '';
-fig.Children(3).Title.String = '';
+%fig.Children(1).Title.String = '';
+%fig.Children(2).Title.String = '';
+%fig.Children(3).Title.String = '';
 % add the expected arrival time
 % TODO?
 

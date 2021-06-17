@@ -14,7 +14,7 @@ function hoursection_plot(filename, nfft, fs, lwin, olap, sfax, beg, unit, fscal
 %
 % NO OUTPUT (the plot saved at $EPS)
 %
-% Last modified by Sirawich Pipatprathanporn: 12/21/2020
+% Last modified by Sirawich Pipatprathanporn: 06/17/2021
 
 % default parameter list
 defval('nfft', 1024);

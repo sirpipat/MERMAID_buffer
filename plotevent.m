@@ -82,7 +82,7 @@ ax0.XAxis.Visible = 'off';
 ax0.YAxis.Visible = 'off';
  
 %% plot spectrogram
-ax1 = subplot('Position', [0.09 0.58 0.86 0.22]);
+ax1 = subplot('Position', [0.08 0.60 0.87 0.22]);
 
 nfft = round(fs * 100);
 lwin = nfft;
@@ -93,7 +93,7 @@ colormap(jet(256));
 % insert colorbar
 c = colorbar('NorthOutside');
 c.Label.String = 'spectral density (energy/Hz)';
-c.Position = [0.0897 0.8359 0.8600 0.0178];
+c.Position = [0.0800 0.8359 0.8700 0.0178];
 c.TickDirection = 'both';
 
 % fix the precision of the time on XAxis label
@@ -104,7 +104,7 @@ ax1.XAxis.Label.String = sprintf('time since origin (hh:mm:ss): %d s window', ro
 text(x_pos, y_pos, 'a', 'FontSize', 12);
 
 %% plot filtered seismogram 0.05-0.1 Hz
-ax2 = subplot('Position', [0.09 0.39 0.86 0.1]);
+ax2 = subplot('Position', [0.08 0.37 0.87 0.14]);
 % time since origin
 dur_B = dt_B - dt_origin;
 ax2 = signalplot(xf2, fs/d_factor, dur_B, ax2, '', 'left');
@@ -117,6 +117,8 @@ ax1.XTick = seconds(ax2.XTick - dur_B);
 ax1.XTick = ax1.XTick(ax1.XTick > seconds(0));
 ax1.XTickLabel = ax2.XTickLabel;
 ax1s = doubleaxes(ax1);
+ax1s.XTickLabel = [];
+
 axes(ax2)
 
 % add moving average
@@ -132,19 +134,20 @@ mov_rms = movmean(xf2_sq, round(fs/d_factor * 150)) .^ 0.5;
 hold on
 plot(t_plot, mov_rms, 'Color', [0.8 0.25 0.25], 'LineWidth', 1);
 hold off
-title('Filtered: dc5 dt bp0.05-0.1 -- green = mov avg, red = mov rms, win = 150 s', ...
+title('Filtered: dc5 dt bp0.05-0.1 -- green = mov avg, red = mov rms, window = 150 s', ...
     'FontWeight', 'normal')
-title('')
+%title('')
+ylabel('counts')
 ax2.TitleFontSizeMultiplier = 1.0;
 ax2.Title.FontWeight = 'normal';
 ax2.TickDir = 'both';
 
 % set ylimit to exclude outliers
 r = rms(xf2);
-ylim([-5.25*r 5.25*r]);
+ylim([-6*r 6*r]);
 
 % add expected arrival for each phase
-vline(ax2, event.expArrivalTime - dt_origin, '--', 1, rgbcolor('deep sky blue'));
+vline(ax2, event.expArrivalTime - dt_origin, '-', 1, rgbcolor('deep sky blue'));
 ynorm = 0.9;
 t_curr = dur_B;
 for ii = 1:size(event.expArrivalTime,2)
@@ -166,7 +169,7 @@ end
 % add surface wave arrival
 R_speed = [5 4 3 1.5];
 R_arrival = seconds(event.distance/180 * pi * 6371 ./ R_speed);
-vline(ax2, R_arrival, '--', 1, rgbcolor('orange'));
+vline(ax2, R_arrival, '-', 1, rgbcolor('orange'));
 for ii = 1:size(R_arrival,2)
     if (R_arrival(ii) - t_curr > 1/8 * (ax2.XLim(2) - ax2.XLim(1)))
         ynorm = 0.9;
@@ -187,7 +190,7 @@ end
 text(x_pos, y_pos, 'b', 'FontSize', 12);
 
 %% plot map with event focal mechanism and MERMAIDS
-ax3 = subplot('Position', [0.09 0.04 0.60 0.25]);
+ax3 = subplot('Position', [0.08 0.04 0.61 0.25]);
 % plot tcoastlines
 [axlim,handl,XYZ] = plotcont([0 90], [360 -90], 1, 0);
 % plot plate boundaries
@@ -308,6 +311,7 @@ ax3.YTickLabel = {'-90', '-75', '-60', '-45', '-30', '-15', '0', '15', ...
 ax3.TickDir = 'both';
 ax3s = doubleaxes(ax3);
 ax3s.TickDir = 'both';
+ax3s.XTickLabel = [];
 
 % add box
 ax3.Box = 'on';
