@@ -11,7 +11,7 @@ function compare_p2l_mermaid(option)
 % OUTOUT
 % no output beside figures saved at $EPS
 % 
-% Last modified by Sirawich Pipatprathanporn: 03/17/2021
+% Last modified by Sirawich Pipatprathanporn: 06/20/2021
 
 % WAVEWATCH spectral density files
 % MERMAID spectral density files
@@ -114,22 +114,24 @@ for ii = 1:pndex
     
     % plot SD
     ax1 = subplot('Position', [0.1 0.16 0.35 0.64]);
-    p2 = semilogx(f * f_scale, sdU + y_shift, '^-', 'Color', ...
-        rgbcolor('silver'), 'MarkerFaceColor', rgbcolor('silver'));
+    p2 = semilogx(f * f_scale, sdU + y_shift, '.-', ...'MarkerSize', 3, ...
+        'Color', rgbcolor('silver'), 'MarkerFaceColor', rgbcolor('silver'));
     hold on
-    p3 = semilogx(f * f_scale, sdL + y_shift, '^-', 'Color', ...
-        rgbcolor('silver'), 'MarkerFaceColor', rgbcolor('silver'));
-    p1 = semilogx(f * f_scale, sd + y_shift, '^-k', 'MarkerFaceColor', 'k');
+    p3 = semilogx(f * f_scale, sdL + y_shift, '.-', ...'MarkerSize', 3, ...
+        'Color', rgbcolor('silver'), 'MarkerFaceColor', rgbcolor('silver'));
+    p1 = semilogx(f * f_scale, sd + y_shift, '^-k', 'MarkerSize', 5, ...
+        'MarkerFaceColor', 'k');
     p4 = semilogx(m_f, m_sd, '.-r');
     p5 = semilogx(m_f, m_sdU, '.-', 'Color', rgbcolor('gray'));
     p6 = semilogx(m_f, m_sdL, '.-', 'Color', rgbcolor('gray'));
     % plot f_MH = 2 f_WW
     where = and(m_f >= 2*f(1), m_f <= 2*f(end));
-    p7 = semilogx(m_f(where), m_sd(where), 'v-r', 'MarkerFaceColor', 'r');
-    p8 = semilogx(m_f(where), m_sdU(where), 'v-', 'Color', ...
-        rgbcolor('gray'), 'MarkerFaceColor', rgbcolor('gray'));
-    p9 = semilogx(m_f(where), m_sdL(where), 'v-', 'Color', ...
-        rgbcolor('gray'), 'MarkerFaceColor', rgbcolor('gray'));
+    p7 = semilogx(m_f(where), m_sd(where), 'v-r', 'MarkerSize', 5, ...
+        'MarkerFaceColor', 'r');
+    p8 = semilogx(m_f(where), m_sdU(where), '.-', 'MarkerSize', 3, ...
+        'Color', rgbcolor('gray'), 'MarkerFaceColor', rgbcolor('gray'));
+    p9 = semilogx(m_f(where), m_sdL(where), '.-', 'MarkerSize', 3, ...
+        'Color', rgbcolor('gray'), 'MarkerFaceColor', rgbcolor('gray'));
     hold off
     grid on
     xlim([0.0099 2.0001]);
@@ -156,25 +158,26 @@ for ii = 1:pndex
     
     title(ax1s,sprintf('%s (%s)\nspectral density', titles{ii}, option));
     axeslabel(ax1, 0.1, 0.9, 'a', 'FontSize', 12);
+        
+    % sends the vertical lines to the back
+    ax1.Children = ax1.Children([1 6 7 8 9 10 11 12 13 14 2 3 4 5]);
     
     % plot offset
     ax2 = subplot('Position', [0.6 0.16 0.35 0.64]); 
-    semilogx(f, offset, '^-k', 'MarkerFaceColor', 'k');
+    semilogx(2 * f, offset, '^-k', 'MarkerFaceColor', 'k', 'MarkerSize', 5);
     xlim([0.0099 2.0001]);
     ylim([50 110]);
     ax2.XTick = sort([0.01 0.1 0.2 1 2 f(1) f(end)]);
     ax2.XTickLabel = string(round(ax2.XTick, 2));
     hold on
-    vline(ax2, [f(1) f(end)], '-', 1, [1 0.5 1]);
-    %vline(ax2, 0.2, '--', 1, [1 0.5 0]);
     hold off
     grid on
-    xlabel('WAVEWATCH frequency (Hz)');
+    xlabel('MERMAID frequency (Hz)');
     ylabel('10 log_{10} spectral density');
     ax2.TickDir = 'both';
     ax2.YLim = [-110 -20];
     ax2s = doubleaxes(ax2);
-    inverseaxis(ax2s.XAxis, 'WAVEWATCH period (s)');
+    inverseaxis(ax2s.XAxis, 'MERMAID period (s)');
     
     title(ax2s,sprintf('(f-scale = %.3f, SD-shift = %.3f)\nspectral density offset', ...
         f_scale, y_shift));
