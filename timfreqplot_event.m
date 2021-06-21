@@ -73,12 +73,11 @@ data = fscanf(fid,'%f %f %f %f %f',[5 Inf]);
 fclose(fid);
 % add reference spectral density of the month
 ax = fig.Children(8);
-axes(ax)
-hold on
-semilogx(data(1,:),data(2,:),'Color',rgbcolor('deep sky blue'));
-semilogx(data(1,:),data(4,:),'Color',rgbcolor('gray'));
-semilogx(data(1,:),data(5,:),'Color',rgbcolor('gray'));
-hold off
+hold(ax, 'on');
+semilogx(ax, data(1,:),data(2,:),'Color',rgbcolor('deep sky blue'));
+semilogx(ax, data(1,:),data(4,:),'Color',rgbcolor('gray'));
+semilogx(ax, data(1,:),data(5,:),'Color',rgbcolor('gray'));
+hold(ax, 'off');
 
 % save figure
 filename = strcat(mfilename, '_', replace(string(dt_begin), ':', '_'), '.eps');
