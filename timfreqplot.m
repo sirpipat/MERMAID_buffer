@@ -110,7 +110,8 @@ ax1s = doubleaxes(ax1);
 ax1s.YAxis.Visible = 'off';
 
 % add subplot label
-[x_pos, y_pos] = norm2trueposition(ax1, 1/8, 7/8);
+ax1b = addbox(ax1, [0 0.9 0.1 0.1]);
+[x_pos, y_pos] = norm2trueposition(ax1b, 0.28, 3/5);
 text(x_pos, y_pos, 'a', 'FontSize', 12);
 
 %% plot power spectral density profile
@@ -145,15 +146,18 @@ ax2s = doubleaxes(ax2);
 % add axis label
 inverseaxis(ax2s.XAxis, 'period (s)');
 
-% add subplot label
-[x_pos, y_pos] = norm2trueposition(ax2, 1/10, 7/8);
-text(x_pos, y_pos, 'b', 'FontSize', 12);
-
 % add frequency bands label
 hold on
 ax2 = vline(ax2, [0.05, 0.1], '-', 1, rgbcolor('green'));
 ax2 = vline(ax2, [2, 10], '-', 1, rgbcolor('brown'));
 hold off
+% move the frequency bands to the back
+ax2.Children = ax2.Children([5:end 1:4]);
+
+% add subplot label
+ax2b = addbox(ax2, [0 0.9 0.1 0.1]);
+[x_pos, y_pos] = norm2trueposition(ax2b, 0.28, 3/5);
+text(x_pos, y_pos, 'b', 'FontSize', 12);
 
 %% plot raw signal
 ax3 = subplot('Position', [0.075 2/6+0.03 0.87 1/6-0.06]);
@@ -172,19 +176,23 @@ mov_rms = movmean(y_sq, round(fs * 30)) .^ 0.5;
 hold on
 plot(t_plot, mov_rms, 'Color', [0.8 0.25 0.25], 'LineWidth', 1);
 hold off
-title('raw buffer -- green = mov avg, red = mov rms, window = 30 s', ...
-    'FontWeight', 'normal')
-%title('')
-ylabel('counts')
-ax3.TitleFontSizeMultiplier = 1.0;
-ax3.TickDir = 'both';
 
 % set ylimit to exclude outliers
 r = rms(y);
 ylim([-5.25*r 5.25*r]);
 
+% add title
+tt = title('raw buffer -- green = mov avg, red = mov rms, window = 30 s', ...
+    'FontWeight', 'normal');
+tt.Position(2) = ax3.YLim(2) * 1.15;
+%title('')
+ylabel('counts')
+ax3.TitleFontSizeMultiplier = 1.0;
+ax3.TickDir = 'both';
+
 % add subplot label
-[x_pos, y_pos] = norm2trueposition(ax3, 1/12, 7/8);
+ax3b = addbox(ax3, [0 0.75 0.04 0.25]);
+[x_pos, y_pos] = norm2trueposition(ax3b, 0.28, 3/5);
 text(x_pos, y_pos, 'c', 'FontSize', 12);
 
 % remove xlabel
@@ -209,15 +217,18 @@ mov_rms = movmean(yf1_sq, round(fs * 30)) .^ 0.5;
 hold on
 plot(t_plot, mov_rms, 'Color', [0.8 0.25 0.25], 'LineWidth', 1);
 hold off
-title('filtered: bp2-10 -- green = mov avg, red = mov rms, window = 30 s', ...
-    'FontWeight', 'normal')
+
+% set ylimit to exclude outliers
+ylim([-10.5*r 10.5*r]);
+
+% add title
+tt = title('filtered: bp2-10 -- green = mov avg, red = mov rms, window = 30 s', ...
+    'FontWeight', 'normal');
+tt.Position(2) = ax4.YLim(2) * 1.15;
 %title('')
 ylabel('counts')
 ax4.TitleFontSizeMultiplier = 1.0;
 ax4.TickDir = 'both';
-
-% set ylimit to exclude outliers
-ylim([-10.5*r 10.5*r]);
 
 % add trigger times and detrigger times
 if trig && (isempty(yf1_trigs) || isempty(yf1_dtrigs))
@@ -246,8 +257,12 @@ if trig
     hold off
 end
 
+% move trigger/detrigger times to the back
+ax4.Children = ax4.Children([(end-2):end 1:(end-3)]);
+
 % add subplot label
-[x_pos, y_pos] = norm2trueposition(ax4, 1/12, 7/8);
+ax4b = addbox(ax4, [0 0.75 0.04 0.25]);
+[x_pos, y_pos] = norm2trueposition(ax4b, 0.28, 3/5);
 text(x_pos, y_pos, 'd', 'FontSize', 12);
 
 % remove xlabel
@@ -272,19 +287,23 @@ mov_rms = movmean(yf2_sq, round(fs/d_factor * 150)) .^ 0.5;
 hold on
 plot(t_plot, mov_rms, 'Color', [0.8 0.25 0.25], 'LineWidth', 1);
 hold off
-title('filtered: dc5 dt bp0.05-0.1 -- green = mov avg, red = mov rms, window = 150 s', ...
-    'FontWeight', 'normal')
-%title('')
-ylabel('counts')
-ax5.TitleFontSizeMultiplier = 1.0;
-ax5.TickDir = 'both';
 
 % set ylimit to exclude outliers
 r = rms(yf2);
 ylim([-5.25*r 5.25*r]);
 
+% add title
+tt = title('filtered: dc5 dt bp0.05-0.1 -- green = mov avg, red = mov rms, window = 150 s', ...
+    'FontWeight', 'normal');
+tt.Position(2) = ax5.YLim(2) * 1.15;
+%title('')
+ylabel('counts')
+ax5.TitleFontSizeMultiplier = 1.0;
+ax5.TickDir = 'both';
+
 % add subplot label
-[x_pos, y_pos] = norm2trueposition(ax5, 1/12, 7/8);
+ax5b = addbox(ax5, [0 0.75 0.04 0.25]);
+[x_pos, y_pos] = norm2trueposition(ax5b, 0.28, 3/5);
 text(x_pos, y_pos, 'e', 'FontSize', 12);
 
 fig = gcf;
