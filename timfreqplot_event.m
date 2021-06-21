@@ -14,7 +14,7 @@ function fig = timfreqplot_event(ev, dt_begin)
 % SEE ALSO
 % TIMFREQPLOT
 %
-% Last modified by Sirawich Pipatprathanporn, 06/17/2021
+% Last modified by Sirawich Pipatprathanporn, 06/22/2021
 
 % reference spectral density files
 SDdir = '/Users/sirawich/research/processed_data/monthly_SD_profiles_before_conversion/';
@@ -44,20 +44,20 @@ dt_origin = datetime(ev.PreferredTime, 'TimeZone', 'UTC', 'Format', ...
     'uuuu-MM-dd''T''HH:mm:ss.SSSSSS');
 time_labels = string(duration((0:5) * minutes(15), 'Format', 'hh:mm'));
 % make time axis relative to the origin time for seismograms
-fig.Children(1).XTick = dt_origin + (0:5) * minutes(15);
 fig.Children(2).XTick = dt_origin + (0:5) * minutes(15);
-fig.Children(3).XTick = dt_origin + (0:5) * minutes(15);
-fig.Children(1).XTickLabel = time_labels;
-fig.Children(1).XLabel.String = 'time since origin (hh:mm)';
+fig.Children(4).XTick = dt_origin + (0:5) * minutes(15);
+fig.Children(6).XTick = dt_origin + (0:5) * minutes(15);
+fig.Children(2).XTickLabel = time_labels;
+fig.Children(2).XLabel.String = 'time since origin (hh:mm)';
 % make time axis relative to the origin time for spectrogram
 seconds_since_origin = seconds(dt_origin + (0:5) * minutes(15) - dt_begin);
-fig.Children(7).XLim = seconds(fig.Children(1).XLim - dt_origin);
-fig.Children(7).XTick = seconds_since_origin;
-fig.Children(7).XTickLabel = time_labels;
-fig.Children(7).XLabel.String = 'time since origin (hh:mm): 100 s window';
-fig.Children(8).XLim = seconds(fig.Children(1).XLim - dt_origin);
-fig.Children(8).XTick = seconds_since_origin;
-fig.Children(8).XTickLabel = time_labels;
+fig.Children(12).XLim = seconds(fig.Children(2).XLim - dt_origin);
+fig.Children(12).XTick = seconds_since_origin;
+fig.Children(12).XTickLabel = time_labels;
+fig.Children(12).XLabel.String = 'time since origin (hh:mm): 100 s window';
+fig.Children(13).XLim = seconds(fig.Children(2).XLim - dt_origin);
+fig.Children(13).XTick = seconds_since_origin;
+fig.Children(13).XTickLabel = time_labels;
 % remove unneccessary titles
 %fig.Children(1).Title.String = '';
 %fig.Children(2).Title.String = '';
@@ -72,7 +72,7 @@ fid = fopen(allSDs{index},'r');
 data = fscanf(fid,'%f %f %f %f %f',[5 Inf]);
 fclose(fid);
 % add reference spectral density of the month
-ax = fig.Children(4);
+ax = fig.Children(8);
 axes(ax)
 hold on
 semilogx(data(1,:),data(2,:),'Color',rgbcolor('deep sky blue'));
