@@ -17,10 +17,21 @@ function plotevent(arrival, arrival_type, event, endtime, fs)
 % SEE ALSO
 % FINDEVENTS
 %
-% Last modified by Sirawich Pipatprathanporn: 01/11/2021
-defval('arrival_type', 'body')
+% Last modified by Sirawich Pipatprathanporn: 06/23/2021
+
 defval('endtime', [])
 defval('fs', 40.01406)
+
+% deduce the arrival type from event
+surface_travel_time = seconds(arrival - datetime(event.PreferredTime, ...
+    'Format', 'uuuu-MM-dd''T''HH:mm:ss.SSSSSS', 'TimeZone', 'UTC'));
+if isempty(arrival_type) && and(event.distance/180 * pi * 6371 / 5 < ...
+        surface_travel_time, ...
+        event.distance/180 * pi * 6371 / 3 > surface_travel_time)
+    arrival_type = 'surface';
+else
+    arrival_type = 'body';
+end
 
 %% read seismogram
 if strcmp(arrival_type, 'surface')
@@ -100,7 +111,8 @@ c.TickDirection = 'both';
 ax1.XAxis.Label.String = sprintf('time since origin (hh:mm:ss): %d s window', round(nfft/fs));
 
 % add subplot label
-[x_pos, y_pos] = norm2trueposition(ax1, 7/8, 7/8);
+ax1b = addbox(ax1, [0 0.85 0.04 0.15]);
+[x_pos, y_pos] = norm2trueposition(ax1b, 0.28, 3/5);
 text(x_pos, y_pos, 'a', 'FontSize', 12);
 
 %% plot filtered seismogram 0.05-0.1 Hz
@@ -118,6 +130,7 @@ ax1.XTick = ax1.XTick(ax1.XTick > seconds(0));
 ax1.XTickLabel = ax2.XTickLabel;
 ax1s = doubleaxes(ax1);
 ax1s.XTickLabel = [];
+axes(ax1b)
 
 axes(ax2)
 
@@ -134,17 +147,20 @@ mov_rms = movmean(xf2_sq, round(fs/d_factor * 150)) .^ 0.5;
 hold on
 plot(t_plot, mov_rms, 'Color', [0.8 0.25 0.25], 'LineWidth', 1);
 hold off
-title('Filtered: dc5 dt bp0.05-0.1 -- green = mov avg, red = mov rms, window = 150 s', ...
-    'FontWeight', 'normal')
+
+% set ylimit to exclude outliers
+r = rms(xf2);
+ylim([-6*r 6*r]);
+
+% add title
+tt = title('Filtered: dc5 dt bp0.05-0.1 -- green = mov avg, red = mov rms, window = 150 s', ...
+    'FontWeight', 'normal');
+tt.Position(2) = ax2.YLim(2) * 1.15;
 %title('')
 ylabel('counts')
 ax2.TitleFontSizeMultiplier = 1.0;
 ax2.Title.FontWeight = 'normal';
 ax2.TickDir = 'both';
-
-% set ylimit to exclude outliers
-r = rms(xf2);
-ylim([-6*r 6*r]);
 
 % add expected arrival for each phase
 vline(ax2, event.expArrivalTime - dt_origin, '-', 1, rgbcolor('deep sky blue'));
@@ -163,13 +179,14 @@ for ii = 1:size(event.expArrivalTime,2)
     end
     [~,y] = norm2trueposition(ax2,0,ynorm);
     t_curr = event.expArrivalTime(ii) - dt_origin;
-    text(t_curr+seconds(3),y,event.phase{ii});
+    text(t_curr+seconds(3),y,event.phase{ii},'Color',rgbcolor('deep sky blue'));
 end
 
 % add surface wave arrival
 R_speed = [5 4 3 1.5];
 R_arrival = seconds(event.distance/180 * pi * 6371 ./ R_speed);
-vline(ax2, R_arrival, '-', 1, rgbcolor('orange'));
+vline(ax2, R_arrival(1:3), '-', 1, rgbcolor('orange'));
+vline(ax2, R_arrival(4), '-', 1, rgbcolor('hot pink'));
 for ii = 1:size(R_arrival,2)
     if (R_arrival(ii) - t_curr > 1/8 * (ax2.XLim(2) - ax2.XLim(1)))
         ynorm = 0.9;
@@ -181,12 +198,19 @@ for ii = 1:size(R_arrival,2)
         end
     end
     [~,y] = norm2trueposition(ax2,0,ynorm);
-    text(R_arrival(ii)+seconds(3),y,sprintf('%3.1f km/s', R_speed(ii)));
+    if ii <= 3
+        text(R_arrival(ii)+seconds(3),y,sprintf('%3.1f km/s', R_speed(ii)),...
+            'Color',rgbcolor('orange'));
+    else
+        text(R_arrival(ii)+seconds(3),y,sprintf('%3.1f km/s', R_speed(ii)),...
+            'Color',rgbcolor('hot pink'));
+    end
     t_curr = R_arrival(ii);
 end
 
 % add subplot label
-[x_pos, y_pos] = norm2trueposition(ax2, 7/8, 7/8);
+ax2b = addbox(ax2, [0 0.75 0.04 0.25]);
+[x_pos, y_pos] = norm2trueposition(ax2b, 0.28, 3/5);
 text(x_pos, y_pos, 'b', 'FontSize', 12);
 
 %% plot map with event focal mechanism and MERMAIDS
@@ -317,7 +341,8 @@ ax3s.XTickLabel = [];
 ax3.Box = 'on';
 
 % add subplot label
-[x_pos, y_pos] = norm2trueposition(ax3, 1/8, 7/8);
+ax3b = addbox(ax3, [0 0.85 0.06 0.15]);
+[x_pos, y_pos] = norm2trueposition(ax3b, 0.28, 3/5);
 text(x_pos, y_pos, 'c', 'FontSize', 12);
 
 %% plot ray paths on an Earth cross-section
@@ -329,7 +354,8 @@ taupPlotRayPath(ax4, 'ak135', max(0, event.PreferredDepth), ...
 ax4.YLim = [-2 1.5] * 6371;
 
 % add subplot label
-[x_pos, y_pos] = norm2trueposition(ax4, 1/8, 23/24);
+ax4b = addbox(ax4, [0 0.86 0.18 0.14]);
+[x_pos, y_pos] = norm2trueposition(ax4b, 0.28, 3/5);
 text(x_pos, y_pos, 'd', 'FontSize', 12);
 
 %% save figure
