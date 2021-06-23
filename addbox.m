@@ -11,7 +11,10 @@ function axb = addbox(ax,norm_position)
 % OUTPUT
 % axb               axes handling the box
 %
-% Last modified by Sirawich Pipatprathanporn: 07/07/2020
+% Last modified by Sirawich Pipatprathanporn: 06/22/2021
+
+% invoke the axes
+axes(ax)
 
 % create an empty box
 axb = axes();
