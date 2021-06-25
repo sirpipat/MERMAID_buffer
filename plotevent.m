@@ -17,7 +17,7 @@ function plotevent(arrival, arrival_type, event, endtime, fs)
 % SEE ALSO
 % FINDEVENTS
 %
-% Last modified by Sirawich Pipatprathanporn: 06/23/2021
+% Last modified by Sirawich Pipatprathanporn: 06/25/2021
 
 defval('endtime', [])
 defval('fs', 40.01406)
@@ -108,7 +108,8 @@ c.Position = [0.0800 0.8359 0.8700 0.0178];
 c.TickDirection = 'both';
 
 % fix the precision of the time on XAxis label
-ax1.XAxis.Label.String = sprintf('time since origin (hh:mm:ss): %d s window', round(nfft/fs));
+ax1.XAxis.Label.String = sprintf('time since origin (hh:mm): %d s window', round(nfft/fs));
+ax1.XAxis.Label.String = '';
 
 % add subplot label
 ax1b = addbox(ax1, [0 0.85 0.04 0.15]);
@@ -120,7 +121,8 @@ ax2 = subplot('Position', [0.08 0.37 0.87 0.14]);
 % time since origin
 dur_B = dt_B - dt_origin;
 ax2 = signalplot(xf2, fs/d_factor, dur_B, ax2, '', 'left');
-ax2.XAxis.Label.String = 'time since origin (hh:mm:ss)';
+datetick('x', 15, 'keeplimits', 'keepticks');
+ax2.XAxis.Label.String = 'time since origin (hh:mm)';
 
 % add label on the top and right
 ax1.TickDir = 'both';
@@ -179,7 +181,7 @@ for ii = 1:size(event.expArrivalTime,2)
     end
     [~,y] = norm2trueposition(ax2,0,ynorm);
     t_curr = event.expArrivalTime(ii) - dt_origin;
-    text(t_curr+seconds(3),y,event.phase{ii},'Color',rgbcolor('deep sky blue'));
+    text(t_curr+seconds(60),y,event.phase{ii},'Color',rgbcolor('deep sky blue'));
 end
 
 % add surface wave arrival
@@ -199,14 +201,17 @@ for ii = 1:size(R_arrival,2)
     end
     [~,y] = norm2trueposition(ax2,0,ynorm);
     if ii <= 3
-        text(R_arrival(ii)+seconds(3),y,sprintf('%3.1f km/s', R_speed(ii)),...
+        text(R_arrival(ii)+seconds(60),y,sprintf('%3.1f km/s', R_speed(ii)),...
             'Color',rgbcolor('orange'));
     else
-        text(R_arrival(ii)+seconds(3),y,sprintf('%3.1f km/s', R_speed(ii)),...
+        text(R_arrival(ii)+seconds(60),y,sprintf('%3.1f km/s', R_speed(ii)),...
             'Color',rgbcolor('hot pink'));
     end
     t_curr = R_arrival(ii);
 end
+
+% move the vertical lines to the back
+ax2.Children = ax2.Children([1 2 3 4 9 11 12 13 5 6 7 8 10]);
 
 % add subplot label
 ax2b = addbox(ax2, [0 0.75 0.04 0.25]);
@@ -359,6 +364,7 @@ ax4b = addbox(ax4, [0 0.86 0.18 0.14]);
 text(x_pos, y_pos, 'd', 'FontSize', 12);
 
 %% save figure
+set(gcf, 'Renderer', 'painters')
 savename = sprintf('%s_%s_%s_M%4.2f.eps', mfilename, ...
                    replace(string(arrival), ':', '_'), event.id, ...
                    event.PreferredMagnitudeValue);
