@@ -11,7 +11,7 @@ function compare_p2l_mermaid(option)
 % OUTOUT
 % no output beside figures saved at $EPS
 % 
-% Last modified by Sirawich Pipatprathanporn: 06/20/2021
+% Last modified by Sirawich Pipatprathanporn: 06/25/2021
 
 % WAVEWATCH spectral density files
 % MERMAID spectral density files
@@ -114,10 +114,10 @@ for ii = 1:pndex
     
     % plot SD
     ax1 = subplot('Position', [0.1 0.16 0.35 0.64]);
-    p2 = semilogx(f * f_scale, sdU + y_shift, '.-', ...'MarkerSize', 3, ...
+    p2 = semilogx(f * f_scale, sdU + y_shift, '^-', 'MarkerSize', 3, ...
         'Color', rgbcolor('silver'), 'MarkerFaceColor', rgbcolor('silver'));
     hold on
-    p3 = semilogx(f * f_scale, sdL + y_shift, '.-', ...'MarkerSize', 3, ...
+    p3 = semilogx(f * f_scale, sdL + y_shift, '^-', 'MarkerSize', 3, ...
         'Color', rgbcolor('silver'), 'MarkerFaceColor', rgbcolor('silver'));
     p1 = semilogx(f * f_scale, sd + y_shift, '^-k', 'MarkerSize', 5, ...
         'MarkerFaceColor', 'k');
@@ -128,9 +128,9 @@ for ii = 1:pndex
     where = and(m_f >= 2*f(1), m_f <= 2*f(end));
     p7 = semilogx(m_f(where), m_sd(where), 'v-r', 'MarkerSize', 5, ...
         'MarkerFaceColor', 'r');
-    p8 = semilogx(m_f(where), m_sdU(where), '.-', 'MarkerSize', 3, ...
+    p8 = semilogx(m_f(where), m_sdU(where), 'v-', 'MarkerSize', 3, ...
         'Color', rgbcolor('gray'), 'MarkerFaceColor', rgbcolor('gray'));
-    p9 = semilogx(m_f(where), m_sdL(where), '.-', 'MarkerSize', 3, ...
+    p9 = semilogx(m_f(where), m_sdL(where), 'v-', 'MarkerSize', 3, ...
         'Color', rgbcolor('gray'), 'MarkerFaceColor', rgbcolor('gray'));
     hold off
     grid on
@@ -157,10 +157,13 @@ for ii = 1:pndex
     inverseaxis(ax1s.XAxis, 'period (s)');
     
     title(ax1s,sprintf('%s (%s)\nspectral density', titles{ii}, option));
-    axeslabel(ax1, 0.1, 0.9, 'a', 'FontSize', 12);
+    
+    % add subplot label
+    ax1b = addbox(ax1, [0 0.9 0.08 0.1]);
+    axeslabel(ax1b, 0.28, 0.55, 'a', 'FontSize', 12);
         
     % sends the vertical lines to the back
-    ax1.Children = ax1.Children([1 6 7 8 9 10 11 12 13 14 2 3 4 5]);
+    ax1.Children = ax1.Children([1 6 7 8 9 10 11 12 13 2 3 4 5]);
     
     % plot offset
     ax2 = subplot('Position', [0.6 0.16 0.35 0.64]); 
@@ -181,7 +184,10 @@ for ii = 1:pndex
     
     title(ax2s,sprintf('(f-scale = %.3f, SD-shift = %.3f)\nspectral density offset', ...
         f_scale, y_shift));
-    axeslabel(ax2, 0.1, 0.9, 'b', 'FontSize', 12);
+    
+    % add subplot label
+    ax2b = addbox(ax2, [0 0.9 0.08 0.1]);
+    axeslabel(ax2b, 0.28, 0.55, 'b', 'FontSize', 12);
     
     % save figure
     figdisp(strcat(mfilename,'_',save_titles{ii},'_',option,'.eps'),...
