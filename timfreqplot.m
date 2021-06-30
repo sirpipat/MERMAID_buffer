@@ -1,8 +1,9 @@
 function fig = timfreqplot(y, yf1, yf2, yf1_trigs, yf1_dtrigs, dt_begin, ...
-    nfft, fs, lwindow, olap, sfax, beg, unit, p, save, trig, fscale)
+    nfft, fs, lwindow, olap, sfax, beg, unit, p, save, trig, fscale, ...
+    yunit)
 % fig = TIMFREQPLOT(y, yf1, yf2, yf1_trigs, yf1_dtrigs, dt_begin, nfft, ...
 %                   fs, lwindow, olap, sfax, beg, unit, p, save, trig, ...
-%                   fscale)
+%                   fscale, y_unit)
 % plot seismogram, power spectral density, spectograms, and filtered
 % seismogram
 % 
@@ -26,13 +27,15 @@ function fig = timfreqplot(y, yf1, yf2, yf1_trigs, yf1_dtrigs, dt_begin, ...
 % trig          whether to plot the (de)triggers in yf1 [Default: false]
 % fscale        Scaling option for frequency axis: 
 %                   'linear' or 'log' [default: 'log']
+% yunit         unit of the data:
+%                   'counts' or 'Pa'  [default: 'counts']
 %
 % OUTPUT
 % fig           figure handling the plots
 %
 % If save is true, the output file is saved as $EPS.
 % 
-% Last modified by Sirawich Pipatprathanporn: 06/17/2021
+% Last modified by Sirawich Pipatprathanporn: 06/30/2021
 
 % parameter list
 defval('fs', 40.01406);
@@ -45,6 +48,7 @@ defval('unit', 's');
 defval('save', true);
 defval('trig', false);
 defval('fscale', 'log');
+defval('yunit', 'counts');
 wolap = olap / 100;
 
 dt_begin.Format = 'uuuu-MM-dd''T''HH:mm:ss.SSSSSS';
@@ -94,6 +98,16 @@ title('');
 % insert colorbar
 c = colorbar;
 c.Label.String = 'spectral density (energy/Hz)';
+cPosition = c.Position;
+
+% fix colormap for pressure case
+if strcmp(yunit, 'Pa')
+    m = colormap('jet');
+    k = zeros(192, 3);
+    m = [k; m];
+    colormap(ax1, m)
+    c.Limits = [-100 40];
+end
 
 % change xticks to HH:mm and date
 t_ph = previous_hour(dt_begin);
@@ -108,6 +122,9 @@ ax1.XAxis.Label.String = sprintf('time (hh:mm): %d s window', round(nfft/fs));
 ax1.TickDir = 'both';
 ax1s = doubleaxes(ax1);
 ax1s.YAxis.Visible = 'off';
+ax1.Position = ax1s.Position;
+axes(ax1);
+c.Position = cPosition;
 
 % add subplot label
 ax1b = addbox(ax1, [0 0.9 0.1 0.1]);
@@ -122,7 +139,11 @@ grid on
 xlim([0.0095 F(end)]);
 xticks([0.01 0.1 1 10]);
 xticklabels({'0.01', '0.1', '1', '10'});
-ylim([40 145]);
+if strcmp(yunit, 'counts')
+    ylim([40 145]);
+elseif strcmp(yunit, 'Pa')
+    ylim([-80 40]);
+end
 
 % change color line
 p(1).Color = [0.8 0.25 0.25];
@@ -160,7 +181,7 @@ ax2b = addbox(ax2, [0 0.9 0.1 0.1]);
 text(x_pos, y_pos, 'b', 'FontSize', 12);
 
 %% plot raw signal
-ax3 = subplot('Position', [0.075 2/6+0.03 0.87 1/6-0.06]);
+ax3 = subplot('Position', [0.075 2/6+0.03 0.87 1/6-0.06], 'Box', 'on');
 ax3 = signalplot(y, fs, dt_begin, ax3, '', 'left');
 
 % add moving average
@@ -186,7 +207,7 @@ tt = title('raw buffer -- green = mov avg, red = mov rms, window = 30 s', ...
     'FontWeight', 'normal');
 tt.Position(2) = ax3.YLim(2) * 1.15;
 %title('')
-ylabel('counts')
+ylabel(yunit)
 ax3.TitleFontSizeMultiplier = 1.0;
 ax3.TickDir = 'both';
 
@@ -200,7 +221,7 @@ nolabels(ax3, 1);
 ax3.XAxis.Label.Visible = 'off';
 
 %% plot filered signal 2-10 Hz
-ax4 = subplot('Position', [0.075 1/6+0.05 0.87 1/6-0.06]);
+ax4 = subplot('Position', [0.075 1/6+0.05 0.87 1/6-0.06], 'Box', 'on');
 ax4 = signalplot(yf1, fs, dt_begin, ax4, '', 'left');
 
 % add moving average
@@ -226,7 +247,7 @@ tt = title('filtered: bp2-10 -- green = mov avg, red = mov rms, window = 30 s', 
     'FontWeight', 'normal');
 tt.Position(2) = ax4.YLim(2) * 1.15;
 %title('')
-ylabel('counts')
+ylabel(yunit)
 ax4.TitleFontSizeMultiplier = 1.0;
 ax4.TickDir = 'both';
 
@@ -270,7 +291,7 @@ nolabels(ax4, 1);
 ax4.XAxis.Label.Visible = 'off';
 
 %% plot filtered signal 0.05-0.1 Hz
-ax5 = subplot('Position', [0.075 0.07 0.87 1/6-0.06]);
+ax5 = subplot('Position', [0.075 0.07 0.87 1/6-0.06], 'Box', 'on');
 ax5 = signalplot(yf2, fs/d_factor, dt_begin, ax5, '', 'left');
 xlabel('time (hh:mm)')
 
@@ -297,7 +318,7 @@ tt = title('filtered: dc5 dt bp0.05-0.1 -- green = mov avg, red = mov rms, windo
     'FontWeight', 'normal');
 tt.Position(2) = ax5.YLim(2) * 1.15;
 %title('')
-ylabel('counts')
+ylabel(yunit)
 ax5.TitleFontSizeMultiplier = 1.0;
 ax5.TickDir = 'both';
 
