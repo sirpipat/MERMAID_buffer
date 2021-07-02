@@ -49,6 +49,10 @@ dt_all = dt_all(~isnat(dt_all));
 dt_trigs = dt_all(1:2:end);
 dt_dtrigs = dt_all(2:2:end);
 
+% remove the instrument response using rflexa/matlab/transfer
+y = transfer(y, 1/fs, [0.1 0.2 10 20], 'acceleration', ...
+    '/Users/sirawich/research/polezero/MERMAID_response.txt', 'sacpz');
+
 % filter the signal
 yf1 = bandpass(y, fs, 2, 10, 2, 2, 'butter', 'linear');
 dc_factor = 5;
@@ -67,7 +71,7 @@ dt_B.Format = 'uuuu-MM-dd''T''HH:mm:ss.SSSSSS';
 % relative position of the sliced section in the file
 p = [(dt_B - dt_start) (dt_E - dt_start)] / (dt_end - dt_start) * 100;
 timfreqplot(x, xf1, xf2, dt_trigs, dt_dtrigs, dt_B, nfft, fs, lwin, ...
-    olap, sfax, beg, unit, p, true, true, fscale);
+    olap, sfax, beg, unit, p, true, true, fscale, 'Pa');
 dt_curr = dt_curr + minutes(30);
 
 % slice later sections then plot
@@ -83,7 +87,7 @@ while dt_end - dt_curr > minutes(30)
     % relative position of the sliced section in the file
     p = [(dt_B - dt_start) (dt_E - dt_start)] / (dt_end - dt_start) * 100;
     timfreqplot(x, xf1, xf2, dt_trigs, dt_dtrigs, dt_B, nfft, fs, lwin, ...
-        olap, sfax, beg, unit, p, true, true, fscale);
+        olap, sfax, beg, unit, p, true, true, fscale, 'Pa');
     dt_curr = dt_curr + minutes(30);
 end
 
