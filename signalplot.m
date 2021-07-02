@@ -14,7 +14,7 @@ function ax = signalplot(x, fs, t, ax, title_name, position, color)
 % OUTPUT
 % ax        = handling axes of the plot
 %
-% Last modified by Sirawich Pipatprathanporn, 10/27/2020
+% Last modified by Sirawich Pipatprathanporn, 07/02/2020
 
 defval('title_name', 'signal');
 defval('position', 'left');
