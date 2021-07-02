@@ -14,7 +14,7 @@ function specdensplot_yearly(win)
 % SEE ALSO:
 % SPECDENSPLOT_SECTION
 % 
-% Last modified by Sirawich Pipatprathanporn: 07/26/2020
+% Last modified by Sirawich Pipatprathanporn: 07/02/2021
 
 % dt_begin and dt_end for specdensplot_section
 dt_0 = datetime(2018, 9, 1, 'TimeZone', 'UTC', 'Format', ...
@@ -31,6 +31,7 @@ sfax = 10;
 midval = 'median';
 method = 'pct';
 scale = 'log';
+rmtransfer = true;
 plt = false;
 
 % titles of specdensplot heatmap
@@ -46,7 +47,7 @@ clf
 
 [~, up, np, F, SDbins, Swcounts, Swmean, ~, SwU, SwL] = ...
     specdensplot_section(dt(1), dt(2), excdir, nfft, fs, lwin, olap, ...
-    sfax, midval, method, scale, plt);
+    sfax, midval, method, scale, rmtransfer, plt);
 ax = subplot('Position',[0.05 2/3+0.05 1/4-0.07 1/3-0.1]);
 [ax,axs,axb] = specdensplot_heatmap(ax, up, np, F, SDbins, Swcounts, Swmean, SwU, ...
     SwL, sfax, scale, titles{1});
@@ -55,7 +56,7 @@ Swcounts_total = Swcounts;
 for ii = 2:12
     [~, up, np, F, ~, Swcounts, Swmean, ~, SwU, SwL] = ...
         specdensplot_section(dt(ii), dt(ii+1), excdir, nfft, fs, lwin, ...
-        olap, sfax, midval, method, scale, plt);
+        olap, sfax, midval, method, scale, rmtransfer, plt);
     Swcounts_total = Swcounts_total + Swcounts;
     
     % grid coordinates for panels (1,1) = bottom left, (4,3) = top right

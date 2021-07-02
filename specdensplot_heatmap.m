@@ -26,7 +26,7 @@ function [ax,ax2,axb] = specdensplot_heatmap(ax,up,np,F,Swbins,Swcounts,...
 % SEE ALSO
 % SPECDENSPLOT_SECTION
 %
-% Last modified by Sirawich Pipatprathanporn: 06/17/2021
+% Last modified by Sirawich Pipatprathanporn: 07/02/2021
 
 defval('sfax',10)
 defval('Fscale','log')
@@ -56,7 +56,7 @@ if strcmp(Fscale, 'log')
 end
 
 % fix y-label
-ax.YTick = [20 40 60 80 100 120 140 160];
+ax.YTick = (floor(Swbins(1) / 20) * 20):20:(ceil(Swbins(end) / 20) * 20);
 
 % fix the precision of the time on XAxis label
 if strcmp(Fscale, 'linear')

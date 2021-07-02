@@ -1,9 +1,9 @@
 function [fig,up,np,F,Swbins,Swcounts,Swmid,Swstd,SwU,SwL] = ...
     specdensplot_section(dt_begin,dt_end,excdir,nfft,fs,lwin,olap,sfax,...
-    midval,method,scale,plt)
+    midval,method,scale,rmtransfer,plt)
 % [fig, F, SDbins, Swcounts, Swmean, Swerr, SwU, SwL] = ...
 %   SPECDENSPLOT_SECTION(dt_begin,dt_end,excdir,nfft,fs,lwin,olap,sfax,...
-%   scale,plt)
+%   scale,rmtransfer,plt)
 % plot spectral sensity heat map of a section from dt_begin and dt_end
 %
 % INPUT
@@ -18,6 +18,7 @@ function [fig,up,np,F,Swbins,Swcounts,Swmid,Swstd,SwU,SwL] = ...
 % midval        middle values ('mean' or 'median') [default: 'median']
 % method        method for confidence limit ('std' or 'pct') [default: 'pct']      
 % scale         scale of X-axis (linear or log) [default: 'log']
+% rmtransfer    whether remove instrument response or not [default: 'false'
 % plt           whether to plot or not [default: false]
 %
 % OUTPUT
@@ -32,7 +33,7 @@ function [fig,up,np,F,Swbins,Swcounts,Swmid,Swstd,SwU,SwL] = ...
 % SwU           upper confidence limit
 % SwL           lower confidence limit
 %
-% Last modified by Sirawich Pipatprathanporn: 06/17/2021
+% Last modified by Sirawich Pipatprathanporn: 07/02/2021
 
 defval('nfft',256)
 defval('fs',40.01406)
@@ -42,6 +43,7 @@ defval('sfax',10)
 defval('scale','log')
 defval('midval','median')
 defval('method','pct')
+defval('rmtransfer',false)
 defval('plt',false);
 
 %% get data and remove all signals
@@ -114,9 +116,15 @@ for ii = 1:length(sections)
     for jj = 1:length(sub_intervals)
         [yy, dt_B, dt_E] = slicesection(y, dt_b, ...
             sub_intervals{jj}{1}, sub_intervals{jj}{2}, fs);
-        % convert counts to Pa
-        % yy = yy / 170176;
         if ~isempty(yy) && length(yy) >= nfft * (2 - olap/100)
+            if rmtransfer
+                % convert counts to Pa
+                % yy = yy / 170176;   [old, preliminary version]
+                yy = transfer(yy, 1/fs, [0.01 0.02 10 20], ...
+                    'acceleration', ...
+                    ['/Users/sirawich/research/polezero/', ...
+                    'MERMAID_response.txt'], 'sacpz');
+            end
             X{length(X)+1} = yy;
             noisetime = noisetime + (dt_E - dt_B);
         end
@@ -243,7 +251,11 @@ if strcmp(scale, 'log')
 end
 
 % Bins for the number of spectral density lines going through
-Swbins = 20:1:160;
+if rmtransfer
+    Swbins = -80:1:60;
+else
+    Swbins = 20:1:160;
+end
 Swcounts = zeros(length(F), length(Swbins)-1);
 for ii = 1:length(F)
     Swcounts(ii,:) = histcounts(Sd(ii,:), 'BinEdges', Swbins);
