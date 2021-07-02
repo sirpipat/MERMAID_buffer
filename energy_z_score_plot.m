@@ -11,7 +11,7 @@ function energy_z_score_plot
 % SEE ALSO
 % ENERGY_CC, COMPARE_ENERGY
 %
-% Last modified by Sirawich Pipatprathanporn, 11/09/2020
+% Last modified by Sirawich Pipatprathanporn, 07/02/2021
 
 F_WW = [0.06 0.08; 0.21 0.23; 0.10 0.12];
 F_MM = [0.13 0.15; 0.36 0.38; 0.44 0.46];
@@ -137,10 +137,11 @@ for ii = 1:3
     f_WW = F_WW(ii,:);
     f_MM = F_MM(ii,:);
     [t,E_WW,E_MM] = compare_energy(1, f_WW, f_MM, 'scaled', false);
-    plot(t,E_WW,'LineWidth',1.5);
+    plot(t,E_WW,'o-','LineWidth',1.5,'MarkerSize',3,'MarkerFaceColor',...
+        rgbcolor('1'));
     hold on
-    plot(t,E_MM,'LineWidth',1.5);
-    text(t(3), 3.25, t_label{ii}, 'FontSize', 11);
+    plot(t,E_MM,'o-','LineWidth',1.5,'MarkerSize',3,'MarkerFaceColor',...
+        [0.95 0.1 0.1],'Color',[0.95 0.1 0.1]);
     hold off
     grid on
     xlim([t(1) t(end)])
@@ -156,6 +157,8 @@ for ii = 1:3
     end
     set(gca, 'FontSize', 10, 'TickDir', 'both');
     ax1.Title.Position(2) = ax1.Title.Position(2) + 0.2;
+    
+    boxedlabel(ax1, 'northwest', 0.25, [], t_label{ii});
     
     % remove redundant labels
     if ii < 3
