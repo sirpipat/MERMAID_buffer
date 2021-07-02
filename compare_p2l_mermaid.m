@@ -11,15 +11,15 @@ function compare_p2l_mermaid(option)
 % OUTOUT
 % no output beside figures saved at $EPS
 % 
-% Last modified by Sirawich Pipatprathanporn: 06/25/2021
+% Last modified by Sirawich Pipatprathanporn: 07/02/2021
 
 % WAVEWATCH spectral density files
 % MERMAID spectral density files
 if strcmp(option, 'weekly')
-    WWdir = '/Users/sirawich/research/processed_data/weekly_WWSD_profiles/';
-    SDdir = '/Users/sirawich/research/processed_data/weekly_SD_profiles/';
-    % WWdir = '/Users/sirawich/research/processed_data/weekly_WWSD_profiles_before_conversion/';
-    % SDdir = '/Users/sirawich/research/processed_data/weekly_SD_profiles_before_conversion/';
+    % WWdir = '/Users/sirawich/research/processed_data/weekly_WWSD_profiles/';
+    % SDdir = '/Users/sirawich/research/processed_data/weekly_SD_profiles/';
+    WWdir = '/Users/sirawich/research/processed_data/weekly_WWSD_profiles_before_conversion/';
+    SDdir = '/Users/sirawich/research/processed_data/weekly_SD_profiles_before_conversion/';
 elseif strcmp(option, 'biweekly')
     WWdir = '/Users/sirawich/research/processed_data/biweekly_WWSD_profiles/';
     SDdir = '/Users/sirawich/research/processed_data/biweekly_SD_profiles/';
@@ -78,6 +78,30 @@ for ii = 1:pndex
     m_sdU = data(4,:);
     m_sdL = data(5,:);
     
+    % convert WAVEWATCH from unconverted PSD using a following factors
+    % - multiply 10^12 to remove +1e-12 in the unit
+    % - multiply 4.0000e-4 to the pressure, so it is squared here
+    % - divide the area 0.5 by 0.5 degrees at 24-S latitude
+    %   A    = R^2 * dlat * dlon * cos(lat)
+    %   A    = area
+    %   R    = Earth radius         (6371000 m)
+    %   dlat = latitude resolution  (0.5 * pi/180 rad)
+    %   dlon = longitude resolution (0.5 * pi/180 rad)
+    %   lat  = latitude of the grid (-24 * pi/180 rad)
+    % to the spectral density (NOT 10 * log10 of spectral density)
+    sd = 10 * log10(10.^(sd/10) * 10^12 * (4.0000e-04)^2 / (6371000^2 * ...
+        (0.5*pi/180) * (0.5*pi/180) * cos(-24*pi/180)));
+    sdU = 10 * log10(10.^(sdU/10) * 10^12 * (4.0000e-04)^2 / (6371000^2 * ...
+        (0.5*pi/180) * (0.5*pi/180) * cos(-24*pi/180)));
+    sdL = 10 * log10(10.^(sdL/10) * 10^12 * (4.0000e-04)^2 / (6371000^2 * ...
+        (0.5*pi/180) * (0.5*pi/180) * cos(-24*pi/180)));
+    
+    % convert MERMAID using the gain (not amplitude response)
+    [~,~,k] = parsePZ('/Users/sirawich/research/polezero/MERMAID_response.txt');
+    m_sd = 10 * log10(10.^(m_sd/10) / k^2);
+    m_sdU = 10 * log10(10.^(m_sdU/10) / k^2);
+    m_sdL = 10 * log10(10.^(m_sdL/10) / k^2);
+    
     % find best SD shift
     y_shift = max(m_sd,[],'all') - max(sd,[],'all');
     % find best frequency ratio
@@ -102,9 +126,9 @@ for ii = 1:pndex
     m_sd_interp = interp1(m_f, m_sd, 2 * f);
     
     % adjust MERMAID response
-    where = (f < 0.2);
-    m_sd_interp(where) = m_sd_interp(where) + (30 - ...
-        interp1(f_curve/2, gain, f(where)));
+%     where = (f < 0.2);
+%     m_sd_interp(where) = m_sd_interp(where) + (30 - ...
+%         interp1(f_curve/2, gain, f(where)));
     offset = m_sd_interp - sd;
     
     % create figure
@@ -119,27 +143,36 @@ for ii = 1:pndex
     hold on
     p3 = semilogx(f * f_scale, sdL + y_shift, '^-', 'MarkerSize', 3, ...
         'Color', rgbcolor('silver'), 'MarkerFaceColor', rgbcolor('silver'));
-    p1 = semilogx(f * f_scale, sd + y_shift, '^-k', 'MarkerSize', 5, ...
-        'MarkerFaceColor', 'k');
-    p4 = semilogx(m_f, m_sd, '.-r');
     p5 = semilogx(m_f, m_sdU, '.-', 'Color', rgbcolor('gray'));
     p6 = semilogx(m_f, m_sdL, '.-', 'Color', rgbcolor('gray'));
     % plot f_MH = 2 f_WW
     where = and(m_f >= 2*f(1), m_f <= 2*f(end));
-    p7 = semilogx(m_f(where), m_sd(where), 'v-r', 'MarkerSize', 5, ...
-        'MarkerFaceColor', 'r');
+    
     p8 = semilogx(m_f(where), m_sdU(where), 'v-', 'MarkerSize', 3, ...
         'Color', rgbcolor('gray'), 'MarkerFaceColor', rgbcolor('gray'));
     p9 = semilogx(m_f(where), m_sdL(where), 'v-', 'MarkerSize', 3, ...
         'Color', rgbcolor('gray'), 'MarkerFaceColor', rgbcolor('gray'));
+    
+    % plot WW SD on top
+    p1 = semilogx(f * f_scale, sd + y_shift, '^-', 'MarkerSize', 5, ...
+        'Color', rgbcolor('1'), 'MarkerEdgeColor', rgbcolor('1'), ...
+        'MarkerFaceColor', rgbcolor('1'));
+    
+    % plot corresponding MH SD on top
+    p4 = semilogx(m_f, m_sd, '.-', 'Color', [0.95 0.1 0.1]);
+    p7 = semilogx(m_f(where), m_sd(where), 'v-', 'MarkerSize', 5, ...
+        'Color', [0.95 0.1 0.1], 'MarkerEdgeColor', [0.95 0.1 0.1], ...
+        'MarkerFaceColor', [0.95 0.1 0.1]);
+    
+    
     hold off
     grid on
     xlim([0.0099 2.0001]);
-    ylim([-60 120]);
+    ylim([-60 60]);
     ax1.XTick = sort([0.01 0.02 0.04 0.1 0.2 0.4 1 2]);
     ax1.XTickLabel = string(round(ax1.XTick, 2));
     xlabel('frequency (Hz)');
-    ylabel('10 log_{10} spectral density');
+    ylabel('10 log_{10} spectral density (Pa^2/Hz)');
     
     % add limit marker
     vline(ax1, [f(1) f(end)], '-', 1, [1 0.5 1]);
@@ -159,26 +192,24 @@ for ii = 1:pndex
     title(ax1s,sprintf('%s (%s)\nspectral density', titles{ii}, option));
     
     % add subplot label
-    ax1b = addbox(ax1, [0 0.9 0.08 0.1]);
-    axeslabel(ax1b, 0.28, 0.55, 'a', 'FontSize', 12);
+    ax1b = boxedlabel(ax1, 'northwest', 0.25, [], 'c', 'FontSize', 12);
         
     % sends the vertical lines to the back
-    ax1.Children = ax1.Children([1 6 7 8 9 10 11 12 13 2 3 4 5]);
+    ax1.Children = ax1.Children([5 6 7 8 9 10 11 12 13 1 2 3 4]);
     
     % plot offset
     ax2 = subplot('Position', [0.6 0.16 0.35 0.64]); 
     semilogx(2 * f, offset, '^-k', 'MarkerFaceColor', 'k', 'MarkerSize', 5);
     xlim([0.0099 2.0001]);
-    ylim([50 110]);
     ax2.XTick = sort([0.01 0.1 0.2 1 2 f(1) f(end)]);
     ax2.XTickLabel = string(round(ax2.XTick, 2));
     hold on
     hold off
     grid on
     xlabel('MERMAID frequency (Hz)');
-    ylabel('10 log_{10} spectral density');
+    ylabel('10 log_{10} Pa^2/Hz');
     ax2.TickDir = 'both';
-    ax2.YLim = [-110 -20];
+    ax2.YLim = [-40 40];
     ax2s = doubleaxes(ax2);
     inverseaxis(ax2s.XAxis, 'MERMAID period (s)');
     
@@ -186,8 +217,7 @@ for ii = 1:pndex
         f_scale, y_shift));
     
     % add subplot label
-    ax2b = addbox(ax2, [0 0.9 0.08 0.1]);
-    axeslabel(ax2b, 0.28, 0.55, 'b', 'FontSize', 12);
+    ax2b = boxedlabel(ax2, 'northwest', 0.25, [], 'd', 'FontSize', 12);
     
     % save figure
     figdisp(strcat(mfilename,'_',save_titles{ii},'_',option,'.eps'),...
