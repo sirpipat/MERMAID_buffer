@@ -43,6 +43,7 @@ max_x = max([max(x) abs(min(x))]);
 
 % plots the signal
 axes(ax);
+hold on
 plot(t_plot, x,'Color',color);
 title('Signal');       
 xlabel('time')
