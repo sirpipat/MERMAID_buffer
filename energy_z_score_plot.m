@@ -11,11 +11,11 @@ function energy_z_score_plot
 % SEE ALSO
 % ENERGY_CC, COMPARE_ENERGY
 %
-% Last modified by Sirawich Pipatprathanporn, 07/02/2021
+% Last modified by Sirawich Pipatprathanporn, 07/05/2021
 
 F_WW = [0.06 0.08; 0.21 0.23; 0.10 0.12];
 F_MM = [0.13 0.15; 0.36 0.38; 0.44 0.46];
-t_label = {'a', 'b', 'c'};
+t_label = {'b', 'c', 'd'};
 t_color = {'k', 'w', 'k'};
 
 figure
@@ -129,6 +129,9 @@ for ii = 1:3
         t_label{ii}, 'FontSize', 11, 'Color', t_color{ii});
 end
 
+% label the cc-plot
+boxedlabel(ax, 'northwest', 0.25, [], 'a', 'FontSize', 12);
+
 %% plot z-score
 for ii = 1:3
     y_pos = 0.15 * (3-ii);
@@ -137,10 +140,10 @@ for ii = 1:3
     f_WW = F_WW(ii,:);
     f_MM = F_MM(ii,:);
     [t,E_WW,E_MM] = compare_energy(1, f_WW, f_MM, 'scaled', false);
-    plot(t,E_WW,'o-','LineWidth',1.5,'MarkerSize',3,'MarkerFaceColor',...
+    plot(t,E_WW,'o-','LineWidth',1.5,'MarkerSize',2.5,'MarkerFaceColor',...
         rgbcolor('1'));
     hold on
-    plot(t,E_MM,'o-','LineWidth',1.5,'MarkerSize',3,'MarkerFaceColor',...
+    plot(t,E_MM,'o-','LineWidth',1.5,'MarkerSize',2.5,'MarkerFaceColor',...
         [0.95 0.1 0.1],'Color',[0.95 0.1 0.1]);
     hold off
     grid on
@@ -158,7 +161,7 @@ for ii = 1:3
     set(gca, 'FontSize', 10, 'TickDir', 'both');
     ax1.Title.Position(2) = ax1.Title.Position(2) + 0.2;
     
-    boxedlabel(ax1, 'northwest', 0.25, [], t_label{ii});
+    boxedlabel(ax1, 'northwest', 0.25, [], t_label{ii}, 'FontSize', 12);
     
     % remove redundant labels
     if ii < 3
