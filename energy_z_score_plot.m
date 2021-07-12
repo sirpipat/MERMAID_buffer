@@ -136,7 +136,7 @@ boxedlabel(ax, 'northwest', 0.25, [], 'a', 'FontSize', 12);
 for ii = 1:3
     y_pos = 0.15 * (3-ii);
     y_shift = 0.08 * floor(ii/3);
-    ax1 = subplot('Position', [0.15 0.08+y_pos-y_shift 0.8 0.12+y_shift]);
+    ax1 = subplot('Position', [0.15 0.1+y_pos-y_shift 0.8 0.12+y_shift]);
     f_WW = F_WW(ii,:);
     f_MM = F_MM(ii,:);
     [t,E_WW,E_MM] = compare_energy(1, f_WW, f_MM, 'scaled', false);
@@ -165,7 +165,7 @@ for ii = 1:3
     
     % remove redundant labels
     if ii < 3
-        set(gca, 'XTickLabel', []);
+        set(ax1, 'XTickLabel', []);
     end
 end
 % save figure
