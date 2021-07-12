@@ -15,7 +15,7 @@ function [t_trigs,t_dtrigs] = findarrivals(x,fs,sta,lta,p)
 % t_trigs   List of trigger times from the beginning
 % t_dtrigs   List of detrigger times from the beginning
 %
-% Last modified by Sirawich Pipatprathanporn: 06/01/2020
+% Last modified by Sirawich Pipatprathanporn: 07/11/2021
 
 t = (0:length(x)-1) / fs;
 [trigt,stav,ltav,ratio,tim1,tim2,tim3,trigs,dtrigs] = ...
@@ -32,8 +32,8 @@ if p
     plot(t,xf,'k','LineWidth',1);
     hold on
     for ii = 1:length(trigs)
-        vline(ax1,t(trigs(ii)),'--',2,'r');
-        vline(ax1,t(dtrigs(ii)),'--',2,'g');
+        vline(ax1,t(trigs(ii)),'LineStyle','--','LineWidth',2,'Color','r');
+        vline(ax1,t(dtrigs(ii)),'LineStyle','--','LineWidth',2,'Color','g');
     end
     hold off
     xlim([min(t) max(t)]);
@@ -46,8 +46,8 @@ if p
     xlim([min(t) max(t)]);
     hold on
     for ii = 1:length(trigs)
-        vline(ax2,t(trigs(ii)),'--',2,'r');
-        vline(ax2,t(dtrigs(ii)),'--',2,'g');
+        vline(ax2,t(trigs(ii)),'LineStyle','--','LineWidth',2,'Color','r');
+        vline(ax2,t(dtrigs(ii)),'LineStyle','--','LineWidth',2,'Color','g');
     end
     hold off
     grid on

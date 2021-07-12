@@ -28,7 +28,7 @@ function [dt_B, dt_E, CCmaxs, CCfmax, t_shifts, t_shiftf] = matchsac(sacfile, on
 % SEE ALSO:
 % READSAC, GETSECTIONS, READSECTION, 
 %
-% Last modified by Sirawich Pipatprathanporn, 09/22/2020
+% Last modified by Sirawich Pipatprathanporn, 07/11/2021
 
 defval('oneyeardir', getenv('ONEYEAR'));
 defval('savedir', getenv('EPS'));
@@ -265,10 +265,12 @@ if plt
         'left', 'blue');
     ax1.XLabel.String = 'Buffer Time';
     hold on
-    vline(ax1, dt_B + seconds(t_shift), '--', 2, 'r');
+    vline(ax1, dt_B + seconds(t_shift), 'LineStyle', '--', ...
+        'LineWidth', 2, 'Color', 'r');
     [~,y] = norm2trueposition(ax1, 0, 0.9);
     text(dt_B + seconds(t_shift + 10), y, 'Begin', 'Color', 'r');
-    vline(ax1, dt_E + seconds(t_shift), '--', 2, 'r');
+    vline(ax1, dt_E + seconds(t_shift), 'LineStyle', '--', ...
+        'LineWidth', 2, 'Color', 'r');
     text(dt_E + seconds(t_shift - 40), y, 'End', 'Color', 'r');
     hold off
     ax1.FontSize = 8;
@@ -280,10 +282,10 @@ if plt
         'left', 'black');
     ax2.XLabel.String = 'Processed Time';
     hold on
-    vline(ax2, dt_B, '--', 2, 'r');
+    vline(ax2, dt_B, 'LineStyle', '--', 'LineWidth', 2, 'Color', 'r');
     [~,y] = norm2trueposition(ax2, 0, 0.9);
     text(dt_B + seconds(10), y, 'Begin', 'Color', 'r');
-    vline(ax2, dt_E, '--', 2, 'r');
+    vline(ax2, dt_E, 'LineStyle', '--', 'LineWidth', 2, 'Color', 'r');
     text(dt_E - seconds(45), y, 'End', 'Color', 'r');
     hold off
     ax2.FontSize = 8;

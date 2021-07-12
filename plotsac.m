@@ -16,7 +16,7 @@ function ax = plotsac(SeisData, HdrData, ax, varargin)
 % SEE ALSO:
 % ARRIVAL2SAC, READSAC
 %
-% Last modified by Sirawich Pipatprathanporn, 03/18/2021
+% Last modified by Sirawich Pipatprathanporn, 07/11/2021
 
 % gets the information from SAC header
 [dt_ref, dt_B, dt_E, fs, npts, dts, tims] = gethdrinfo(HdrData);
@@ -32,7 +32,8 @@ phaseNum = 0;
 phaseTime = HdrData.T0;
 phaseName = HdrData.KT0;
 while phaseTime ~= -12345
-    vline(ax, dt_ref + seconds(phaseTime), '--', 1, 'r');
+    vline(ax, dt_ref + seconds(phaseTime), 'LineStyle', '--', ...
+        'LineWidth', 1, 'Color', 'r');
     
     [x_pos, y_pos] = norm2trueposition(ax, 1/100, 9/10);
     text(x_pos + (dt_ref - dt_B) + seconds(phaseTime), y_pos, phaseName);

@@ -11,7 +11,7 @@ function compare_p2l_mermaid(option)
 % OUTOUT
 % no output beside figures saved at $EPS
 % 
-% Last modified by Sirawich Pipatprathanporn: 07/02/2021
+% Last modified by Sirawich Pipatprathanporn: 07/11/2021
 
 % WAVEWATCH spectral density files
 % MERMAID spectral density files
@@ -175,9 +175,11 @@ for ii = 1:pndex
     ylabel('10 log_{10} spectral density (Pa^2/Hz)');
     
     % add limit marker
-    vline(ax1, [f(1) f(end)], '-', 1, [1 0.5 1]);
-    vline(ax1, 2 * [f(1) f(end)], '-', 1, [0.2 0.8 0.4]);
-    %vline(ax1, 0.4, '--', 1, [1 0.5 0]);
+    vline(ax1, [f(1) f(end)], 'LineStyle', '-', 'LineWidth', 1, ...
+        'Color', [1 0.5 1]);
+    vline(ax1, 2 * [f(1) f(end)], 'LineStyle', '-', 'LineWidth', 1, ...
+        'Color', [0.2 0.8 0.4]);
+    %vline(ax1, 0.4, 'LineStyle', '--', 'LineWidth', 1, 'Color', [1 0.5 0]);
     hold on
     %plot([f(end) ax1.XLim(2)], sd(end) * [1 1], '--', 'LineWidth', 1, ...
     %    'Color', [1 0.5 1]);

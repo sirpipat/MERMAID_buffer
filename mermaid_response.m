@@ -15,7 +15,7 @@ function mermaid_response(option, f_width, ratio, shift)
 % OUTPUT
 % no output beside figures saved at $EPS
 %
-% Last modified by Sirawich Pipatprathanporn, 11/10/2020
+% Last modified by Sirawich Pipatprathanporn, 07/11/2021
 
 defval('ratio', 2)
 defval('shift', 0)
@@ -74,7 +74,7 @@ ax1s.YLim = [20 34];
 ax1s.YTick = 20:2:34;
 ax1s.YTickLabel = 20:2:34;
 ax1s.YLabel.String = 'MERMAID gain';
-vline(ax1s, 0.2, '--', 1.5, [1 0.5 0]);
+vline(ax1s, 0.2, 'LineStyle', '--', 'LineWidth', 1.5, 'Color', [1 0.5 0]);
 axes(ax1)
 
 % plot correlation coefficient

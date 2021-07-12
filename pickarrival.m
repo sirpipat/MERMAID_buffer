@@ -14,7 +14,7 @@ function [pick, snr] = pickarrival(x, fs, t_begin, win_noise, win_signal, plt)
 % OUTPUT
 % pick          best-picked arrival time
 %
-% Last modified by Sirawich Pipatprathanporn, 02/01/2021
+% Last modified by Sirawich Pipatprathanporn, 07/11/2021
 
 defval('plt', false)
 defval('t_begin', 0.0)
@@ -64,17 +64,21 @@ if plt
     end
     if and(win_noise > 0, win_signal > 0)
         plot(t, sqrt(ms_noise), 'Color', rgbcolor('r'), 'LineWidth', 1);
-        plot(t, sqrt(ms_signal), 'Color', rgbcolor('my green'), 'LineWidth', 1);
+        plot(t, sqrt(ms_signal), 'Color', rgbcolor('my green'), ...
+            'LineWidth', 1);
     end
-    vline(ax1, pick, '-', 2, rgbcolor('my blue'));
+    vline(ax1, pick, 'LineStyle', '-', 'LineWidth', 2, ...
+        'Color', rgbcolor('my blue'));
     grid on
     xlabel('time (s)')
     if and(win_noise > 0, win_signal > 0)
-        legend('data', 'noise moving rms', 'signal moving rms', 'Location', 'best')
+        legend('data', 'noise moving rms', 'signal moving rms', ...
+            'Location', 'best')
     end
     ax2 = subplot(2, 1, 2);
     plot(t, snr, 'Color', rgbcolor('pp'), 'LineWidth', 1);
-    vline(ax2, pick, '-', 2, rgbcolor('my blue'));
+    vline(ax2, pick, 'LineStyle', '-', 'LineWidth', 2, ...
+        'Color', rgbcolor('my blue'));
     grid on
     ax2.XLim = ax1.XLim;
     xlabel('time(s)')

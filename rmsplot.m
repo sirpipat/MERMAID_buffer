@@ -21,7 +21,7 @@ function rmsplot(x,fs,dt_begin,win,longwin,method,savedir,plt,plt_trigs)
 % SEE ALSO
 % PICKPEAKS, STALTA
 %
-% Last modified by Sirawich Pipatprathanporn: 10/02/2020
+% Last modified by Sirawich Pipatprathanporn: 07/11/2021
 
 dt_begin.Format = 'uuuu-MM-dd''T''HH:mm:ss.SSSSSS';
 % calculation of mov rms
@@ -68,10 +68,12 @@ if plt
     % add trigger times and detrigger times
     if plt_trigs
         if ~isempty(trigs)
-            vline(gca, trigs, '--', 0.75, [0.9 0.5 0.2]);
+            vline(gca, trigs, 'LineStyle', '--', 'LineWidth', 0.75, ...
+                'Color', [0.9 0.5 0.2]);
         end
         if ~isempty(dtrigs)
-            vline(gca, dtrigs, '--', 0.75, [0.2 0.5 0.9]);
+            vline(gca, dtrigs, 'LineStyle', '--', 'LineWidth', 0.75, ...
+                'Color', [0.2 0.5 0.9]);
         end
     end
     hold off

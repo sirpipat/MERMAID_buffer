@@ -17,7 +17,7 @@ function plotevent(arrival, arrival_type, event, endtime, fs)
 % SEE ALSO
 % FINDEVENTS
 %
-% Last modified by Sirawich Pipatprathanporn: 06/25/2021
+% Last modified by Sirawich Pipatprathanporn: 07/11/2021
 
 defval('endtime', [])
 defval('fs', 40.01406)
@@ -165,7 +165,8 @@ ax2.Title.FontWeight = 'normal';
 ax2.TickDir = 'both';
 
 % add expected arrival for each phase
-vline(ax2, event.expArrivalTime - dt_origin, '-', 1, rgbcolor('deep sky blue'));
+vline(ax2, event.expArrivalTime - dt_origin, 'LineStyle', '-', ...
+    'LineWidth', 1, 'Color', rgbcolor('deep sky blue'));
 ynorm = 0.9;
 t_curr = dur_B;
 for ii = 1:size(event.expArrivalTime,2)
@@ -181,14 +182,17 @@ for ii = 1:size(event.expArrivalTime,2)
     end
     [~,y] = norm2trueposition(ax2,0,ynorm);
     t_curr = event.expArrivalTime(ii) - dt_origin;
-    text(t_curr+seconds(60),y,event.phase{ii},'Color',rgbcolor('deep sky blue'));
+    text(t_curr+seconds(60), y, event.phase{ii}, ...
+        'Color', rgbcolor('deep sky blue'));
 end
 
 % add surface wave arrival
 R_speed = [5 4 3 1.5];
 R_arrival = seconds(event.distance/180 * pi * 6371 ./ R_speed);
-vline(ax2, R_arrival(1:3), '-', 1, rgbcolor('orange'));
-vline(ax2, R_arrival(4), '-', 1, rgbcolor('hot pink'));
+vline(ax2, R_arrival(1:3), 'LineStyle', '-', 'LineWidth', 1, ...
+    'Color', rgbcolor('orange'));
+vline(ax2, R_arrival(4), 'LineStyle', '-', 'LineWidth', 1, ...
+    'Color', rgbcolor('hot pink'));
 for ii = 1:size(R_arrival,2)
     if (R_arrival(ii) - t_curr > 1/8 * (ax2.XLim(2) - ax2.XLim(1)))
         ynorm = 0.9;
@@ -201,11 +205,11 @@ for ii = 1:size(R_arrival,2)
     end
     [~,y] = norm2trueposition(ax2,0,ynorm);
     if ii <= 3
-        text(R_arrival(ii)+seconds(60),y,sprintf('%3.1f km/s', R_speed(ii)),...
-            'Color',rgbcolor('orange'));
+        text(R_arrival(ii) + seconds(60), y, sprintf('%3.1f km/s', ...
+            R_speed(ii)), 'Color', rgbcolor('orange'));
     else
-        text(R_arrival(ii)+seconds(60),y,sprintf('%3.1f km/s', R_speed(ii)),...
-            'Color',rgbcolor('hot pink'));
+        text(R_arrival(ii) + seconds(60), y, sprintf('%3.1f km/s', ...
+            R_speed(ii)), 'Color', rgbcolor('hot pink'));
     end
     t_curr = R_arrival(ii);
 end

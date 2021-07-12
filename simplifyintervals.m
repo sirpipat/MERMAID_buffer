@@ -1,6 +1,8 @@
 function [b_out,e_out] = simplifyintervals(b_in,e_in)
 % [b_out,e_out] = SIMPLIFYINTERVALs(b_in,e_in)
 %
+% Simplifies possibly overlapping intervals.
+%
 % INPUT
 % b_in      vector of intervals' beginnings
 % e_in      vector of intervals' endings
@@ -8,6 +10,8 @@ function [b_out,e_out] = simplifyintervals(b_in,e_in)
 % OUTPUT
 % b_out     col vector of simplified intervals' beginnings
 % e_out     col vector of simplified intervlas' endings
+%
+% Last modified by Sirawich Pipatprathanporn, 07/11/2021
 
 % transform to col vectors
 b_in = reshape(b_in,length(b_in),1);

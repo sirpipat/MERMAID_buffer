@@ -35,7 +35,7 @@ function fig = timfreqplot(y, yf1, yf2, yf1_trigs, yf1_dtrigs, dt_begin, ...
 %
 % If save is true, the output file is saved as $EPS.
 % 
-% Last modified by Sirawich Pipatprathanporn: 06/30/2021
+% Last modified by Sirawich Pipatprathanporn: 07/11/2021
 
 % parameter list
 defval('fs', 40.01406);
@@ -169,8 +169,10 @@ inverseaxis(ax2s.XAxis, 'period (s)');
 
 % add frequency bands label
 hold on
-ax2 = vline(ax2, [0.05, 0.1], '-', 1, rgbcolor('green'));
-ax2 = vline(ax2, [2, 10], '-', 1, rgbcolor('brown'));
+ax2 = vline(ax2, [0.05, 0.1], 'LineStyle', '-', 'LineWidth', 1, ...
+    'Color', rgbcolor('green'));
+ax2 = vline(ax2, [2, 10], 'LineStyle', '-', 'LineWidth', 1, ...
+    'Color', rgbcolor('brown'));
 hold off
 % move the frequency bands to the back
 ax2.Children = ax2.Children([5:end 1:4]);
@@ -270,10 +272,12 @@ if trig
 
     hold on
     for ii = 1:length(yf1_trigs)
-        vline(ax4, yf1_trigs(ii), '-', 1, [0.9 0.5 0.2]);
+        vline(ax4, yf1_trigs(ii), 'LineStyle', '-', 'LineWidth', 1, ...
+            'Color', [0.9 0.5 0.2]);
     end
     for ii = 1:length(yf1_dtrigs)
-        vline(ax4, yf1_dtrigs(ii), '-', 1, [0.2 0.5 0.9]);
+        vline(ax4, yf1_dtrigs(ii), 'LineStyle', '-', 'LineWidth', 1, ...
+            'Color', [0.2 0.5 0.9]);
     end
     hold off
 end
