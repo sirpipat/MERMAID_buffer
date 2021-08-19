@@ -25,12 +25,12 @@ function [begins,ends,arrivals,tags] = readeventlist(tag)
 % [begins,ends,arrivals,tags] = READEVENTLIST();
 %
 % % return triggered, reported events
-% [begins,ends,arrivals,tags] = READEVENTLIST('DET');
+% [begins,ends,arrivals,tags] = READEVENTLIST({'DET'});
 %
 % % return all unreported events, with arrival = P-wave arrivals
 % [begins,ends,arrivals,tags] = READEVENTLIST({'***', '**', '*'});
 % 
-% Last modified by Sirawich Pipatprathanporn: 09/24/2020
+% Last modified by Sirawich Pipatprathanporn: 08/19/2021
 
 defval('tag',[])
 
