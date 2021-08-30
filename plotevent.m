@@ -17,7 +17,7 @@ function plotevent(arrival, arrival_type, event, endtime, fs)
 % SEE ALSO
 % FINDEVENTS
 %
-% Last modified by Sirawich Pipatprathanporn: 07/11/2021
+% Last modified by Sirawich Pipatprathanporn: 08/19/2021
 
 defval('endtime', [])
 defval('fs', 40.01406)
@@ -117,11 +117,13 @@ ax1b = addbox(ax1, [0 0.85 0.04 0.15]);
 text(x_pos, y_pos, 'a', 'FontSize', 12);
 
 %% plot filtered seismogram 0.05-0.1 Hz
-ax2 = subplot('Position', [0.08 0.37 0.87 0.14]);
+ax2 = subplot('Position', [0.08 0.37 0.87 0.14], 'Box', 'on');
 % time since origin
 dur_B = dt_B - dt_origin;
 ax2 = signalplot(xf2, fs/d_factor, dur_B, ax2, '', 'left');
-datetick('x', 15, 'keeplimits', 'keepticks');
+% Don't use datetick for duration variable. Use string instead.
+%datetick('x', 15, 'keeplimits', 'keepticks');
+ax2.XTickLabel = string(ax2.XTick, 'hh:mm');
 ax2.XAxis.Label.String = 'time since origin (hh:mm)';
 
 % add label on the top and right
