@@ -1,6 +1,5 @@
 function [lons, lats, elev, ax, c] = bathymetry(fname, lonlim, latlim, plt, ax)
-% [lons, lats, elev] = bathymetry(fname, [minlon maxlon], [minlat maxlat], cutofflon)
-%
+% [lons, lats, elev, ax, c] = bathymetry(fname, [minlon maxlon], [minlat maxlat], plt, ax)
 % Reads a GEBCO bathymetry grid, stored in NETCDF format, and plots the
 % bathymetry map bounded by [minlon maxlon] and [minlat maxlat].
 %
@@ -18,7 +17,7 @@ function [lons, lats, elev, ax, c] = bathymetry(fname, lonlim, latlim, plt, ax)
 % ax                axes containing the plot
 % c                 colorbar
 %
-% Last modified by Sirawich Pipatprathanporn, 12/01/2020
+% Last modified by Sirawich Pipatprathanporn, 09/01/2021
 
 defval('fname', fullfile(getenv('IFILES'), 'TOPOGRAPHY', 'EARTH', ...
     'GEBCO', 'GEBCO_2020.nc'))
@@ -72,6 +71,7 @@ if ~exist(pname, 'file')
         axis xy;
         [cb,cm] = cax2dem([-7000 3500], 'hor');
         delete(cb);
+        c = colorbar;
         grid on
         set(gca, 'DataAspectRatio', [1 1 1], 'FontSize', 13, 'LineWidth', 1);
     else
