@@ -1,5 +1,5 @@
-function ax = signalplot(x, fs, t, ax, title_name, position, color)
-% ax = SIGNALPLOT(x, fs, t, ax, title_name, position, color)
+function ax = signalplot(x, fs, t, ax, title_name, position, color, varargin)
+% ax = SIGNALPLOT(x, fs, t, ax, title_name, position, color, varargin)
 % Make a plot of the signal
 %
 % INPUT
@@ -10,11 +10,12 @@ function ax = signalplot(x, fs, t, ax, title_name, position, color)
 % title_name    title of the plot
 % position      position of zero either left or center
 % color         the color of the line
+% varargin      arguments for plot()
 %
 % OUTPUT
 % ax        = handling axes of the plot
 %
-% Last modified by Sirawich Pipatprathanporn, 07/02/2020
+% Last modified by Sirawich Pipatprathanporn, 09/01/2021
 
 defval('title_name', 'signal');
 defval('position', 'left');
@@ -44,7 +45,7 @@ max_x = max([max(x) abs(min(x))]);
 % plots the signal
 axes(ax);
 hold on
-plot(t_plot, x,'Color',color);
+plot(t_plot, x, 'Color', color, varargin{:});
 title('Signal');       
 xlabel('time')
 if max_x == 0
