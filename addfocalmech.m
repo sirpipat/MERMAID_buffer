@@ -12,7 +12,7 @@ function addfocalmech(ax, options)
 %                   'PublicID'
 %                   'Event'
 % info          information for the given option
-%                   - for 'PublicID', the info is an integer representing
+%                   - for 'PublicID', the info is a string representing
 %                     IRIS event ID
 %                   - for 'Event', the info is a struct representing an
 %                     earthquake event that is returned from
@@ -23,11 +23,11 @@ function addfocalmech(ax, options)
 % SEE ALSO:
 % READCMT, FOCALMECH, IRISFETCH
 %
-% Last modified by sirawich-at-princeton.edu, 09/03/2021
+% Last modified by sirawich-at-princeton.edu, 09/06/2021
 
 arguments
     ax                  (1,1) matlab.graphics.axis.Axes
-    options.PublicID    (1,1) double
+    options.PublicID    (1,1) string
     options.Event       (1,1) struct
 end
 
@@ -54,8 +54,13 @@ monthname = lower(datechar(6:8));
 fname = sprintf('%s%02d.ndk', monthname, mod(dt_origin.Year, 100));
 
 % get the moment tensor
-[quake,Mw] = readCMT(fname, strcat(getenv('IFILES'),'CMT'), tbeg, tend, ...
-    mblo, mbhi, depmin, depmax);
+try
+    [quake,Mw] = readCMT(fname, strcat(getenv('IFILES'),'CMT'), tbeg, tend, ...
+        mblo, mbhi, depmin, depmax);
+catch
+    quake = [];
+    Mw = [];
+end
 if size(Mw,1) > 1
     fprintf('size(Mw,1) > 1\n');
 end
@@ -63,11 +68,11 @@ end
 % draws a moment tensor
 if ~isempty(quake) && size(Mw,1) == 1
     M = quake(5:end);
-    r = (ax3.XLim(2) - ax3.XLim(1)) / 18;   % radius of the beachball
+    r = (ax.XLim(2) - ax.XLim(1)) / 50;   % radius of the beachball
     focalmech(ax, M, mod(event.PreferredLongitude,360), ...
         event.PreferredLatitude, r, 'b');
 else
-    scatter(ax, mod(event.PreferredLongitudeo,360), ...
+    scatter(ax, mod(event.PreferredLongitude,360), ...
         event.PreferredLatitude, 100, 'Marker', 'p', ...
         'MarkerEdgeColor', 'k', 'MarkerFaceColor', 'y');
 end
