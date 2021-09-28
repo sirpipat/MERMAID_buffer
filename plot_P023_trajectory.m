@@ -3,7 +3,7 @@ function plot_P023_trajectory
 %
 % plot P023 trajectory during 13 Sep 2018 to 15 Aug 2019
 %
-% Last edited by Sirawich Pipatprathanporn, 12/01/2020
+% Last edited by Sirawich Pipatprathanporn, 09/28/2021
 
 % reads P023 vit file to obtain the trajectory
 T = readvit('/Users/sirawich/research/raw_data/metadata/vit/P023_all.txt');
@@ -92,6 +92,7 @@ ax2s = doubleaxes(ax2);
 
 % fix axes misalignment
 ax2s.Position = ax2.Position;
+ax2s.DataAspectRatio = ax2.DataAspectRatio;
 
 %% save the figure
 figdisp(mfilename, [], [], 2, [], 'epstopdf');
