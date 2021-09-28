@@ -17,7 +17,7 @@ function [lons, lats, elev, ax, c] = bathymetry(fname, lonlim, latlim, plt, ax)
 % ax                axes containing the plot
 % c                 colorbar
 %
-% Last modified by Sirawich Pipatprathanporn, 09/01/2021
+% Last modified by Sirawich Pipatprathanporn, 09/28/2021
 
 defval('fname', fullfile(getenv('IFILES'), 'TOPOGRAPHY', 'EARTH', ...
     'GEBCO', 'GEBCO_2020.nc'))
@@ -62,23 +62,36 @@ if ~exist(pname, 'file')
 
     % converts longitudes back to [0,360]
     lons = mod(lons, 360);
-
-    % plots the bathymetry map
-    if plt
-        defval('ax', gca)
-        axes(ax)
-        imagesc(lons, lats, elev', [-11000 9000]);
-        axis xy;
-        [cb,cm] = cax2dem([-7000 3500], 'hor');
-        delete(cb);
-        c = colorbar;
-        grid on
-        set(gca, 'DataAspectRatio', [1 1 1], 'FontSize', 13, 'LineWidth', 1);
-    else
-        ax = [];
-        c = [];
-    end
-    save(pname, 'lons', 'lats', 'elev', 'ax', 'c');
+    
+    save(pname, 'lons', 'lats', 'elev');
 else
-    load(pname);
+    load(pname, 'lons', 'lats', 'elev');
+end
+
+% plots the bathymetry map
+if plt
+    % x-value for the plot
+    xval = mod(lons -lons(1), 360);
+    
+    defval('ax', gca)
+    axes(ax)
+    imagesc(xval, lats, elev', [-11000 9000]);
+    axis xy;
+    [cb,cm] = cax2dem([-7000 3500], 'hor');
+    delete(cb);
+    c = colorbar;
+    grid on
+    set(gca, 'DataAspectRatio', [1 1 1], 'FontSize', 13, 'LineWidth', 1);
+    
+    % adjust the longitude ticks and ticks label
+    dx = ax.XTick(2) - ax.XTick(1);
+    lon1EW = mod(lons(1) + 180, 360) - 180;
+    shift = mod(lon1EW, dx);
+    ax.XTick = ax.XTick - shift;
+    ax.XTick = [ax.XTick ax.XTick(end)+dx];
+    ax.XTickLabel = string(mod(ax.XTick + lons(1) + 180, 360) - 180);
+else
+    ax = [];
+    c = [];
+end
 end
