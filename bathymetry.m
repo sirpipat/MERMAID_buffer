@@ -17,7 +17,19 @@ function [lons, lats, elev, ax, c] = bathymetry(fname, lonlim, latlim, plt, ax)
 % ax                axes containing the plot
 % c                 colorbar
 %
-% Last modified by Sirawich Pipatprathanporn, 09/28/2021
+% EXAMPLES
+% % plot entire globe (takes some time)
+% [lons, lats, elev, ax, c] = bathymetry([], [], [], true);
+%
+% % plot a region (Africa)
+% [lons, lats, elev, ax, c] = bathymetry([], [-70 20], [-5 45], true);
+%
+% % request the elevation at a location
+% lonlat = [-143, -24];
+% [lons, lats, elev, ax, c] = bathymetry([], [-0.1 0.1] + lonlat(1), ...
+%       [-0.1 0.1] + lonlat(2), false, []);
+%
+% Last modified by sirawich-at-princeton.edu, 09/28/2021
 
 defval('fname', fullfile(getenv('IFILES'), 'TOPOGRAPHY', 'EARTH', ...
     'GEBCO', 'GEBCO_2020.nc'))
@@ -44,13 +56,13 @@ if ~exist(pname, 'file')
 
     % reads the elevation from the GEBCO file
     % CASE 1: the region does not across 180E longitude
-    if lonlim(2) >= lonlim(1)
+    if lonlim(2) > lonlim(1)
         lons = lons_full(i_lon1:i_lon2);
         lats = lats_full(i_lat1:i_lat2);
         elev = ncread(fname, 'elevation', [i_lon1 i_lat1], ...
             [i_lon2-i_lon1+1 i_lat2-i_lat1+1]);
     % CASE 2: the region acrosses 180E longitude
-    else
+    elseif lonlim(2) < lonlim(1)
         lons = lons_full([i_lon1:end, 1:i_lon2]);
         lats = lats_full(i_lat1:i_lat2);
         elev1 = ncread(fname, 'elevation', [i_lon1 i_lat1], ...
@@ -58,6 +70,19 @@ if ~exist(pname, 'file')
         elev2 = ncread(fname, 'elevation', [1 i_lat1], ...
             [i_lon2 i_lat2-i_lat1+1]);
         elev = [elev1; elev2];
+    % CASE 3: the region is all longitudes
+    else
+        lons = lons_full([i_lon1:end, 1:i_lon2-1]);
+        lats = lats_full(i_lat1:i_lat2);
+        elev1 = ncread(fname, 'elevation', [i_lon1 i_lat1], ...
+            [length(lons_full)-i_lon1+1 i_lat2-i_lat1+1]);
+        if i_lon2 > 1
+            elev2 = ncread(fname, 'elevation', [1 i_lat1], ...
+                [i_lon2-1 i_lat2-i_lat1+1]);
+            elev = [elev1; elev2];
+        else
+            elev = elev1;
+        end
     end
 
     % converts longitudes back to [0,360]
