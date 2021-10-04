@@ -16,16 +16,20 @@ function ax = plotsac(SeisData, HdrData, ax, varargin)
 % SEE ALSO:
 % ARRIVAL2SAC, READSAC
 %
-% Last modified by Sirawich Pipatprathanporn, 07/11/2021
+% Last modified by Sirawich Pipatprathanporn, 09/15/2021
 
 % gets the information from SAC header
 [dt_ref, dt_B, dt_E, fs, npts, dts, tims] = gethdrinfo(HdrData);
 
-x = detrend(decimate(detrend(SeisData, 1), 5), 1);
-xf = bandpass(x, fs/5, 0.05, 0.10, 2, 2, 'butter');
+x = SeisData;
+if true
+    %x = detrend(decimate(detrend(x, 1), 5), 1);
+    %fs = fs/5;
+    x = bandpass(x, fs, 1, 2, 2, 2, 'butter');
+end
 
 % plot sesimogram
-ax = signalplot(xf, fs/5, dt_B, ax, 'title', [], 'k');
+ax = signalplot(x, fs, dt_B, ax, 'title', [], 'k', varargin{:});
 
 % plot arrival times
 phaseNum = 0;
@@ -73,5 +77,5 @@ end
 
 % adds title
 ax.Title.String = sprintf('Origin: %s, ID: %d, Mw = %5.2f', ...
-    string(dt_ref), HdrData.USER6, HdrData.MAG);
+    string(dt_ref), HdrData.USER7, HdrData.MAG);
 end
