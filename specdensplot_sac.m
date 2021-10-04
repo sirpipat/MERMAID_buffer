@@ -1,4 +1,13 @@
 function specdensplot_sac()
+% SPECDENSPLOT_SAC()
+%
+% plot seismogram, power spectral density, spectograms, and filtered
+% seismogram for SAC files.
+%
+% SEE ALSO:
+% TIMFREQPLOT
+%
+% Last modified by sirawich-at-princeton.edu, 10/04/2021
 
 [allsacfiles,sndex] = sacdata(getenv('SAC'));
 
@@ -25,6 +34,10 @@ for ii = 1:sndex
     % Assuming there is only 1 secion
     [x,dt_b,dt_e] = readsection(sections{1},intervals{1}{1},...
         intervals{1}{2},fs);
+    
+    % remove the instrument response using rflexa/matlab/transfer
+    x = transfer(x, 1/fs, [0.01 0.02 10 20], 'acceleration', ...
+        '/Users/sirawich/research/polezero/MERMAID_response.txt', 'sacpz');
 
     % relative position of the sliced section in the file
     [~,dt_start,dt_end] = readOneYearData(sections{1},fs);
@@ -34,11 +47,11 @@ for ii = 1:sndex
     lwin = nfft;
     
     % make a standard timfreqplot for a SAC section
-    timfreqplot(x,[],[],[],[],dt_b,nfft,fs,lwin,70,10,0,'s',p,false);
+    timfreqplot(x,[],[],[],[],dt_b,nfft,fs,lwin,70,10,0,'s',p,false,false,'log','Pa');
     
     % add title
     fig = gcf;
-    fig.Children(9).Title.String = strcat(string(dt_b),' -- ', ...
+    fig.Children(14).Title.String = strcat(string(dt_b),' -- ', ...
         string(dt_e));
     
     % read spectral density refernce data
@@ -48,15 +61,17 @@ for ii = 1:sndex
     data = fscanf(fid,'%f %f %f %f %f',[5 Inf]);
     fclose(fid);
     % add reference spectral density of the month
-    ax = fig.Children(4);
+    ax = fig.Children(8);
     axes(ax)
     hold on
     semilogx(data(1,:),data(2,:),'Color',rgbcolor('deep sky blue'));
     semilogx(data(1,:),data(4,:),'Color',rgbcolor('gray'));
     semilogx(data(1,:),data(5,:),'Color',rgbcolor('gray'));
     hold off
+    axes(fig.Children(8));
     
     % save figure
+    set(gcf, 'Renderer', 'painters')
     filename = strcat('specdensplot_event_',removepath(allsacfiles{ii}));
     figdisp(filename,[],[],2,[],'epstopdf');
 end
