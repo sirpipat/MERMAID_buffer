@@ -1,5 +1,5 @@
-function addfocalmech(ax, options)
-% ADDFOCALMECH(ax, option, info)
+function addfocalmech(ax, loc, options)
+% ADDFOCALMECH(ax, loc, option, info)
 %
 % Looks up for a full moment tensor of a specified earthquake and draws a 
 % full moment tensor beachball diagram to a plot. If no moment tensor is
@@ -8,6 +8,7 @@ function addfocalmech(ax, options)
 %
 % INPUT:
 % ax            target axes to plot
+% loc           location of the earthquake [Default: [lon lat]]             
 % option        type of information to supply: either one of these
 %                   'PublicID'
 %                   'Event'
@@ -23,10 +24,11 @@ function addfocalmech(ax, options)
 % SEE ALSO:
 % READCMT, FOCALMECH, IRISFETCH
 %
-% Last modified by sirawich-at-princeton.edu, 09/06/2021
+% Last modified by sirawich-at-princeton.edu, 10/04/2021
 
 arguments
     ax                  (1,1) matlab.graphics.axis.Axes
+    loc                 (1,2) double
     options.PublicID    (1,1) string
     options.Event       (1,1) struct
 end
@@ -66,14 +68,17 @@ if size(Mw,1) > 1
 end
 
 % draws a moment tensor
+if isempty(loc)
+    loc = [mod(event.PreferredLongitude,360), ...
+        event.PreferredLatitude];
+end
+
 if ~isempty(quake) && size(Mw,1) == 1
     M = quake(5:end);
     r = (ax.XLim(2) - ax.XLim(1)) / 50;   % radius of the beachball
-    focalmech(ax, M, mod(event.PreferredLongitude,360), ...
-        event.PreferredLatitude, r, 'b');
+    focalmech(ax, M, loc(1), loc(2), r, 'b');
 else
-    scatter(ax, mod(event.PreferredLongitude,360), ...
-        event.PreferredLatitude, 100, 'Marker', 'p', ...
+    scatter(ax, loc(1), loc(2), 100, 'Marker', 'p', ...
         'MarkerEdgeColor', 'k', 'MarkerFaceColor', 'y');
 end
 end
