@@ -1,5 +1,5 @@
 function [lon,lat,f,t,dt,p2l] = readp2l(p2lfile)
-% [lon,lat,f,t,p2l] = READP2L(p2lfile)
+% [lon,lat,f,t,dt,p2l] = READP2L(p2lfile)
 % Reads data from a P2LFILE
 %
 % INPUT
@@ -14,7 +14,7 @@ function [lon,lat,f,t,dt,p2l] = readp2l(p2lfile)
 % p2l           wave spectral density
 %               size(p2l) == [size(lon,1) size(lat,1) size(f,1) size(t,1)]
 %
-% Last modified by Sirawich Pipatprathanporn: 08/01/2020
+% Last modified by sirawich-at-princeton.edu: 11/17/2021
 
 lon = ncread(p2lfile, 'longitude');
 lat = ncread(p2lfile, 'latitude');
