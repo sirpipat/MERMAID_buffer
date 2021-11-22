@@ -10,7 +10,10 @@ function [distKM, distDeg] = grcdist(lon1lat1, lon2lat2)
 % distKM            distance in kilometers
 % distDeg           distance in degrees
 %
-% Last modified by Sirawich Pipatprathanporn: 09/15/2020
+% SEE ALSO:
+% AZIM, AZIMDIST
+%
+% Last modified by sirawich-at-princeton.edu, 10/11/2021
 
 % Conversion to radians
 lon1lat1=lon1lat1 * pi / 180;
