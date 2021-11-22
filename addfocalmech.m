@@ -1,4 +1,4 @@
-function addfocalmech(ax, loc, options)
+function addfocalmech(ax, loc, option, info)
 % ADDFOCALMECH(ax, loc, option, info)
 %
 % Looks up for a full moment tensor of a specified earthquake and draws a 
@@ -24,19 +24,13 @@ function addfocalmech(ax, loc, options)
 % SEE ALSO:
 % READCMT, FOCALMECH, IRISFETCH
 %
-% Last modified by sirawich-at-princeton.edu, 10/04/2021
+% Last modified by sirawich-at-princeton.edu, 10/07/2021
 
-arguments
-    ax                  (1,1) matlab.graphics.axis.Axes
-    loc                 (1,2) double
-    options.PublicID    (1,1) string
-    options.Event       (1,1) struct
-end
 
-if ~isempty(options.PublicID)
-    event = irisFetch.Events('eventID', options.PublicID);
-elseif ~isempty(options.Event)
-    event = options.Event;
+if strcmpi(option, 'publicid')
+    event = irisFetch.Events('eventID', info);
+elseif strcmpi(option, 'event')
+    event = info;
 else
     return
 end
