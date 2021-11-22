@@ -16,7 +16,7 @@ function [f, psd] = getwavewatchpsd(dt, lat, lon, p2ldir)
 %
 % Last modified by sirawich-at-princeton.edu, 11/22/2021
 
-defval('wwdir', strcat(getenv('NCFILES'), 'p2l/'))
+defval('p2ldir', strcat(getenv('NCFILES'), 'p2l/'))
 
 % figure out which file to read
 year = dt.Year;
@@ -33,9 +33,18 @@ dts_full = time_full + datetime(1990, 1, 1, 0, 0, 0, 'Format', ...
     'uuuu-MM-dd''T''HH:mm:ss.SSSSSS', 'TimeZone', 'UTC');
 f = ncread(fname, 'f');
 
+% get indices to read p2l from the file
 [dlons, i_lon] = mink(abs(lons_full - lon), 2);
+[i_lon, i_sort] = sort(i_lon);
+dlons = dlons(i_sort);
+
 [dlats, i_lat] = mink(abs(lats_full - lat), 2);
+[i_lat, i_sort] = sort(i_lat);
+dlats = dlats(i_sort);
+
 [ddts, i_dt] = mink(abs(dts_full - dt), 2);
+[i_dt, i_sort] = sort(i_dt);
+ddts = ddts(i_sort);
 
 % read p2l from the file
 p2l = ncread(fname, 'p2l', [i_lon(1) i_lat(1) 1 i_dt(1)], ...
