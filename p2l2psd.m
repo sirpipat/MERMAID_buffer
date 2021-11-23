@@ -15,7 +15,7 @@ function psd = p2l2psd(p2l, lat)
 % SEE ALSO:
 % READP2L
 %
-% Last modified by sirawich-at-princeton.edu, 11/21/2021
+% Last modified by sirawich-at-princeton.edu, 11/23/2021
 
 % validate the input
 if size(p2l, 2) ~= length(lat)
@@ -27,9 +27,9 @@ if size(lat, 2) == 1
     lat = lat';
 end
 
-% convert P2L (in decibels) to spectral density 
-% (in Pa^2 m^2 s +1E-12) by 10 .^ (P2L / 10)
-sd = 10 .^ (p2l / 10);
+% convert P2L to spectral density 
+% (in Pa^2 m^2 s +1E-12) by 10 .^ P2L
+sd = 10 .^ p2l;
 
 % multiply 1E12 to remove +1E-12 in the unit
 sd = sd * 1e12;
@@ -42,6 +42,6 @@ R = 6371000;
 A = (0.5 * pi / 180 * R) ^ 2 .* cos(lat * pi / 180);
 sd = sd ./ A;
 
-% 5 convert to PSD (in decibels)
+% convert to PSD (in decibels)
 psd = 10 * log10(sd);
 end
