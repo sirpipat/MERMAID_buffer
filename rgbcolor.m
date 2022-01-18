@@ -1,93 +1,144 @@
 function c = rgbcolor(name)
-% Return rgb color triplet given the color name
+% c = RGBCOLOR(name)
+%
+% Return rgb color triplet given the color name. The list of predefined
+% names can be accessed by calling RGBCOLOR('list'). More colors can be
+% added to a cell variable COLORCELL_MORE in the file. If name is
+% undefined, it returns [0 0 0] (black).
 %
 % INPUT
-% name      Name of the color
+% name      Name of the color. It can be either
+%           - defined name e.g. 'red', 'r'. Call rgbcolor('list') to see 
+%             the list of colors 
+%           - Hexadecimal code e.g. 'ff0000'
+%           - 'random' or 'any' to request for a random color
 %
 % OUTPUT
 % c         RGB triplet
 %
-% Last modified by Sirawich Pipatprathanporn: 06/12/2020
+% EXAMPLE
+% % get a brown color
+% c = rgbcolor('brown');
+% x = 1:10;
+% plot(x,x.^2,'LineColor',c)
+%
+% % print the list of defined color
+% rgbcolor('list');
+%
+% % get a random color
+% c = rgbcolor('random')
+%
+% Last modified by Sirawich Pipatprathanporn: 01/18/2022
 
-switch lower(name)
-    % predefined MATLAB colors
-    case {'r', 'red'}
-        c = [1 0 0];
-    case {'g', 'lime'}
-        c = [0 1 0];
-    case {'b', 'blue'}
-        c = [0 0 1];
-    case {'c', 'cyan'}
-        c = [0 1 1];
-    case {'m', 'magenta'}
-        c = [1 0 1];
-    case {'y', 'yellow'}
-        c = [1 1 0];
-    case {'k', 'black'}
-        c = [0 0 0];
-    case {'w', 'white'}
-        c = [1 1 1];
-    % default cyclic colors
-    case '1'
-        c = [0 0.4470 0.7410];
-    case '2'
-        c = [0.8500 0.3250 0.0980];
-    case '3'
-        c = [0.9290 0.6940 0.1250];
-    case '4'
-        c = [0.4940 0.1840 0.5560];
-    case '5'
-        c = [0.4660 0.6740 0.1880];
-    case '6'
-        c = [0.3010 0.7450 0.9330];
-    case '7'
-        c = [0.6350 0.0780 0.1840];
-    % add custom colors here
-    case 'silver'
-        c = [0.75 0.75 0.75];
-    case 'gray'
-        c = [0.5 0.5 0.5];
-    case 'maroon'
-        c = [0.5 0 0];
-    case 'olive'
-        c = [0.5 0.5 0];
-    case 'green'
-        c = [0 0.5 0];
-    case {'pp', 'purple'}
-        c = [0.5 0 0.5];
-    case 'teal'
-        c = [0 0.5 0.5];
-    case 'navy'
-        c = [0 0 0.5];
-    case {'o', 'orange'}
-        c = [1 0.5 0];
-    case {'sg', 'spring green'}
-        c = [0 1 0.5];
-    case {'v', 'violet'}
-        c = [0.5 0 1];
-    case 'lime green'
-        c = [0.5 1 0];
-    case 'deep sky blue'
-        c = [0 0.5 1];
-    case 'hot pink'
-        c = [1 0 0.5];
-    case {'br', 'brown'}
-        c = [0.30 0.10 0];
-    case 'my pink'
-        c = [0.8143 0.2435 0.9293];
-    case 'my light green'
-        c = [0.15 0.9 0.05];
-    case 'my green'
-        c = [0.4 0.8 0.05];
-    case 'my blue'
-        c = [0.1 0.7 0.9];
-    % give me any color
-    case {'random', 'any'}
-        c = (rand(1,3) * 0.9) + 0.05;
-    % if the color name is undefined return black
-    otherwise
-        c = [0 0 0];
+defval('name', 'list')
+% validate the input
+if ~ischar(name)
+    warning('name must be a string or char cell')
+    name = 'list';
 end
 
+%% basic colors
+% DO NOT add any new line of color into this variable. If you want to add
+% color, define a new color in COLORCELL_MORE instead. However, you may add
+% alternative name to existing colors as you please.
+colorcell = {
+    {'r','red'},             [1 0 0], ...
+    {'g','lime'},             [0 1 0], ...
+    {'b','blue'},             [0 0 1], ...
+    {'c','cyan'},             [0 1 1], ...
+    {'m','magenta'},             [1 0 1], ...
+    {'y','yellow'},             [1 1 0], ...
+    {'k','black'},             [0 0 0], ...
+    {'w','white'},         [1 1 1], ...
+    {'1'},             [0 0.4470 0.7410], ...
+    {'2'},             [0.8500 0.3250 0.0980], ...
+    {'3'},             [0.9290 0.6940 0.1250], ...
+    {'4'},             [0.4940 0.1840 0.5560], ...
+    {'5'},             [0.4660 0.6740 0.1880], ...
+    {'6'},             [0.3010 0.7450 0.9330], ...
+    {'7'},             [0.6350 0.0780 0.1840], ...
+    {'gray'},          [0.5 0.5 0.5], ...
+    {'maroon'},        [0.5 0 0], ...
+    {'olive'},         [0.5 0.5 0], ...
+    {'green'},         [0 0.5 0], ...
+    {'pp','purple'},        [0.5 0 0.5], ...
+    {'teal'},          [0 0.5 0.5], ...
+    {'navy'},          [0 0 0.5], ...
+    {'o','orange'},        [1 0.5 0], ...
+    {'sg','spring green'},  [0 1 0.5], ...
+    {'v','violet'},        [0.5 0 1], ...
+    {'lime green'},    [0.5 1 0], ...
+    {'deep sky blue'}, [0 0.5 1], ...
+    {'hot pink'},      [1 0 0.5]};
 
+%% define more color here
+% please follow this format:
+% {'colorname_1', 'colorname_2', ...}, [R G B], ... 
+colorcell_more = {
+    {'silver'},        [0.75 0.75 0.75], ...
+    {'br','brown'},    [0.3 0.1 0], ...
+    {'my pink'},       [0.8143 0.2435 0.9293], ...
+    {'my light green'},[0.15 0.9 0.05], ...
+    {'my green'},      [0.4 0.8 0.05], ...
+    {'my blue'},       [0.1 0.7 0.9] ...
+    };
+colorcell = [colorcell, colorcell_more];
+
+%% handle the input
+if strcmpi(name, 'list')
+    % print the listed colors
+    fprintf('---------------------------------------------------\n');
+    fprintf('          name   = [  R      G      B   ]          \n');
+    fprintf('---------------------------------------------------\n');
+    % print basic colors
+    for ii = 1:2:16
+        fprintf('%16s = [%d %d %d]\n', ...
+            cell2commasepstr(colorcell{ii}), ...
+            indeks(colorcell{ii+1},1), indeks(colorcell{ii+1},2), ...
+            indeks(colorcell{ii+1},3));
+    end
+    fprintf('---------------------------------------------------\n');
+    for ii = 17:2:30
+        fprintf('%16s = [%.4f %.4f %.4f]\n', ...
+            cell2commasepstr(colorcell{ii}), ...
+            indeks(colorcell{ii+1},1), indeks(colorcell{ii+1},2), ...
+            indeks(colorcell{ii+1},3));
+    end
+    fprintf('---------------------------------------------------\n');
+    for ii = 31:2:56
+        fprintf('%16s = [%.1f %.1f %.1f]\n', ...
+            cell2commasepstr(colorcell{ii}), ...
+            indeks(colorcell{ii+1},1), indeks(colorcell{ii+1},2), ...
+            indeks(colorcell{ii+1},3));
+    end
+    fprintf('---------------------------------------------------\n');
+    % print user-defined colors
+    for ii = 57:2:length(colorcell)
+        fprintf('%16s = [%.4f %.4f %.4f]\n', ...
+            cell2commasepstr(colorcell{ii}), ...
+            indeks(colorcell{ii+1},1), indeks(colorcell{ii+1},2), ...
+            indeks(colorcell{ii+1},3));
+    end
+    fprintf('---------------------------------------------------\n');
+% random colors
+elseif any(strcmpi(name, {'random', 'any'}))
+    c = (rand(1,3) * 0.9) + 0.05;
+    return
+else
+    % check if it is hexadecimal code
+    try
+        c = [hex2dec(name(1:2)) hex2dec(name(3:4)) hex2dec(name(5:6))] / 255;
+        return
+    catch
+    end
+    % check the predefined colors
+    for ii = 1:2:length(colorcell)
+        if any(strcmpi(colorcell{ii}, name))
+            c = colorcell{ii+1};
+            return
+        end
+    end
+    % if the name is undefined, return black
+    c = [0 0 0];
+end
 end
