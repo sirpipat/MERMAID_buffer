@@ -71,33 +71,6 @@ if is_swapped
 end
 
 %%
-% % Figure out the end time of each section
-% dt_end1 = dt_begin1 + seconds((length(x1) - 1) / fs);
-% dt_end2 = dt_begin1 + seconds((length(x2) - 1) / fs);
-% 
-% % create windows, CC (just a container), and lag
-% x1 = [zeros(length(x2), 1); x1; zeros(length(x2), 1)];%cat(1, x1, zeros(length(x2), 1));
-% num_window = length(x1) - length(x2) + 1;%length(x1) - length(x2) + 1;
-% CC = zeros(1, num_window);
-% lag = seconds(dt_begin1 - dt_begin2):(1/fs):seconds(dt_end1 - dt_end2);
-% 
-% % correct the length of lag
-% size_diff = length(CC) - length(lag);
-% if size_diff > 0
-%     lag_extension_left = (-size_diff/2:-1) / fs + lag(1);
-%     lag_extension_right = (1:size_diff/2) / fs + lag(end);
-%     lag = [lag_extension_left lag lag_extension_right];
-% elseif size_diff < 0
-%     lag = lag(1:length(CC));
-% end
-% 
-% % compute correlation coefficient between each sliced section of x1 and x2
-% for ii = 1:num_window
-%     x1_slice = x1((1:length(x2)) + ii - 1);
-%     CC(1,ii) = corr(detrend(x1_slice,1), detrend(x2,1));
-% end
-
-%%
 % remove any data that lag is beyond +- maximum margin
 CC(abs(lag) > seconds(maxmargin)) = 0;
 
