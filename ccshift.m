@@ -1,7 +1,7 @@
 function [t_shift, CCmax, lag, CC] = ...
-    ccshift(x1,x2,dt_begin1,dt_begin2,fs,maxmargin)
+    ccshift(x1,x2,dt_begin1,dt_begin2,fs,maxmargin,windowtype)
 % [t_shift, CCmax, lag, CC] = ...
-%   CCSHIFT(x1,x2,dt_begin1,dt_begin2,fs,maxmargin)
+%   CCSHIFT(x1,x2,dt_begin1,dt_begin2,fs,maxmargin,windowtype)
 %
 % Compute correlation coefficients for all lags in [-maxmargin, maxmargin]
 % between two unequal-length signals. If the two signals are equal in 
@@ -14,6 +14,11 @@ function [t_shift, CCmax, lag, CC] = ...
 % dt_begin2     Begin datetime of x2
 % fs            Sampling rate of both signals
 % maxmargin     Maximum time shift as a duration
+% windowtype    How to apply window to CC outside [-maxmargin maxmargin]
+%               options are the following
+%               'hard' -- boxcar window, zero outside  [default]
+%               'soft' -- Gaussian curve outside the window with the
+%                         variance of (maxmargin / 2)^2
 %
 % OUTPUT:
 % t_shift       Best time shift where CC is maximum
@@ -21,7 +26,9 @@ function [t_shift, CCmax, lag, CC] = ...
 % lag           Vector of all time shifts
 % CC            Vector of CC for every time shift in lag
 %
-% Last modified by Sirawich Pipatprathanporn: 10/21/2021
+% Last modified by Sirawich Pipatprathanporn: 01/26/2022
+
+defval('windowtype', 'hard')
 
 % convert x1 and x2 to column vectors
 if size(x1, 1) == 1
@@ -71,8 +78,19 @@ if is_swapped
 end
 
 %%
-% remove any data that lag is beyond +- maximum margin
-CC(abs(lag) > seconds(maxmargin)) = 0;
+switch lower(windowtype)
+    case 'hard'
+        CC(abs(lag) > seconds(maxmargin)) = 0;
+    case 'soft'
+        % soft window (flat within maxmargin, normal outside) to put less
+        % weight on peaks outside the maxmargin window
+        mm = seconds(maxmargin);
+        w = exp(-(max(abs(lag), mm) - mm).^2 / (2 * (mm/2).^2))';
+        CC = CC .* w;
+    otherwise
+        fprintf('Invalid option. Hard window is applied\n');
+        CC(abs(lag) > seconds(maxmargin)) = 0;
+end
 
 % find best CC and timeshift
 [CCmax, IImax] = max(CC);
