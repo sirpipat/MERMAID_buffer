@@ -55,6 +55,8 @@ export IRISFETCH=/where-you-keep-irisFetch/
 
 `
 addpath(genpath(getenv('SLEPIANS')))
+
 addpath(genpath(getenv('MERMAID')))
+
 addpath(genpath(getenv('IRISFETCH')))
 `
