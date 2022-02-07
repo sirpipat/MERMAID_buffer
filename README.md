@@ -53,8 +53,8 @@ export IRISFETCH=/where-you-keep-irisFetch/
 
 [3] Add the following paths `startup.m`, so that MATLAB recognizes the installed packages
 
-`
+```
 addpath(genpath(getenv('SLEPIANS')))
 addpath(genpath(getenv('MERMAID')))
 addpath(genpath(getenv('IRISFETCH')))
-`
+```
