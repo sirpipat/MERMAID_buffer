@@ -38,7 +38,7 @@ export IFILES=/where-you-keep-the-information-files/
 export SFILES=/where-you-want-the-output-SAC-files-to-be/
 export NCFILES=/where-you-keep-the-NetCDF-files/
 export EPS=/where-you-want-plots-to-be-saved/
-export SLEPIANS=/where-you-put-slepian\_alpha-and-slepian\_oscar/
+export SLEPIANS=/where-you-put-slepian_alpha-and-slepian_oscar/
 export IRISFETCH=/where-you-keep-irisFetch/
 ```
 
