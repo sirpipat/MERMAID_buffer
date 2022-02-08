@@ -1,5 +1,5 @@
 function [dt_ref, dt_B, dt_E, fs, npts, dts, tims] = gethdrinfo(HdrData)
-% [dt_ref, dt_begin, dt_end, fs, npts, dts, tims] = HDR2INFO(HdrData)
+% [dt_ref, dt_B, dt_E, fs, npts, dts, tims] = GETHDRINFO(HdrData)
 %
 % Gets useful information from SAC header primarily for plotting signal.
 %
@@ -24,7 +24,7 @@ function [dt_ref, dt_B, dt_E, fs, npts, dts, tims] = gethdrinfo(HdrData)
 % SEE ALSO
 % READSAC
 %
-% Last modified by Sirawich Pipatprathanporn, 02/01/2021
+% Last modified by Sirawich Pipatprathanporn, 02/08/2022
 
 % gets the reference datatime
 dt_ref = datetime(HdrData.NZYEAR, 1, 0, HdrData.NZHOUR, HdrData.NZMIN, ...
