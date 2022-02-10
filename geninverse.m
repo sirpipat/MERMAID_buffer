@@ -28,7 +28,11 @@ end
 
 % overdetermined case
 if size(G,1) >= size(G,2)
-    Gi = geninverse3(G, Cd) * G' / Cd;
+    if all(Cd == eye(size(G,1)), 'all')
+        Gi = (G' * G) \ G';
+    else
+        Gi = (G' / Cd * G) \ G' / Cd;
+    end
 % underdetermined case
 else
     Gi = G' / (G * G');
