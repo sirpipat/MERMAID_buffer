@@ -1,7 +1,8 @@
-function [lons, lats, elev, ax, c] = bathymetry(fname, lonlim, latlim, plt, ax)
-% [lons, lats, elev, ax, c] = bathymetry(fname, [minlon maxlon], [minlat maxlat], plt, ax)
+function [lons, lats, elev, ax, c, xoffset] = bathymetry(fname, lonlim, latlim, plt, ax)
+% [lons, lats, elev, ax, c, xoffset] = bathymetry(fname, [minlon maxlon], [minlat maxlat], plt, ax)
 % Reads a GEBCO bathymetry grid, stored in NETCDF format, and plots the
-% bathymetry map bounded by [minlon maxlon] and [minlat maxlat].
+% bathymetry map bounded by [minlon maxlon] and [minlat maxlat]. The
+% x-coordinate 
 %
 % INPUT
 % fname             GEBCO full filename
@@ -16,20 +17,26 @@ function [lons, lats, elev, ax, c] = bathymetry(fname, lonlim, latlim, plt, ax)
 % elev              elevations of the requested bathymetry grid
 % ax                axes containing the plot
 % c                 colorbar
+% xoffset           the offset between the x-coordinate on the plot and the
+%                   actual longitude. Used when plotting over the map
 %
 % EXAMPLES
 % % plot entire globe (takes some time)
 % [lons, lats, elev, ax, c] = bathymetry([], [], [], true);
 %
 % % plot a region (Africa)
-% [lons, lats, elev, ax, c] = bathymetry([], [-70 20], [-5 45], true);
+% [lons, lats, elev, ax, c, xoffset] = bathymetry([], [-70 20], ...
+%       [-5 45], true);
+% % plot a track
+% hold on
+% plot([-30 -55] + xoffset, [-10 40], 'LineWidth', 1, 'Color', 'k');
 %
 % % request the elevation at a location
 % lonlat = [-143, -24];
 % [lons, lats, elev, ax, c] = bathymetry([], [-0.1 0.1] + lonlat(1), ...
 %       [-0.1 0.1] + lonlat(2), false, []);
 %
-% Last modified by sirawich-at-princeton.edu, 09/28/2021
+% Last modified by sirawich-at-princeton.edu, 03/17/2022
 
 defval('fname', fullfile(getenv('IFILES'), 'TOPOGRAPHY', 'EARTH', ...
     'GEBCO', 'GEBCO_2020.nc'))
@@ -115,8 +122,10 @@ if plt
     ax.XTick = ax.XTick - shift;
     ax.XTick = [ax.XTick ax.XTick(end)+dx];
     ax.XTickLabel = string(mod(ax.XTick + lons(1) + 180, 360) - 180);
+    xoffset = ax.XTick(1) - str2double(ax.XTickLabel{1});
 else
     ax = [];
     c = [];
+    xoffset = [];
 end
 end
