@@ -10,7 +10,7 @@ function c = rgbcolor(name)
 % name      Name of the color. It can be either
 %           - defined name e.g. 'red', 'r'. Call rgbcolor('list') to see 
 %             the list of colors 
-%           - Hexadecimal code e.g. 'ff0000'
+%           - Hexadecimal code e.g. 'ff0000' or '#FF0000'
 %           - 'random' or 'any' to request for a random color
 %
 % OUTPUT
@@ -20,7 +20,7 @@ function c = rgbcolor(name)
 % % get a brown color
 % c = rgbcolor('brown');
 % x = 1:10;
-% plot(x,x.^2,'LineColor',c)
+% plot(x,x.^2,'Color',c)
 %
 % % print the list of defined color
 % rgbcolor('list');
@@ -32,9 +32,17 @@ function c = rgbcolor(name)
 
 defval('name', 'list')
 % validate the input
+if isstring(name)
+    name = char(name);
+end
 if ~ischar(name)
     warning('name must be a string or char cell')
     name = 'list';
+end
+
+% remove the leading # for hex color code
+if name(1) == '#'
+    name = name(2:end);
 end
 
 %% basic colors
