@@ -10,6 +10,7 @@ function axb = boxedlabel(ax, corner, w, unit, str, varargin)
 % unit      unit of the width of the box ('norm' or [], if [], it will use 
 %           the unit of the figure.)
 % str       the label in the box
+% varargin  input options for TEXT
 %
 % OUTPUT
 % axb       axes handle of the box
@@ -17,7 +18,7 @@ function axb = boxedlabel(ax, corner, w, unit, str, varargin)
 % SEE ALSO
 % ADDBOX, AXESLABEL
 %
-% Last modified by sirawich@princeton.edu: 07/02/2021
+% Last modified by sirawich-at-princeton.edu: 04/03/2022
 
 % invoke the axes
 axes(ax)
