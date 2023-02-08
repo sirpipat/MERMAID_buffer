@@ -1,5 +1,5 @@
-function addfocalmech(ax, loc, option, info)
-% ADDFOCALMECH(ax, loc, option, info)
+function addfocalmech(ax, loc, option, info, s)
+% ADDFOCALMECH(ax, loc, option, info, s)
 %
 % Looks up for a full moment tensor of a specified earthquake and draws a 
 % full moment tensor beachball diagram to a plot. If no moment tensor is
@@ -18,41 +18,20 @@ function addfocalmech(ax, loc, option, info)
 %                   - for 'Event', the info is a struct representing an
 %                     earthquake event that is returned from
 %                     IRISFETCH.EVENTS
+% s             size of the beachball [default: 25]
 %
 % This function updates the target axes, ax.
 %
 % SEE ALSO:
-% READCMT, FOCALMECH, IRISFETCH
+% READCMT, FOCALMECH, IRISFETCH, GETFOCALMECH
 %
-% Last modified by sirawich-at-princeton.edu, 10/07/2021
+% Last modified by sirawich-at-princeton.edu, 07/14/2022
 
-
-if strcmpi(option, 'publicid')
-    event = irisFetch.Events('eventID', info);
-elseif strcmpi(option, 'event')
-    event = info;
-else
-    return
-end
-
-dt_origin = datetime(event.PreferredTime, ...
-   'TimeZone', 'UTC', 'Format', 'uuuu-MMM-dd''T''HH:mm:ss.SSSSSS');
-tbeg = datenum(dt_origin - minutes(1));
-tend = datenum(dt_origin + minutes(1));
-mblo = event.PreferredMagnitudeValue - 0.5;
-mbhi = event.PreferredMagnitudeValue + 0.5;
-depmin = event.PreferredDepth - 50;
-depmax = event.PreferredDepth + 50;
-
-% searching for the CMT filename
-datechar = char(dt_origin);
-monthname = lower(datechar(6:8));
-fname = sprintf('%s%02d.ndk', monthname, mod(dt_origin.Year, 100));
+defval('s', 25)
 
 % get the moment tensor
 try
-    [quake,Mw] = readCMT(fname, strcat(getenv('IFILES'),'CMT'), tbeg, tend, ...
-        mblo, mbhi, depmin, depmax);
+    [quake,Mw] = getfocalmech(option, info);
 catch
     quake = [];
     Mw = [];
@@ -69,10 +48,10 @@ end
 
 if ~isempty(quake) && size(Mw,1) == 1
     M = quake(5:end);
-    r = (ax.XLim(2) - ax.XLim(1)) / 50;   % radius of the beachball
+    r = (ax.XLim(2) - ax.XLim(1)) * s / 625;   % radius of the beachball
     focalmech(ax, M, loc(1), loc(2), r, 'b');
 else
-    scatter(ax, loc(1), loc(2), 100, 'Marker', 'p', ...
+    scatter(ax, loc(1), loc(2), s * 4, 'Marker', 'p', ...
         'MarkerEdgeColor', 'k', 'MarkerFaceColor', 'y');
 end
 end
