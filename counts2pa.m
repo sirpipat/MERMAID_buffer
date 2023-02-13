@@ -23,11 +23,11 @@ function pa = counts2pa(counts, fs, freqlimits, file, filetype, plt)
 % SEE ALSO:
 % TRANSFER
 %
-% Last modified by sirawich-at-princeton.edu, 09/03/2021
+% Last modified by sirawich-at-princeton.edu, 09/29/2021
 
 defval('fs', 40.01406)
 defval('freqlimits', [0.01 0.02 10 20])
-defval('file', '/Users/sirawich/research/polezero/MERMAID_response.txt')
+defval('file', strcat(getenv('SACPZ'), 'MERMAID_response.txt'))
 defval('filetype', 'sacpz')
 defval('plt', false)
 
