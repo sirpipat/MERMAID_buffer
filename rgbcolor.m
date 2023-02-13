@@ -3,24 +3,25 @@ function c = rgbcolor(name)
 %
 % Return rgb color triplet given the color name. The list of predefined
 % names can be accessed by calling RGBCOLOR('list'). More colors can be
-% added to a cell variable COLORCELL_MORE in the file. If name is
-% undefined, it returns [0 0 0] (black).
+% added to a cell variable COLORCELL_MORE in the file.
 %
 % INPUT
 % name      Name of the color. It can be either
-%           - defined name e.g. 'red', 'r'. Call rgbcolor('list') to see 
-%             the list of colors 
-%           - Hexadecimal code e.g. 'ff0000'
-%           - 'random' or 'any' to request for a random color
+%           1 defined name characters or strings e.g. 'red', 'r', "ReD". 
+%             Call rgbcolor('list') to see the list of defined colors 
+%           2 Hexadecimal code e.g. 'ff0000' or '#FF0000'
+%           3 'random' or 'any' to request for a random color
+%           4 Cell array containing any combinations of 1-3
+%             e.g. {'yellow', "Green", '#7F7F7F', 'random'}
 %
 % OUTPUT
-% c         RGB triplet
+% c         RGB triplets
 %
 % EXAMPLE
 % % get a brown color
 % c = rgbcolor('brown');
 % x = 1:10;
-% plot(x,x.^2,'LineColor',c)
+% plot(x,x.^2,'Color',c)
 %
 % % print the list of defined color
 % rgbcolor('list');
@@ -28,13 +29,46 @@ function c = rgbcolor(name)
 % % get a random color
 % c = rgbcolor('random')
 %
-% Last modified by Sirawich Pipatprathanporn: 01/18/2022
+% Last modified by Sirawich Pipatprathanporn: 02/06/2023
 
 defval('name', 'list')
+
+% loop through cell array
+if iscell(name)
+    c = nan(length(name), 3);
+    for ii = 1:length(name)
+        if ~strcmpi(name{ii}, 'list')
+            try
+                c(ii, :) = rgbcolor(name{ii});
+            catch ME
+                switch ME.identifier
+                    case 'rgbcolor:datatype'
+                        warning('[color #%d] Name must be a string or char cell', ii)
+                    case 'rgbcolor:namenotfound'
+                        warning('[color #%d] Color name not found. Try rgbcolor(''list'')', ii)
+                    otherwise
+                        rethrow(ME)
+                end
+                continue
+            end
+        end
+    end
+    return
+end
+
 % validate the input
+if isstring(name)
+    name = char(name);
+end
 if ~ischar(name)
-    warning('name must be a string or char cell')
-    name = 'list';
+    errorStruct.message = 'name must be a string or char cell';
+    errorStruct.identifier = 'rgbcolor:datatype';
+    error(errorStruct)
+end
+
+% remove the leading # for hex color code
+if name(1) == '#'
+    name = name(2:end);
 end
 
 %% basic colors
@@ -57,7 +91,7 @@ colorcell = {
     {'5'},             [0.4660 0.6740 0.1880], ...
     {'6'},             [0.3010 0.7450 0.9330], ...
     {'7'},             [0.6350 0.0780 0.1840], ...
-    {'gray'},          [0.5 0.5 0.5], ...
+    {'gray','grey'},   [0.5 0.5 0.5], ...
     {'maroon'},        [0.5 0 0], ...
     {'olive'},         [0.5 0.5 0], ...
     {'green'},         [0 0.5 0], ...
@@ -138,7 +172,9 @@ else
             return
         end
     end
-    % if the name is undefined, return black
-    c = [0 0 0];
+    % if the name is undefined, throw an error
+    errorStruct.message = 'color name not found';
+    errorStruct.identifier = 'rgbcolor:namenotfound';
+    error(errorStruct)
 end
 end
