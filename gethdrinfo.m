@@ -13,7 +13,7 @@ function [dt_ref, dt_B, dt_E, fs, npts, dts, tims] = gethdrinfo(HdrData)
 % fs            sampling rate
 % npts          number of points
 % dts           datetime of every sample
-% tims          time in seconds since the beginning datetime
+% tims          duration in seconds since the beginning datetime
 %
 % Example
 % % sacfile is the filename of a SAC file
@@ -24,7 +24,7 @@ function [dt_ref, dt_B, dt_E, fs, npts, dts, tims] = gethdrinfo(HdrData)
 % SEE ALSO
 % READSAC
 %
-% Last modified by Sirawich Pipatprathanporn, 02/08/2022
+% Last modified by Sirawich Pipatprathanporn, 07/13/2022
 
 % gets the reference datatime
 dt_ref = datetime(HdrData.NZYEAR, 1, 0, HdrData.NZHOUR, HdrData.NZMIN, ...
