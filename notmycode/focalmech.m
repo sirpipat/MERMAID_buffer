@@ -1,7 +1,9 @@
 function focalmech(ax, fm, centerX, centerY, diam, varargin)
-%	>> focalmech(fm, centerX, centerY, diam, varargin)
+%	>> focalmech(ax, fm, centerX, centerY, diam, varargin)
 %   Draws full moment tensor beachball diagram of earthquake focal mechanism.
 %   Required inputs
+%   ax: target axes handle for the moment tensor beachball diagram.
+%           Note that it alters the colormap of the axes.
 %	fm: 3x3 or 1x6 vector of the six independent components of the 
 %           moment tensor (mrr, mtt, mff, mrt, mrf, mtf).
 %	centerX, centerY: position to place beachball at position
@@ -42,7 +44,9 @@ function focalmech(ax, fm, centerX, centerY, diam, varargin)
 %   Stein and Wysession, 2003, pg244)
 %   9/08/2020 Added axes parameter to specify the axes to plot the 
 %   beachball and prevent color bleaching to other axes.
-%
+%   3/09/2023 Clarified in the documentation that this function requires
+%   the target axes input.
+
 % defaults
 fillcolor = [0 0 0];  % black for tensional region(s)
 unitratio = 1;      % axis equal
