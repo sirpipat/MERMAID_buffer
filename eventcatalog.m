@@ -48,7 +48,7 @@ function [s, a, evs] = eventcatalog(fname, plt)
 % SEE ALSO:
 % MATCHEVENTS, FINDEVENT, PLOTEVENT
 % 
-% Last modified by Sirawich Pipatprathanporn: 09/02/2021
+% Last modified by Sirawich Pipatprathanporn: 04/11/2022
 
 defval('fname', ...
     '/Users/sirawich/research/processed_data/events/catalog_events.txt');
@@ -166,6 +166,7 @@ if plt
     grid on
 
     % save figure
+    set(gcf, 'Renderer', 'painters')
     figdisp(strcat(mfilename, '.eps'), [], [], 2, [], 'epstopdf');
 end
 end
