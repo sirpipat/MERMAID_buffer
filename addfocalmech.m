@@ -1,5 +1,5 @@
-function addfocalmech(ax, loc, option, info, s)
-% ADDFOCALMECH(ax, loc, option, info, s)
+function addfocalmech(ax, loc, option, info, s, varargin)
+% ADDFOCALMECH(ax, loc, option, info, s, varargin)
 %
 % Looks up for a full moment tensor of a specified earthquake and draws a 
 % full moment tensor beachball diagram to a plot. If no moment tensor is
@@ -19,15 +19,22 @@ function addfocalmech(ax, loc, option, info, s)
 %                     earthquake event that is returned from
 %                     IRISFETCH.EVENTS
 % s             size of the beachball [default: 25]
+% varargin      optional arguments for FOCALMECH
 %
 % This function updates the target axes, ax.
 %
 % SEE ALSO:
 % READCMT, FOCALMECH, IRISFETCH, GETFOCALMECH
 %
-% Last modified by sirawich-at-princeton.edu, 07/14/2022
+% Last modified by sirawich-at-princeton.edu, 03/15/2023
 
 defval('s', 25)
+
+% set the default color to blue to conform with the expected output of the
+% previous versions
+if isempty(varargin)
+    varargin = {'b'};
+end
 
 % get the moment tensor
 try
@@ -49,7 +56,7 @@ end
 if ~isempty(quake) && size(Mw,1) == 1
     M = quake(5:end);
     r = (ax.XLim(2) - ax.XLim(1)) * s / 625;   % radius of the beachball
-    focalmech(ax, M, loc(1), loc(2), r, 'b');
+    focalmech(ax, M, loc(1), loc(2), r, varargin{:});
 else
     scatter(ax, loc(1), loc(2), s * 4, 'Marker', 'p', ...
         'MarkerEdgeColor', 'k', 'MarkerFaceColor', 'y');
