@@ -36,7 +36,10 @@ function [lons, lats, elev, ax, c, xoffset] = bathymetry(fname, lonlim, latlim, 
 % [lons, lats, elev, ax, c] = bathymetry([], [-0.1 0.1] + lonlat(1), ...
 %       [-0.1 0.1] + lonlat(2), false, []);
 %
-% Last modified by sirawich-at-princeton.edu, 03/17/2022
+% SEE ALSO
+% BATHYMETRYPROFILE
+%
+% Last modified by sirawich-at-princeton.edu, 03/18/2022
 
 defval('fname', fullfile(getenv('IFILES'), 'TOPOGRAPHY', 'EARTH', ...
     'GEBCO', 'GEBCO_2020.nc'))
