@@ -38,7 +38,7 @@ function [QUAKES, Mw, CMT] = getfocalmech(option, info)
 % SEE ALSO:
 % READCMT, FOCALMECH, IRISFETCH, ADDFOCALMECH
 %
-% Last modified by sirawich-at-princeton.edu, 02/08/2023
+% Last modified by sirawich-at-princeton.edu, 03/17/2023
 
 if strcmpi(option, 'publicid')
     event = irisFetch.Events('eventID', info);
@@ -66,7 +66,7 @@ fname = sprintf('%s%02d.ndk', monthname, mod(dt_origin.Year, 100));
 try
     [QUAKES, Mw, CMT] = readCMT(fname, strcat(getenv('IFILES'),'CMT'), ...
         tbeg, tend, mblo, mbhi, depmin, depmax);
-catch
+catch ME
     QUAKES = [];
     Mw     = [];
     CMT    = [];
