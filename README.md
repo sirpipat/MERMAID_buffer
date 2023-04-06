@@ -1,4 +1,4 @@
-# MERMAID_work
+# MERMAID_buffer
 
 Software to conduct the analysis and make the figures
 in the paper **One year of sound recorded by a MERMAID float in the
