@@ -10,8 +10,8 @@ _Geophysical Journal International_ (2022)
 
 Pipatprathanporn S., Simons F.J., 2021. One year of sound recorded by
 a MERMAID float in the Pacific: Hydroacoustic earthquake signals and
-infrasonic ambient noise, _Geophys. J. Int_.,
-[doi.org/10.1093/gji/ggab296.](https://academic.oup.com/gji/article/228/1/193/6339277)
+infrasonic ambient noise, _Geophys. J. Int.,
+[10.1093/gji/ggab296](https://dx.doi.org/10.1093/gji/ggab296)
 
 Author: Sirawich Pipatprathanporn
 
