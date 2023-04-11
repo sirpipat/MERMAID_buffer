@@ -1,13 +1,19 @@
-function c = csscolor(name)
-% c = CSSCOLOR(name)
+function c = csscolor(name, c1, c2)
+% c = CSSCOLOR(name, color1, color2)
 %
 % Returns rgb color triplet given a CSS color name. See the list of color
-% at https://gitlab.freedesktop.org/xorg/app/rgb/raw/master/rgb.txt
+% at https://matplotlib.org/stable/gallery/color/named_colors.html
 %
 % INPUT
-% name      Name of defined CSS color e.g. 'red' or 'Lime'. 
-%           Call X11COLOR('list') to see the list of colors. If the color
+% name      Name of defined CSS color e.g. 'red' or 'Lime'. If the color
 %           name is not found, it will call RGBCOLOR(name).
+%
+%           Call CSSCOLOR('list') to see the list of colors. 
+%           Call CSSCOLOR('find', COLOR1, COLOR2) to see the list of colors
+%           closest to COLOR1 with a preference towards COLOR2
+% color1    RGB triplet of the starting color for 'find' option
+% color2    RGB triplet of the preference color for 'find' option
+%           [default: color1]
 %
 % OUTPUT
 % c         RGB triplet
@@ -19,12 +25,15 @@ function c = csscolor(name)
 % plot(x,x.^2,'Color',c)
 %
 % % print the list of defined color
-% x11color('list');
+% csscolor('list');
+%
+% % see what color that is close to salmon and a bit more red
+% csscolor('find', csscolor('salmon'), [1 0 0]);
 %
 % SEE ALSO
 % RGBCOLOR, X11COLOR
 %
-% Last modified by sirawich-at-prineton.edu: 02/06/2023
+% Last modified by sirawich-at-prineton.edu: 04/11/2023
 
 defval('name', 'list')
 
@@ -214,18 +223,45 @@ color_cell = {'aliceblue', '#F0F8FF', ...
     'yellow', '#FFFF00', ...
     'yellowgreen', '#9ACD32'};
 
+% generate the RGB triplets
+colors = nan(length(color_cell) / 2, 3);
+for ii = 2:2:length(color_cell)
+    jj = ii / 2;
+    colors(jj,:) = rgbcolor(color_cell{ii});
+end
+
+% length for listing colors
+len = length(color_cell);
+if strcmpi(name, 'find')
+    defval('c2', c1)
+    c2 = c1 + 0.8 * (c2 - c1);
+    % distance from one color to another
+    d = nan(1, length(colors));
+    for ii = 1:size(colors, 1)
+        c0 = colors(ii, :);
+        d(ii) = norm(c0 - c1) + norm(c0 - c2);
+    end
+    % sort
+    [~, ic] = sort(d);
+    color_cell = color_cell(reshape((ic + [-0.5; 0]) * 2, [1 numel(ic)*2]));
+    colors = colors(ic, :);
+    name = 'list';
+    len = 40;
+    fprintf('Listing first %d colors\n', len/2);
+end
+
 if strcmpi(name, 'list')
     % print the listed colors
     fprintf('-----------------------------------------------------------\n');
     fprintf('          name          = [  R      G      B   ] , hexcode \n');
     fprintf('-----------------------------------------------------------\n');
-    for ii = 1:2:length(color_cell) 
-        d = rgbcolor(color_cell{ii+1});
+    for ii = 1:2:len 
+        jj = (ii+1) / 2;
         fprintf('%23s = [%.4f %.4f %.4f] , %s\n', ...
             cell2commasepstr(color_cell(ii)), ...          
-            d(1), ...
-            d(2), ...
-            d(3), ...
+            colors(jj, 1), ...
+            colors(jj, 2), ...
+            colors(jj, 3), ...
             color_cell{ii+1});
     end
     fprintf('-----------------------------------------------------------\n');
