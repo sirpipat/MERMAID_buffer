@@ -29,7 +29,10 @@ function c = rgbcolor(name)
 % % get a random color
 % c = rgbcolor('random')
 %
-% Last modified by Sirawich Pipatprathanporn: 02/06/2023
+% SEE ALSO:
+% CSSCOLOR, X11COLOR, RGBCOLORDEMO
+%
+% Last modified by Sirawich Pipatprathanporn: 04/13/2023
 
 defval('name', 'list')
 
