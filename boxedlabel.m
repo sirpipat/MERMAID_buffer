@@ -18,7 +18,7 @@ function axb = boxedlabel(ax, corner, w, unit, str, varargin)
 % SEE ALSO
 % ADDBOX, AXESLABEL
 %
-% Last modified by sirawich-at-princeton.edu: 04/03/2022
+% Last modified by sirawich-at-princeton.edu: 05/16/2023
 
 % invoke the axes
 axes(ax)
@@ -54,5 +54,6 @@ end
 
 % add the box and the label
 axb = addbox(ax, [norm_left norm_bottom norm_width norm_height]);
-T = axeslabel(axb, 0.28, 3/5, str, varargin{:});
+T = axeslabel(axb, 0.5, 3/5, str, 'HorizontalAlignment', 'center', ...
+    varargin{:});
 end
