@@ -24,7 +24,7 @@ function [dt_ref, dt_B, dt_E, fs, npts, dts, tims] = gethdrinfo(HdrData)
 % SEE ALSO
 % READSAC
 %
-% Last modified by Sirawich Pipatprathanporn, 07/13/2022
+% Last modified by Sirawich Pipatprathanporn, 09/08/2023
 
 % gets the reference datatime
 dt_ref = datetime(HdrData.NZYEAR, 1, 0, HdrData.NZHOUR, HdrData.NZMIN, ...
@@ -40,8 +40,8 @@ fs = (HdrData.NPTS - 1) / seconds(dt_E - dt_B);
 npts = HdrData.NPTS;
 
 % datetimes
-dts = dt_B + seconds(0:npts-1) / fs;
+dts = dt_B + seconds(0:npts-1)' / fs;
 
 % time in seconds since the beginning datetime
-tims = seconds(0:npts-1) / fs;
+tims = seconds(0:npts-1)' / fs;
 end
