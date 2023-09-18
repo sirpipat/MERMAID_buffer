@@ -26,7 +26,7 @@ function [t_shift, CCmax, lag, CC] = ...
 % lag           Vector of all time shifts
 % CC            Vector of CC for every time shift in lag
 %
-% Last modified by Sirawich Pipatprathanporn: 01/26/2022
+% Last modified by Sirawich Pipatprathanporn: 09/18/2023
 
 defval('windowtype', 'hard')
 
@@ -44,7 +44,7 @@ end
 
 % swap x1 and x2 (if needed) to have x1 longer than x2
 % then populate the lag time accordingly
-if size(x1, 1) <= size(x2, 2)
+if size(x1, 1) <= size(x2, 1)
     temp = x1;
     x1 = x2;
     x2 = temp;
