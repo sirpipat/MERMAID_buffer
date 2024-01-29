@@ -16,13 +16,15 @@ function ax = plotsac(SeisData, HdrData, ax, varargin)
 % SEE ALSO:
 % ARRIVAL2SAC, READSAC
 %
-% Last modified by Sirawich Pipatprathanporn, 09/15/2021
+% Last modified by Sirawich Pipatprathanporn, 01/29/2024
+
+defval('ax', gca)
 
 % gets the information from SAC header
 [dt_ref, dt_B, dt_E, fs, npts, dts, tims] = gethdrinfo(HdrData);
 
 x = SeisData;
-if true
+if false
     %x = detrend(decimate(detrend(x, 1), 5), 1);
     %fs = fs/5;
     x = bandpass(x, fs, 1, 2, 2, 2, 'butter');
