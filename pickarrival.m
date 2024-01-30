@@ -1,4 +1,6 @@
 function [pick, snr] = pickarrival(x, fs, t_begin, win_noise, win_signal, plt)
+% [pick, snr] = PICKARRIVAL(x, fs, t_begin, win_noise, win_signal, plt)
+%
 % Determines arrival time by dividing the time-series data into noise
 % (before the arrival time) and signal (after the arrival time) which gives
 % the maximum signal-to-noise ratio.
@@ -13,8 +15,9 @@ function [pick, snr] = pickarrival(x, fs, t_begin, win_noise, win_signal, plt)
 %
 % OUTPUT
 % pick          best-picked arrival time
+% snr           signal-to-noise ratio
 %
-% Last modified by Sirawich Pipatprathanporn, 07/11/2021
+% Last modified by Sirawich Pipatprathanporn, 01/30/2024
 
 defval('plt', false)
 defval('t_begin', 0.0)
