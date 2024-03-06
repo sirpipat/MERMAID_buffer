@@ -39,14 +39,14 @@ function [lons, lats, elev, ax, c, xoffset] = bathymetry(fname, lonlim, latlim, 
 % SEE ALSO
 % BATHYMETRYPROFILE
 %
-% Last modified by sirawich-at-princeton.edu, 03/18/2022
+% Last modified by sirawich-at-princeton.edu, 02/22/2024
 
 defval('fname', fullfile(getenv('IFILES'), 'TOPOGRAPHY', 'EARTH', ...
     'GEBCO', 'GEBCO_2020.nc'))
 defval('lonlim', [-180 180])
 defval('latlim', [-90 90])
 defval('plt', false)
-defval('sname', sprintf('%s_%s.mat', mfilename, hash([lonlim latlim], 'SHA-1')))
+defval('sname', sprintf('%s_%s.mat', mfilename, hash([fname lonlim latlim], 'SHA-1')))
 
 pname = fullfile(getenv('IFILES'), 'HASHES', sname);
 
@@ -98,8 +98,10 @@ if ~exist(pname, 'file')
     % converts longitudes back to [0,360]
     lons = mod(lons, 360);
     
+    fprintf('save the output to a file to %s ...\n', pname);
     save(pname, 'lons', 'lats', 'elev');
 else
+    fprintf('found the save in a file in %s\n', pname);
     load(pname, 'lons', 'lats', 'elev');
 end
 
