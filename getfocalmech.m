@@ -38,7 +38,7 @@ function [QUAKES, Mw, CMT] = getfocalmech(option, info)
 % SEE ALSO:
 % READCMT, FOCALMECH, IRISFETCH, ADDFOCALMECH
 %
-% Last modified by sirawich-at-princeton.edu, 03/01/2024
+% Last modified by sirawich-at-princeton.edu, 03/06/2024
 
 if strcmpi(option, 'publicid')
     event = irisFetch.Events('eventID', info);
@@ -65,11 +65,11 @@ fname = sprintf('%s%02d.ndk', monthname, mod(dt_origin.Year, 100));
 % get the moment tensor
 try
     [QUAKES, Mw, CMT] = readCMT(fname, strcat(getenv('IFILES'),'CMT'), ...
-        tbeg, tend, mblo, mbhi, depmin, depmax);
-    % check epicenter moment tensor if readCMT did not return anything
+        tbeg, tend, mblo, mbhi, depmin, depmax, 'hypocenter');
+    % check centroid moment tensor if readCMT did not return anything
     if isempty(CMT)
         [QUAKES, Mw,CMT] = readCMT(fname, strcat(getenv('IFILES'),'CMT'), tbeg, ...
-            tend, mblo, mbhi, depmin, depmax, 'hypocenter');
+            tend, mblo, mbhi, depmin, depmax, 'centroid');
     end
 catch ME
     % try to read from quick CMT file for newer events

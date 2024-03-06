@@ -17,7 +17,7 @@ function plotevent(arrival, arrival_type, event, endtime, fs)
 % SEE ALSO
 % FINDEVENTS
 %
-% Last modified by Sirawich Pipatprathanporn: 08/19/2021
+% Last modified by Sirawich Pipatprathanporn: 03/06/2024
 
 defval('endtime', [])
 defval('fs', 40.01406)
@@ -320,10 +320,16 @@ depmax = event.PreferredDepth + 50;
 
 % get the moment tensor
 [quake,Mw] = readCMT(fname, strcat(getenv('IFILES'),'CMT'), tbeg, tend, ...
-    mblo, mbhi, depmin, depmax);
+    mblo, mbhi, depmin, depmax, 'centroid');
 if size(Mw,1) > 1
     fprintf('size(Mw,1) > 1\n');
 end
+% check hypocetner moment tensor if readCMT did not return anything
+if isempty(Mw)
+    [quake, Mw] = readCMT(fname, strcat(getenv('IFILES'),'CMT'), tbeg, ...
+        tend, mblo, mbhi, depmin, depmax, 'hypocenter');
+end
+
 % draw moment tensor (beachball)
 if ~isempty(quake) && size(Mw,1) == 1
     M = quake(5:end);
