@@ -38,7 +38,7 @@ function [QUAKES, Mw, CMT] = getfocalmech(option, info)
 % SEE ALSO:
 % READCMT, FOCALMECH, IRISFETCH, ADDFOCALMECH
 %
-% Last modified by sirawich-at-princeton.edu, 03/17/2023
+% Last modified by sirawich-at-princeton.edu, 03/01/2024
 
 if strcmpi(option, 'publicid')
     event = irisFetch.Events('eventID', info);
@@ -52,8 +52,8 @@ dt_origin = datetime(event.PreferredTime, ...
    'TimeZone', 'UTC', 'Format', 'uuuu-MMM-dd''T''HH:mm:ss.SSSSSS');
 tbeg = datenum(dt_origin - minutes(1));
 tend = datenum(dt_origin + minutes(1));
-mblo = event.PreferredMagnitudeValue - 0.5;
-mbhi = event.PreferredMagnitudeValue + 0.5;
+mblo = event.PreferredMagnitudeValue - 0.51;
+mbhi = event.PreferredMagnitudeValue + 0.51;
 depmin = event.PreferredDepth - 50;
 depmax = event.PreferredDepth + 50;
 
@@ -66,10 +66,27 @@ fname = sprintf('%s%02d.ndk', monthname, mod(dt_origin.Year, 100));
 try
     [QUAKES, Mw, CMT] = readCMT(fname, strcat(getenv('IFILES'),'CMT'), ...
         tbeg, tend, mblo, mbhi, depmin, depmax);
+    % check epicenter moment tensor if readCMT did not return anything
+    if isempty(CMT)
+        [QUAKES, Mw,CMT] = readCMT(fname, strcat(getenv('IFILES'),'CMT'), tbeg, ...
+            tend, mblo, mbhi, depmin, depmax, 'hypocenter');
+    end
 catch ME
-    QUAKES = [];
-    Mw     = [];
-    CMT    = [];
+    % try to read from quick CMT file for newer events
+    try
+        fname = 'qcmt.ndk';
+        [QUAKES, Mw, CMT] = readCMT(fname, strcat(getenv('IFILES'),'CMT'), ...
+            tbeg, tend, mblo, mbhi, depmin, depmax);
+        % check epicenter moment tensor if readCMT did not return anything
+        if isempty(CMT)
+            [QUAKES, Mw,CMT] = readCMT(fname, strcat(getenv('IFILES'),'CMT'), tbeg, ...
+                tend, mblo, mbhi, depmin, depmax, 'hypocenter');
+        end
+    catch ME
+        QUAKES = [];
+        Mw     = [];
+        CMT    = [];
+    end
 end
 if size(Mw,1) > 1
     fprintf('size(Mw,1) > 1\n');
@@ -80,7 +97,7 @@ if size(Mw,1) > 1
             [event.PreferredLongitude event.PreferredLatitude]);
     end
     [~, I] = min(distKM);
-    QUAKES = QUAKES(I);
+    QUAKES = QUAKES(I,:);
     Mw = Mw(I);
     CMT = CMT(I);
 end
