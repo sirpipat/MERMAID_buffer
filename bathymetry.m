@@ -37,16 +37,16 @@ function [lons, lats, elev, ax, c, xoffset] = bathymetry(fname, lonlim, latlim, 
 %       [-0.1 0.1] + lonlat(2), false, []);
 %
 % SEE ALSO
-% BATHYMETRYPROFILE
+% BATHYMETRYPROFILE, BATHYMETRYPROFILE2D
 %
-% Last modified by sirawich-at-princeton.edu, 02/22/2024
+% Last modified by sirawich-at-princeton.edu, 07/01/2024
 
 defval('fname', fullfile(getenv('IFILES'), 'TOPOGRAPHY', 'EARTH', ...
     'GEBCO', 'GEBCO_2020.nc'))
 defval('lonlim', [-180 180])
 defval('latlim', [-90 90])
 defval('plt', false)
-defval('sname', sprintf('%s_%s.mat', mfilename, hash([fname lonlim latlim], 'SHA-1')))
+defval('sname', sprintf('%s_%s.mat', mfilename, hash([double(fname) lonlim latlim], 'SHA-1')))
 
 pname = fullfile(getenv('IFILES'), 'HASHES', sname);
 
