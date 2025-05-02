@@ -1,5 +1,5 @@
 function [ax, h] = hline(ax, y, varargin)
-% [ax, h] = HLINE(ax,x,linestyle,linewidth,linecolor)
+% [ax, h] = HLINE(ax, y, varargin)
 % plots a horizontal line at y
 %
 % INPUT:
@@ -11,7 +11,7 @@ function [ax, h] = hline(ax, y, varargin)
 % ax            The handling axes of the horizontal line
 % h             Line(s) being plotted
 %
-% Last modified by Sirawich Pipatprathanporn, 07/11/2021
+% Last modified by Sirawich Pipatprathanporn, 05/02/2025
 
 if size(y,1) > 1
     y = reshape(y,1,size(y,1));
