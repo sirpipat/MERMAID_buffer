@@ -14,9 +14,17 @@ function v = images2video(images, ext, framerate, savename, savedir)
 % OUTPUT
 % v             video object
 %
-% Last modified by Sirawich Pipatprathanporn, 06/09/2021
+% Last modified by Sirawich Pipatprathanporn, 05/09/2025
 
 defval('savedir', getenv('EPS'))
+
+% determine largest image size
+dim = [0 0];
+for ii = 1:length(images)
+    A = imread(images{ii}, ext);
+    dim(1) = max(dim(1), size(A, 1));
+    dim(2) = max(dim(2), size(A, 2));
+end
 
 % create the video writer
 v = VideoWriter(strcat(savedir, '/', mfilename, '_', savename, '.mp4'), 'MPEG-4');
@@ -27,7 +35,18 @@ open(v);
 % wrtie the frames to the video
 for ii = 1:length(images)
     A = imread(images{ii}, ext);
-    writeVideo(v, A);
+    % pad white pixels to match the size of the largest image
+    if size(A,1) < dim(1)
+        A(size(A,1)+1:dim(1), :, :) = uint8(255);
+    end
+    if size(A,2) < dim(2)
+        A(:, size(A,2)+1:dim(2), :) = uint8(255);
+    end
+    try
+        writeVideo(v, A);
+    catch ME
+        keyboard
+    end
 end
 % close the writer object
 close(v);
