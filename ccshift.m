@@ -1,6 +1,6 @@
-function [t_shift, CCmax, lag, CC] = ...
+function [t_shift, CCmax, lag, CC, s1, s2] = ...
     ccshift(x1,x2,dt_begin1,dt_begin2,fs,maxmargin,windowtype)
-% [t_shift, CCmax, lag, CC] = ...
+% [t_shift, CCmax, lag, CC, s1, s2] = ...
 %   CCSHIFT(x1,x2,dt_begin1,dt_begin2,fs,maxmargin,windowtype)
 %
 % Compute correlation coefficients for all lags in [-maxmargin, maxmargin]
@@ -25,8 +25,10 @@ function [t_shift, CCmax, lag, CC] = ...
 % CCmax         Maximum correlation coefficient
 % lag           Vector of all time shifts
 % CC            Vector of CC for every time shift in lag
+% s1            Vector of RMS scaling factor for every time shift in lag
+% s2            Vector of STD scaling factor for every time shift in lag
 %
-% Last modified by Sirawich Pipatprathanporn: 09/18/2023
+% Last modified by Sirawich Pipatprathanporn: 07/08/2025
 
 defval('windowtype', 'hard')
 
@@ -70,11 +72,17 @@ end
 % compute the correlation coefficient at any lag time
 CC = (n-1) / n * (X * x2) ./ sqrt(sum(X .* X, 2) * (x2' * x2));
 
+% compute the scaling factor
+s1 = rms(X, 2) / rms(x2);
+s2 = std(X, 0, 2) / std(x2);
+
 % do not forget to swap back
 if is_swapped
     lag = -lag;
     [lag, i_sort] = sort(lag);
     CC = CC(i_sort);
+    s1 = 1 ./ s1(i_sort);
+    s2 = 1 ./ s2(i_sort);
 end
 
 %%
