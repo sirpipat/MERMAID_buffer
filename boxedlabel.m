@@ -1,12 +1,12 @@
-function axb = boxedlabel(ax, corner, w, unit, str, varargin)
-% axb = BOXEDLABEL(ax, corner, w, unit, str, varargin)
+function axb = boxedlabel(ax, corner, boxdim, unit, str, varargin)
+% axb = BOXEDLABEL(ax, corner, [w h], unit, str, varargin)
 % Adds a boxed axes label to a corner.
 %
 % INPUT
 % ax        target axes
 % corner    which corner to add a boxed label. Opitions include
 %           'northwest', 'northeast', 'southwest', and 'southeast'
-% w         width of the squre box
+% [w h]     width and height of the squre box
 % unit      unit of the width of the box ('norm' or [], if [], it will use 
 %           the unit of the figure.)
 % str       the label in the box
@@ -18,20 +18,27 @@ function axb = boxedlabel(ax, corner, w, unit, str, varargin)
 % SEE ALSO
 % ADDBOX, AXESLABEL
 %
-% Last modified by sirawich-at-princeton.edu: 05/16/2023
+% Last modified by sirawich-at-princeton.edu: 07/13/2025
 
 % invoke the axes
 axes(ax)
 
+w = boxdim(1);
+if length(boxdim) > 1
+    h = boxdim(2);
+else
+    h = w;
+end
+
 % if w is in a normalized unit, then just scale to the axes position
 if strcmp(unit, 'norm')
     norm_width = w / ax.Position(3);
-    norm_height = w / ax.Position(4);
+    norm_height = h / ax.Position(4);
 % otherwise, normalize first by dividing the dimension of the figure
 else
     fig = ax.Parent;
     norm_width = w / fig.Position(3) / ax.Position(3);
-    norm_height = w / fig.Position(4) / ax.Position(4);
+    norm_height = h / fig.Position(4) / ax.Position(4);
 end
 
 % compute the norm position of the box
